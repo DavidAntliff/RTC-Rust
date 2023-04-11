@@ -1,19 +1,7 @@
-//use std::fmt;
-//pub use glam::f64::DVec4 as Tuple;
-//use glam::f64::DVec4;
-//extern crate derive_more;
-//use impl_ops::impl_op;
 use glam::f64::DVec4;
-//use std::ops;
 
 use derive_more::{Add, Neg, Div};
 
-//#[cfg_attr(test, macro_use)]
-//extern crate approx;
-
-//use approx::assert_approx_eq;
-
-//#[derive(Debug, PartialEq, Add, Sub, Neg, Mul, Div)]
 #[derive(Debug, PartialEq, Add, Neg, Div)]
 pub struct Tuple(glam::f64::DVec4);
 
@@ -66,50 +54,12 @@ impl Tuple {
     }
 }
 
-// impl_op_ex_commutative!(* |a: Tuple, b: f64| -> Tuple {
-//     let c = a.0;
-//     let d = c * b;
-//     Tuple::from_inner(d)
-//     //Tuple::from_inner(a.0 * b)
-// });
-
-// impl std::ops::Mul<f64> for &Tuple {
-//     type Output = Tuple;
-//     fn mul(self, rhs: f64) -> Tuple {
-//         rhs * self
-//     }
-// }
-//
-// impl std::ops::Mul<Tuple> for f64 {
-//     type Output = Tuple;
-//     fn mul(self, rhs: Tuple) -> Tuple {
-//         rhs * self
-//     }
-// }
-//
-// impl std::ops::Mul<&Tuple> for f64 {
-//     type Output = Tuple;
-//     fn mul(self, rhs: &Tuple) -> Tuple {
-//         rhs * self
-//     }
-// }
-//
-// impl std::ops::Sub<&Tuple> for &Tuple {
-//     type Output = Tuple;
-//     fn sub(self, rhs: &Tuple) -> Tuple {
-//         self - rhs
-//     }
-// }
-
 macro_rules! tuple_mul {
     ( $lhs:ty , $rhs:ty ) => {
         impl std::ops::Mul<$rhs> for $lhs {
             type Output = Tuple;
             fn mul(self, rhs: $rhs) -> Tuple {
                 Tuple(self.0 * rhs)
-                // Tuple::from_inner(DVec{})
-                // Tuple{x: self.0.x * rhs, y: self.0.y * rhs,
-                //       z: self.0.z * rhs, w: self.0.w * rhs}
             }
         }
     }
@@ -134,8 +84,6 @@ macro_rules! tuple_sub {
             type Output = Tuple;
             fn sub(self, rhs: $rhs) -> Tuple {
                 Tuple(self.0 - rhs.0)
-                // Tuple{x: self.x - rhs.x, y: self.y - rhs.y,
-                //       z: self.z - rhs.z, w: self.w - rhs.w}
             }
         }
     }
