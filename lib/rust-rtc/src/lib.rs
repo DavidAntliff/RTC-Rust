@@ -1,5 +1,7 @@
 
 pub mod tuples;
+pub mod colors;
+pub mod matrices;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

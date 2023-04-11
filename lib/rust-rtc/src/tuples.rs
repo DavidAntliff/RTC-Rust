@@ -3,7 +3,7 @@ use glam::f64::DVec4;
 use derive_more::{Add, Neg, Div};
 
 #[derive(Debug, PartialEq, Add, Neg, Div)]
-pub struct Tuple(glam::f64::DVec4);
+pub struct Tuple(pub glam::f64::DVec4);
 
 impl Tuple {
     pub fn new() -> Self {
@@ -53,6 +53,22 @@ impl Tuple {
         })
     }
 }
+
+macro_rules! tuple_muls {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Mul<$rhs> for $lhs {
+            type Output = Tuple;
+            fn mul(self, rhs: $rhs) -> Tuple {
+                Tuple(self.0 * rhs.0)
+            }
+        }
+    }
+}
+
+tuple_muls!(Tuple, Tuple);
+tuple_muls!(Tuple, &Tuple);
+tuple_muls!(&Tuple, Tuple);
+tuple_muls!(&Tuple, &Tuple);
 
 macro_rules! tuple_mul {
     ( $lhs:ty , $rhs:ty ) => {
@@ -163,10 +179,7 @@ mod tests {
         }
 
         fn abs_diff_eq(&self, other: &Self, epsilon: f64) -> bool {
-            f64::abs_diff_eq(&self.0.x, &other.0.x, epsilon) &&
-                f64::abs_diff_eq(&self.0.y, &other.0.y, epsilon) &&
-                f64::abs_diff_eq(&self.0.z, &other.0.z, epsilon) &&
-                f64::abs_diff_eq(&self.0.w, &other.0.w, epsilon)
+            self.0.abs_diff_eq(other.0, epsilon)
         }
     }
 

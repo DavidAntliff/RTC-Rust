@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 glam = { version = "0.23" }
 derive_more = "0.99.17"
-impl_ops = "0.1.1"
 
 [dev-dependencies]
 approx = "0.5.1"
