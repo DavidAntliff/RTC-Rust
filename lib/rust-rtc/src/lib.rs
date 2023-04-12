@@ -1,19 +1,10 @@
 
+pub mod math;
 pub mod tuples;
 pub mod colors;
 pub mod matrices;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub mod canvas;
+pub mod transformations;
+pub mod rays;
+pub mod spheres;
+pub mod intersections;

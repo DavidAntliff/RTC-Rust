@@ -2,8 +2,11 @@ use glam::f64::DVec4;
 
 use derive_more::{Add, Neg, Div};
 
-#[derive(Debug, Default, PartialEq, Add, Neg, Div)]
+#[derive(Debug, Default, PartialEq, Copy, Clone, Add, Neg, Div)]
 pub struct Tuple(pub(crate) glam::f64::DVec4);
+
+pub type Point = Tuple;
+pub type Vector = Tuple;
 
 impl Tuple {
     pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
@@ -28,6 +31,11 @@ impl Tuple {
         }
     }
 
+    pub fn set_x(&mut self, value: f64) { self.0.x = value; }
+    pub fn set_y(&mut self, value: f64) { self.0.y = value; }
+    pub fn set_z(&mut self, value: f64) { self.0.z = value; }
+    pub fn set_w(&mut self, value: f64) { self.0.w = value; }
+    
     pub fn is_point(&self) -> bool {
         self.0.w == 1.0
     }

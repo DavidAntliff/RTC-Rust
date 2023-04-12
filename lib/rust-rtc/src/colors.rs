@@ -1,7 +1,7 @@
 use super::tuples::{Tuple};
 use derive_more::{Add, Sub, Neg, Mul};
 
-#[derive(Debug, Default, PartialEq, Add, Sub, Neg, Mul)]
+#[derive(Debug, Default, PartialEq, Copy, Clone, Add, Sub, Neg, Mul)]
 pub struct Color(Tuple);
 
 impl Color {
@@ -107,7 +107,7 @@ mod tests {
     fn multiplying_colors () {
         let c1 = color(1.0, 0.2, 0.4);
         let c2 = color(0.9, 1.0, 0.1);
-        assert_relative_eq!(&c1 * &c2, color(0.9, 0.2, 0.04));
+        assert_relative_eq!(c1 * c2, color(0.9, 0.2, 0.04));
         assert_relative_eq!(hadamard(&c1, &c2), color(0.9, 0.2, 0.04));
     }
 }

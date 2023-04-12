@@ -9,7 +9,7 @@ pub struct Matrix2(DMat2);
 #[derive(Debug, PartialEq)]
 pub struct Matrix3(DMat3);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Matrix4(DMat4);
 
 impl Matrix2 {
@@ -105,6 +105,24 @@ impl Matrix4 {
     pub fn inverse(&self) -> Self {
         Self(self.0.inverse())
     }
+
+    // Fluent API support:
+    pub fn then(&mut self, m: &Matrix4) -> Matrix4 {
+        *self = m * *self;
+        *self
+    }
+}
+
+pub fn transpose(m: &Matrix4) -> Matrix4 {
+    m.transpose()
+}
+
+pub fn is_invertible(m: &Matrix4) -> bool {
+    m.is_invertible()
+}
+
+pub fn inverse(m: &Matrix4) -> Matrix4 {
+    m.inverse()
 }
 
 impl Default for Matrix4 {
