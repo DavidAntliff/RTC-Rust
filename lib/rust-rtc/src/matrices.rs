@@ -14,7 +14,7 @@ pub struct Matrix4(DMat4);
 
 impl Matrix2 {
     pub fn new() -> Self {
-        Self(DMat2::ZERO)
+        Self::default()
     }
 
     pub fn from_rows_array(m: &[[f64; 2]; 2]) -> Self {
@@ -32,13 +32,19 @@ impl Matrix2 {
     }
 }
 
+impl Default for Matrix2 {
+    fn default() -> Self {
+        Self(DMat2::IDENTITY)
+    }
+}
+
 pub fn matrix2(m: &[[f64; 2]; 2]) -> Matrix2 {
     Matrix2::from_rows_array(m)
 }
 
 impl Matrix3 {
     pub fn new() -> Self {
-        Self(DMat3::ZERO)
+        Self::default()
     }
 
     pub fn from_rows_array(m: &[[f64; 3]; 3]) -> Self {
@@ -57,13 +63,19 @@ impl Matrix3 {
     }
 }
 
+impl Default for Matrix3 {
+    fn default() -> Self {
+        Self(DMat3::IDENTITY)
+    }
+}
+
 pub fn matrix3(m: &[[f64; 3]; 3]) -> Matrix3 {
     Matrix3::from_rows_array(m)
 }
 
 impl Matrix4 {
     pub fn new() -> Self {
-        Self(DMat4::ZERO)
+        Self::default()
     }
 
     pub fn from_rows_array(m: &[[f64; 4]; 4]) -> Self {
@@ -92,6 +104,12 @@ impl Matrix4 {
 
     pub fn inverse(&self) -> Self {
         Self(self.0.inverse())
+    }
+}
+
+impl Default for Matrix4 {
+    fn default() -> Self {
+        Self(DMat4::IDENTITY)
     }
 }
 
@@ -195,13 +213,34 @@ mod tests {
     }
 
     #[test]
-    fn default_matrix_is_zero () {
-        let A = Matrix4::new();
+    fn default_matrix2_is_identity () {
+        let A = Matrix2::default();
+
+        for r in 0..2 {
+            for c in 0..2 {
+                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
+            }
+        }
+    }
+
+    #[test]
+    fn default_matrix3_is_identity () {
+        let A = Matrix3::default();
+
+        for r in 0..3 {
+            for c in 0..3 {
+                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
+            }
+        }
+    }
+
+    #[test]
+    fn default_matrix4_is_identity () {
+        let A = Matrix4::default();
 
         for r in 0..4 {
             for c in 0..4 {
-                //assert_eq!(A[[r, c]], 0.0);
-                assert_eq!(A.at(r, c), 0.0);
+                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
             }
         }
     }

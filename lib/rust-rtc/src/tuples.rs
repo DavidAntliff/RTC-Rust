@@ -2,20 +2,30 @@ use glam::f64::DVec4;
 
 use derive_more::{Add, Neg, Div};
 
-#[derive(Debug, PartialEq, Add, Neg, Div)]
-pub struct Tuple(pub glam::f64::DVec4);
+#[derive(Debug, Default, PartialEq, Add, Neg, Div)]
+pub struct Tuple(pub(crate) glam::f64::DVec4);
 
 impl Tuple {
-    pub fn new() -> Self {
-        Self(DVec4 {x: 0.0, y: 0.0, z: 0.0, w: 0.0})
-    }
-
-    pub fn new_with_values(x: f64, y: f64, z: f64, w: f64) -> Self {
+    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
         Self(DVec4 {x, y, z, w})
     }
 
-    pub fn from_inner(inner: DVec4) -> Self {
-        Self(inner)
+    // pub fn from_inner(inner: DVec4) -> Self {
+    //     Self(inner)
+    // }
+
+    pub fn x(&self) -> f64 { self.0.x }
+    pub fn y(&self) -> f64 { self.0.y }
+    pub fn z(&self) -> f64 { self.0.z }
+    pub fn w(&self) -> f64 { self.0.w }
+    pub fn at(&self, index: usize) -> Option<f64> {
+        match index {
+            0 => Some(self.0.x),
+            1 => Some(self.0.y),
+            2 => Some(self.0.z),
+            3 => Some(self.0.w),
+            _ => None,
+        }
     }
 
     pub fn is_point(&self) -> bool {
@@ -110,40 +120,22 @@ tuple_sub!(Tuple, &Tuple);
 tuple_sub!(&Tuple, Tuple);
 tuple_sub!(&Tuple, &Tuple);
 
-pub trait TupleAccess {
-    fn x(&self) -> f64;
-    fn y(&self) -> f64;
-    fn z(&self) -> f64;
-    fn w(&self) -> f64;
-    fn at(&self, index: usize) -> Option<f64>;
-}
-
-impl TupleAccess for Tuple {
-    fn x(&self) -> f64 { self.0.x }
-    fn y(&self) -> f64 { self.0.y }
-    fn z(&self) -> f64 { self.0.z }
-    fn w(&self) -> f64 { self.0.w }
-    fn at(&self, index: usize) -> Option<f64> {
-        match index {
-            0 => Some(self.0.x),
-            1 => Some(self.0.y),
-            2 => Some(self.0.z),
-            3 => Some(self.0.w),
-            _ => None,
-        }
+impl From<DVec4> for Tuple {
+    fn from(value: DVec4) -> Self {
+        Tuple(value)
     }
 }
 
 pub fn tuple(x: f64, y: f64, z: f64, w: f64) -> Tuple {
-     Tuple::new_with_values(x, y, z, w)
+    Tuple::new(x, y, z, w)
 }
 
 pub fn point(x: f64, y: f64, z: f64) -> Tuple {
-    Tuple::new_with_values(x, y, z, 1.0)
+    Tuple::new(x, y, z, 1.0)
 }
 
 pub fn vector(x: f64, y: f64, z: f64) -> Tuple {
-    Tuple::new_with_values(x, y, z, 0.0)
+    Tuple::new(x, y, z, 0.0)
 }
 
 pub fn magnitude(v: &Tuple) -> f64 {
@@ -196,11 +188,20 @@ mod tests {
         }
     }
 
+    // Conversion from a DVec4
+    #[test]
+    fn from_dvec4() {
+        let a = Tuple::from(DVec4::new(1.0, 2.0, 3.0, 4.0));
+        assert_eq!(a.x(), 1.0);
+        assert_eq!(a.y(), 2.0);
+        assert_eq!(a.z(), 3.0);
+        assert_eq!(a.w(), 4.0);
+    }
+
     // The default Tuple is all zero
     #[test]
     fn default_tuple() {
-        // TODO: how to actually do a proper default?
-        let a = tuple(0.0, 0.0, 0.0, 0.0);
+        let a = Tuple::default();
         assert_eq!(a.x(), 0.0);
         assert_eq!(a.y(), 0.0);
         assert_eq!(a.z(), 0.0);

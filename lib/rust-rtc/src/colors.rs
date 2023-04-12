@@ -1,9 +1,9 @@
-use super::tuples::{Tuple, TupleAccess};
+use super::tuples::{Tuple};
 
 type Color = Tuple;
 
 pub fn color(r: f64, g: f64, b: f64) -> Color {
-    Tuple::new_with_values(r, g, b, 0.0)
+    Tuple::new(r, g, b, 0.0)
 }
 
 /// Hadamard or Shur Product
