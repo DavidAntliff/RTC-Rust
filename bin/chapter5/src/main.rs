@@ -1,5 +1,5 @@
 use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
-use rust_rtc::colors::color;
+use rust_rtc::colors::{RED};
 use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::rays::ray;
 use rust_rtc::spheres::sphere;
@@ -23,7 +23,7 @@ fn main() {
 
     let mut c = canvas(canvas_pixels, canvas_pixels);
 
-    let red = color(1.0, 0.0, 0.0);
+    let red = RED;
     let mut shape = sphere(1);
 
     // shrink along the y axis

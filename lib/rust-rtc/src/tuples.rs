@@ -9,7 +9,7 @@ pub type Point = Tuple;
 pub type Vector = Tuple;
 
 impl Tuple {
-    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
+    pub const fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
         Self(DVec4 { x, y, z, w })
     }
 

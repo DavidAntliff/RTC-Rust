@@ -5,7 +5,7 @@ use derive_more::{Add, Mul, Neg, Sub};
 pub struct Color(Tuple);
 
 impl Color {
-    pub fn new(r: f64, g: f64, b: f64) -> Color {
+    pub const fn new(r: f64, g: f64, b: f64) -> Color {
         Color(Tuple::new(r, g, b, 0.0))
     }
 
@@ -18,7 +18,20 @@ impl Color {
     pub fn blue(&self) -> f64 {
         self.0.z()
     }
+
 }
+
+pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
+pub const RED: Color = Color::new(1.0, 0.0, 0.0);
+pub const GREEN: Color = Color::new(0.0, 1.0, 0.0);
+pub const BLUE: Color = Color::new(0.0, 0.0, 1.0);
+pub const YELLOW: Color = Color::new(1.0, 1.0, 0.0);
+pub const CYAN: Color = Color::new(0.0, 1.0, 1.0);
+pub const MAGENTA: Color = Color::new(1.0, 1.0, 0.0);
+pub const GREY75: Color = Color::new(0.75, 0.75, 0.75);
+pub const GREY50: Color = Color::new(0.5, 0.5, 0.5);
+pub const GREY25: Color = Color::new(0.25, 0.25, 0.25);
+pub const WHITE: Color = Color::new(1.0, 1.0, 1.0);
 
 macro_rules! color_mul {
     ( $lhs:ty , $rhs:ty ) => {
@@ -44,6 +57,7 @@ pub fn color(r: f64, g: f64, b: f64) -> Color {
 pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
     lhs * rhs
 }
+
 
 #[cfg(test)]
 mod tests {

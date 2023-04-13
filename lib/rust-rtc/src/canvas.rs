@@ -10,7 +10,7 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Canvas {
-        let capacity = usize::try_from(width * height).unwrap();
+        let capacity = usize::try_from(width * height).expect("Dimensions too large");
         Canvas {
             width,
             height,
@@ -34,7 +34,9 @@ impl Canvas {
     }
 
     pub fn write_pixel(&mut self, x: u32, y: u32, color: &Color) {
-        let index = self._index_of(x, y).unwrap();
+        let index = self
+            ._index_of(x, y)
+            .expect("Pixel coordinates out of range");
         self.pixels[index] = *color;
     }
 
@@ -52,7 +54,7 @@ impl Canvas {
         let mut view = line;
         while view.len() >= limit {
             let head = &view[0..limit - 1];
-            let idx = head.rfind(' ').unwrap();
+            let idx = head.rfind(' ').expect("No space character found");
             let left = &view[0..idx];
             lines.push(left.to_string());
             view = &view[idx + 1..];
