@@ -52,7 +52,7 @@ fn main() {
             let r = ray(ray_origin, normalize(&(position - ray_origin)));
             let mut xs = intersect(&shape, &r);
 
-            if let Some(_) = hit(&mut xs) {
+            if hit(&mut xs).is_some() {
                 write_pixel(&mut c, x, y, &red);
             }
         }

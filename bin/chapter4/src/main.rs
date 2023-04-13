@@ -29,7 +29,7 @@ fn main() {
 
     for _i in 0..12 {
         eprintln!("{:?}", p);
-        let p2 = &hour * p;
+        let p2 = hour * p;
         set_pixel(&mut c, p2.x(), p2.y());
         p = p2;
     }

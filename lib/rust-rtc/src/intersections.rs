@@ -55,7 +55,7 @@ impl IntersectionComputation<'_> {
     pub fn new(object: &Sphere) -> IntersectionComputation {
         IntersectionComputation {
             t: 0.0,
-            object: &object,
+            object,
             point: Point::default(),
             over_point: Point::default(),
             eyev: Vector::default(),

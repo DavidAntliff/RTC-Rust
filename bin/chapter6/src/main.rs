@@ -80,7 +80,7 @@ fn main() {
 
                 let color = lighting(
                     &h.object.material,
-                    &h.object,
+                    h.object,
                     &light,
                     &point,
                     &eye,

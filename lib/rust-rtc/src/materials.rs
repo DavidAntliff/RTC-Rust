@@ -59,7 +59,7 @@ impl Material {
         // light_dot_normal represents the cosine of the angle between the
         // light vector and the normal vector. A negative number means the
         // light is on the other side of the surface.
-        let light_dot_normal = dot(&lightv, &normalv);
+        let light_dot_normal = dot(&lightv, normalv);
         if light_dot_normal < 0.0 {
             diffuse = color(0.0, 0.0, 0.0); // black
             specular = color(0.0, 0.0, 0.0); // black
@@ -70,8 +70,8 @@ impl Material {
             // reflect_dot_eye represents the cosine of the angle between the
             // reflection vector and the eye vector. A negative number means the
             // light reflects away from the eye.
-            let reflectv = reflect(&(-lightv), &normalv);
-            let reflect_dot_eye = dot(&reflectv, &eyev);
+            let reflectv = reflect(&(-lightv), normalv);
+            let reflect_dot_eye = dot(&reflectv, eyev);
 
             if reflect_dot_eye <= 0.0 {
                 specular = color(0.0, 0.0, 0.0);
