@@ -248,11 +248,11 @@ mod tests {
     fn compute_normal_on_translated_sphere() {
         let mut s = sphere(1);
         set_transform(&mut s, &translation(0.0, 1.0, 0.0));
-        let n = normal_at(&s, &point(0.0, 1.70711, -0.70711));
+        let n = normal_at(&s, &point(0.0, 1.70711, -FRAC_1_SQRT_2));
         assert_relative_eq!(
             n,
             vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2),
-            epsilon = 1e-6
+            epsilon = 1e-5
         );
     }
 

@@ -468,8 +468,8 @@ mod tests {
             [ 4.0,  8.0, 16.0, 32.0],
         ]);
         let I = identity4();
-        assert_eq!(&A * &I, A);
-        assert_eq!(I * &A, A);
+        assert_eq!(A * I, A);
+        assert_eq!(I * A, A);
     }
 
     // Multiplying the identity matrix by a tuple
@@ -478,7 +478,7 @@ mod tests {
     fn identity_multiplied_by_tuple() {
         let a = tuple(1.0, 2.0, 3.0, 4.0);
         let I = identity4();
-        assert_eq!(I * &a, a);
+        assert_eq!(I * a, a);
     }
 
     // Transposing a matrix
@@ -717,7 +717,7 @@ mod tests {
             [7.0,   0.0,  5.0,  4.0],
             [6.0,  -2.0,  0.0,  5.0],
         ]);
-        let C = &A * &B;
+        let C = A * B;
         assert_relative_eq!(C * B.inverse(), A, epsilon=1e-5);
     }
 }

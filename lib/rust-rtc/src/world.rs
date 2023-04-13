@@ -37,7 +37,7 @@ impl World {
 
         // Intersections must be in sorted order
         for object in &self.objects {
-            let xs = intersect(&object, &ray);
+            let xs = intersect(object, ray);
             // TODO: insert in sorted order?
             for i in xs {
                 intersections.push(i);
@@ -79,9 +79,9 @@ impl World {
     }
 
     fn color_at(&self, ray: &Ray) -> Color {
-        let mut xs = intersect_world(self, &ray);
+        let mut xs = intersect_world(self, ray);
         if let Some(i) = hit(&mut xs) {
-            let comps = prepare_computations(&i, ray);
+            let comps = prepare_computations(i, ray);
             shade_hit(self, &comps)
         } else {
             Color::new(0.0, 0.0, 0.0)

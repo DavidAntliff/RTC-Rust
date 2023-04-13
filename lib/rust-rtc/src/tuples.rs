@@ -403,7 +403,7 @@ mod tests {
     fn compute_magnitude_vector_1_2_3() {
         let v = vector(1., 2., 3.);
         assert_eq!(magnitude(&v), f64::sqrt(14.0));
-        assert_eq!(magnitude(&v), (14.0 as f64).sqrt()); // equivalent
+        assert_eq!(magnitude(&v), 14.0_f64.sqrt()); // equivalent
     }
 
     // Computing the magnitude of vector(-1, -2, -3)
