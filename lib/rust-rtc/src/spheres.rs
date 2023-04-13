@@ -4,16 +4,18 @@ use super::tuples::{point, normalize, dot, Point, Vector};
 use super::matrices::{identity4, inverse, transpose, Matrix4};
 use super::rays::Ray;
 use super::intersections::{intersection, intersections, Intersections};
+use super::materials::{material, Material};
 
 #[derive(Debug, PartialEq)]
 pub struct Sphere {
     pub id: i32,
     pub transform: Matrix4,
+    pub material: Material,  // copy, for now
 }
 
 impl Sphere {
     pub fn new(id: i32) -> Sphere {
-        Sphere {id, transform: identity4()}
+        Sphere {id, transform: identity4(), material: material() }
     }
 
     pub fn set_transform(&mut self, m: &Matrix4) {
@@ -95,7 +97,7 @@ mod tests {
 
     // A ray intersects a sphere at two points
     #[test]
-    fn ray_intersects_sphere_at_two_points () {
+    fn ray_intersects_sphere_at_two_points() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -106,7 +108,7 @@ mod tests {
 
     // A ray intersects a sphere at a tangent
     #[test]
-    fn ray_intersects_a_sphere_at_a_tangent () {
+    fn ray_intersects_a_sphere_at_a_tangent() {
         let r = ray(point(0.0, 1.0, -5.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -117,7 +119,7 @@ mod tests {
 
     // A ray misses a sphere
     #[test]
-    fn ray_misses_sphere () {
+    fn ray_misses_sphere() {
         let r = ray(point(0.0, 2.0, -5.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -126,7 +128,7 @@ mod tests {
 
     // A ray originates inside a sphere
     #[test]
-    fn ray_originates_inside_sphere () {
+    fn ray_originates_inside_sphere() {
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -137,7 +139,7 @@ mod tests {
 
     // A sphere is behind a ray
     #[test]
-    fn sphere_is_behind_ray () {
+    fn sphere_is_behind_ray() {
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -148,7 +150,7 @@ mod tests {
 
     // Intersect sets the object on the intersection
     #[test]
-    fn intersect_sets_the_object () {
+    fn intersect_sets_the_object() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let s = sphere(1);
         let xs = local_intersect(&s, &r);
@@ -159,14 +161,14 @@ mod tests {
 
     // A sphere's default transformation
     #[test]
-    fn sphere_default_transformation () {
+    fn sphere_default_transformation() {
         let s = sphere(1);
         assert_eq!(s.transform, identity4());
     }
 
     // Changing a sphere's transformation
     #[test]
-    fn changing_sphere_transformation () {
+    fn changing_sphere_transformation() {
         let mut s = sphere(1);
         let t = translation(2.0, 3.0, 4.0);
         set_transform(&mut s, &t);
@@ -175,7 +177,7 @@ mod tests {
 
     // Intersecting a scaled sphere with a ray
     #[test]
-    fn intersecting_a_scaled_sphere_with_ray () {
+    fn intersecting_a_scaled_sphere_with_ray() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut s = sphere(1);
         set_transform(&mut s, &scaling(2.0, 2.0, 2.0));
@@ -187,7 +189,7 @@ mod tests {
 
     // Intersecting a translated sphere with a ray
     #[test]
-    fn intersecting_translated_sphere_with_ray () {
+    fn intersecting_translated_sphere_with_ray() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut s = sphere(1);
         set_transform(&mut s, &translation(5.0, 0.0, 0.0));
@@ -199,7 +201,7 @@ mod tests {
 
     // The normal on a sphere at a point on the x axis
     #[test]
-    fn normal_on_sphere_at_point_on_x_axis () {
+    fn normal_on_sphere_at_point_on_x_axis() {
         let s = sphere(1);
         let n = local_normal_at(&s, &point(1.0, 0.0, 0.0));
         assert_eq!(n, vector(1.0, 0.0, 0.0));
@@ -207,7 +209,7 @@ mod tests {
 
     // The normal on a sphere at a point on the y axis
     #[test]
-    fn normal_on_sphere_at_point_on_y_axis () {
+    fn normal_on_sphere_at_point_on_y_axis() {
         let s = sphere(1);
         let n = local_normal_at(&s, &point(0.0, 1.0, 0.0));
         assert_eq!(n, vector(0.0, 1.0, 0.0));
@@ -215,7 +217,7 @@ mod tests {
 
     // The normal on a sphere at a point on the z axis
     #[test]
-    fn normal_on_sphere_at_point_on_z_axis () {
+    fn normal_on_sphere_at_point_on_z_axis() {
         let s = sphere(1);
         let n = local_normal_at(&s, &point(0.0, 0.0, 1.0));
         assert_eq!(n, vector(0.0, 0.0, 1.0));
@@ -223,7 +225,7 @@ mod tests {
 
     // The normal on a sphere at a non-axial point
     #[test]
-    fn normal_on_sphere_at_non_axial_point () {
+    fn normal_on_sphere_at_non_axial_point() {
         let s = sphere(1);
         let k = f64::sqrt(3.0) / 3.0;
         let n = local_normal_at(&s, &point(k, k, k));
@@ -232,7 +234,7 @@ mod tests {
 
     // The normal is a normalized vector
     #[test]
-    fn normal_is_normalized_vector () {
+    fn normal_is_normalized_vector() {
         let s = sphere(1);
         let k = f64::sqrt(3.0) / 3.0;
         let n = local_normal_at(&s, &point(k, k, k));
@@ -241,7 +243,7 @@ mod tests {
 
     // Computing the normal on a translated sphere
     #[test]
-    fn compute_normal_on_translated_sphere () {
+    fn compute_normal_on_translated_sphere() {
         let mut s = sphere(1);
         set_transform(&mut s, &translation(0.0, 1.0, 0.0));
         let n = normal_at(&s, &point(0.0, 1.70711, -0.70711));
@@ -250,7 +252,7 @@ mod tests {
 
     // Computing the normal on a transformed sphere
     #[test]
-    fn compute_normal_on_transformed_sphere () {
+    fn compute_normal_on_transformed_sphere() {
         let mut s = sphere(1);
         let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
         set_transform(&mut s, &m);
@@ -264,7 +266,7 @@ mod tests {
 
     // A sphere has a default material
     #[test]
-    fn sphere_has_default_material () {
+    fn sphere_has_default_material() {
         let s = sphere(1);
         let m = s.material();
         assert_eq!(m, material());
@@ -272,7 +274,7 @@ mod tests {
 
     // A sphere may be assigned a material
     #[test]
-    fn sphere_may_be_assigned_material () {
+    fn sphere_may_be_assigned_material() {
         let s = sphere(1);
         let m = material();
         m.set_ambient(1.0);

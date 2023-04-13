@@ -8,3 +8,5 @@ pub mod transformations;
 pub mod rays;
 pub mod spheres;
 pub mod intersections;
+pub mod lights;
+pub mod materials;

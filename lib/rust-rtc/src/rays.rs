@@ -42,7 +42,7 @@ mod tests {
     use crate::transformations::{translation, scaling};
 
     #[test]
-    fn creating_and_querying_a_ray () {
+    fn creating_and_querying_a_ray() {
         let origin = point(1.0, 2.0, 3.0);
         let direction = vector(4.0, 5.0, 6.0);
         let r = ray(origin, direction);
@@ -52,7 +52,7 @@ mod tests {
 
     // Computing a point from a distance
     #[test]
-    fn compute_a_point_from_distance () {
+    fn compute_a_point_from_distance() {
         let r = ray(point(2.0, 3.0, 4.0), vector(1.0, 0.0, 0.0));
         assert_eq!(position(&r, 0.0), point(2.0, 3.0, 4.0));
         assert_eq!(position(&r, 1.0), point(3.0, 3.0, 4.0));
@@ -62,7 +62,7 @@ mod tests {
 
     // Translating a ray
     #[test]
-    fn translating_a_ray () {
+    fn translating_a_ray() {
         let r = ray(point(1.0, 2.0, 3.0), vector(0.0, 1.0, 0.0));
         let m = translation(3.0, 4.0, 5.0);
         let r2 = transform(&r, &m);
@@ -72,7 +72,7 @@ mod tests {
 
     // Scaling a ray
     #[test]
-    fn scaling_a_ray () {
+    fn scaling_a_ray() {
         let r = ray(point(1.0, 2.0, 3.0), vector(0.0, 1.0, 0.0));
         let m = scaling(2.0, 3.0, 4.0);
         let r2 = transform(&r, &m);

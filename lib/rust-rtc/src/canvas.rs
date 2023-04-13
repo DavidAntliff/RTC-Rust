@@ -106,7 +106,7 @@ mod tests {
 
     // Creating a canvas
     #[test]
-    fn creating_a_canvas () {
+    fn creating_a_canvas() {
         let c = canvas(10, 20);
         assert_eq!(c.width, 10);
         assert_eq!(c.height, 20);
@@ -119,7 +119,7 @@ mod tests {
 
     // Writing pixels to a canvas
     #[test]
-    fn writing_pixels_to_a_canvas () {
+    fn writing_pixels_to_a_canvas() {
         let mut c = canvas(10, 20);
         let red = color(1., 0., 0.);
         write_pixel(&mut c, 2, 3, &red);
@@ -130,7 +130,7 @@ mod tests {
 
     // Constructing the PPM header
     #[test]
-    fn construct_ppm_header () {
+    fn construct_ppm_header() {
         let c = canvas(5, 3);
         let ppm = ppm_from_canvas(&c);
         assert!(ppm.starts_with("P3\n5 3\n255\n"));
@@ -138,7 +138,7 @@ mod tests {
 
     // Constructing the PPM pixel data
     #[test]
-    fn construct_ppm_pixel_data () {
+    fn construct_ppm_pixel_data() {
         let mut c = canvas(5, 3);
         let c1 = color(1.5, 0.0, 0.0);
         let c2 = color(0.0, 0.5, 0.0);
@@ -157,7 +157,7 @@ mod tests {
 
     // Splitting long lines in PPM files
     #[test]
-    fn splitting_long_lines_in_ppm_files () {
+    fn splitting_long_lines_in_ppm_files() {
         let mut c = canvas(10, 2);
         for y in 0..c.height {
             for x in 0..c.width {
@@ -176,7 +176,7 @@ mod tests {
 
     // PPM files are terminated by a newline character
     #[test]
-    fn ppm_terminated_by_newline () {
+    fn ppm_terminated_by_newline() {
         let c = canvas(5, 3);
         let ppm = ppm_from_canvas(&c);
 

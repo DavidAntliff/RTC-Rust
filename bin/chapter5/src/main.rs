@@ -6,7 +6,7 @@ use rust_rtc::rays::ray;
 use rust_rtc::spheres::{sphere};
 use rust_rtc::intersections::{intersect, hit};
 
-fn main () {
+fn main() {
 
     // Sphere is at 0.0, 0.0, 0.0
     // Ray origin is z = -5.0

@@ -1,14 +1,9 @@
 [package]
-name = "rust-rtc"
+name = "chapter6"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-glam = { version = "0.23" }
-derive_more = "0.99.17"
-
-[dev-dependencies]
-approx = "0.5.1"
-rstest = "0.17.0"
+rust-rtc = { path = "../../lib/rust-rtc" }

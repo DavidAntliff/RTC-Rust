@@ -92,7 +92,7 @@ mod tests {
 
     // Multiplying by a translation matrix
     #[test]
-    fn multiplying_by_translation_matrix () {
+    fn multiplying_by_translation_matrix() {
         let transform = translation(5.0, -3.0, 2.0);
         let p = point(-3.0, 4.0, 5.0);
         assert_eq!(transform * p, point(2.0, 1.0, 7.0));
@@ -100,7 +100,7 @@ mod tests {
 
     // Multiplying by the inverse of a translation matrix
     #[test]
-    fn multiplying_by_inverse_translation_matrix () {
+    fn multiplying_by_inverse_translation_matrix() {
         let transform = translation(5.0, -3.0, 2.0);
         let inv = inverse(&transform);
         let p = point(-3.0, 4.0, 5.0);
@@ -109,7 +109,7 @@ mod tests {
 
     // Translation does not affect vectors
     #[test]
-    fn translation_does_not_affect_vectors () {
+    fn translation_does_not_affect_vectors() {
         let transform = translation(5.0, -3.0, 2.0);
         let v = vector(-3.0, 4.0, 5.0);
         assert_eq!(transform * v, v);
@@ -117,7 +117,7 @@ mod tests {
 
     // A scaling matrix applied to a point
     #[test]
-    fn scaling_matrix_applied_to_point () {
+    fn scaling_matrix_applied_to_point() {
         let transform = scaling(2.0, 3.0, 4.0);
         let p = point(-4.0, 6.0, 8.0);
         assert_eq!(transform * p, point(-8.0, 18.0, 32.0));
@@ -125,7 +125,7 @@ mod tests {
 
     // A scaling matrix applied to a vector
     #[test]
-    fn scaling_matrix_applied_to_vector () {
+    fn scaling_matrix_applied_to_vector() {
         let transform = scaling(2.0, 3.0, 4.0);
         let v = vector(-4.0, 6.0, 8.0);
         assert_eq!(transform * v, vector(-8.0, 18.0, 32.0));
@@ -133,7 +133,7 @@ mod tests {
 
     // Multiplying by the inverse of a scaling matrix
     #[test]
-    fn multiplying_by_inverse_of_scaling_matrix () {
+    fn multiplying_by_inverse_of_scaling_matrix() {
         let transform = scaling(2.0, 3.0, 4.0);
         let inv = inverse(&transform);
         let v = vector(-4.0, 6.0, 8.0);
@@ -142,7 +142,7 @@ mod tests {
 
     // Reflection is scaling by a negative value
     #[test]
-    fn reflection_is_scaling_by_negative_value () {
+    fn reflection_is_scaling_by_negative_value() {
         let transform = scaling(-1.0, 1.0, 1.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(-2.0, 3.0, 4.0));
@@ -150,7 +150,7 @@ mod tests {
 
     // Rotating a point around the x axis
     #[test]
-    fn rotating_point_around_x_axis () {
+    fn rotating_point_around_x_axis() {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         let full_quarter = rotation_x(PI / 2.0);
@@ -160,7 +160,7 @@ mod tests {
 
     // The inverse of an x-rotation rotates in the opposite direction
     #[test]
-    fn inverse_rotate_around_x_axis () {
+    fn inverse_rotate_around_x_axis() {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         let inv = inverse(&half_quarter);
@@ -169,7 +169,7 @@ mod tests {
 
     // Rotating a point around the y axis
     #[test]
-    fn rotating_point_around_y_axis () {
+    fn rotating_point_around_y_axis() {
         let p = point(0.0, 0.0, 1.0);
         let half_quarter = rotation_y(PI / 4.0);
         let full_quarter = rotation_y(PI / 2.0);
@@ -179,7 +179,7 @@ mod tests {
 
     // Rotating a point around the z axis
     #[test]
-    fn rotating_point_around_z_axis () {
+    fn rotating_point_around_z_axis() {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_z(PI / 4.0);
         let full_quarter = rotation_z(PI / 2.0);
@@ -189,7 +189,7 @@ mod tests {
 
     // A shearing transformation moves x in proportion to y
     #[test]
-    fn shearing_moves_x_in_proportion_to_y () {
+    fn shearing_moves_x_in_proportion_to_y() {
         let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(5.0, 3.0, 4.0));
@@ -197,7 +197,7 @@ mod tests {
 
     // A shearing transformation moves x in proportion to z
     #[test]
-    fn shearing_moves_x_in_proportion_to_z () {
+    fn shearing_moves_x_in_proportion_to_z() {
         let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(6.0, 3.0, 4.0));
@@ -205,7 +205,7 @@ mod tests {
 
     // A shearing transformation moves y in proportion to x
     #[test]
-    fn shearing_moves_y_in_proportion_to_x () {
+    fn shearing_moves_y_in_proportion_to_x() {
         let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(2.0, 5.0, 4.0));
@@ -213,7 +213,7 @@ mod tests {
 
     // A shearing transformation moves y in proportion to z
     #[test]
-    fn shearing_moves_y_in_proportion_to_z () {
+    fn shearing_moves_y_in_proportion_to_z() {
         let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(2.0, 7.0, 4.0));
@@ -221,7 +221,7 @@ mod tests {
 
     // A shearing transformation moves z in proportion to x
     #[test]
-    fn shearing_moves_z_in_proportion_to_x () {
+    fn shearing_moves_z_in_proportion_to_x() {
         let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(2.0, 3.0, 6.0));
@@ -229,7 +229,7 @@ mod tests {
 
     // A shearing transformation moves z in proportion to y
     #[test]
-    fn shearing_moves_z_in_proportion_to_y () {
+    fn shearing_moves_z_in_proportion_to_y() {
         let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
         let p = point(2.0, 3.0, 4.0);
         assert_eq!(transform * p, point(2.0, 3.0, 7.0));
@@ -237,7 +237,7 @@ mod tests {
 
     // Individual transformations are applied in sequence
     #[test]
-    fn individual_transformations_applied_in_sequence () {
+    fn individual_transformations_applied_in_sequence() {
         let p = point(1.0, 0.0, 1.0);
         let A = rotation_x(PI / 2.0);
         let B = scaling(5.0, 5.0, 5.0);
@@ -255,7 +255,7 @@ mod tests {
 
     // Chained transformations must be applied in reverse order
     #[test]
-    fn chained_transformations_applied_in_reverse_order () {
+    fn chained_transformations_applied_in_reverse_order() {
         let p = point(1.0, 0.0, 1.0);
         let A = rotation_x(PI / 2.0);
         let B = scaling(5.0, 5.0, 5.0);
@@ -267,7 +267,7 @@ mod tests {
 
     // Fluent API
     #[test]
-    fn fluent_api () {
+    fn fluent_api() {
         let p = point(1.0, 0.0, 1.0);
 
         let M = identity4()
@@ -287,7 +287,7 @@ mod tests {
 
     // The transformation matrix for the default orientation
     #[test]
-    fn transformation_matrix_for_default_orientation () {
+    fn transformation_matrix_for_default_orientation() {
         let from = point(0.0, 0.0, 0.0);
         let to = point(0.0, 0.0, -1.0);
         let up = vector(0.0, 1.0, 0.0);
@@ -297,7 +297,7 @@ mod tests {
 
     // A view transformation matrix looking in positive Z direction
     #[test]
-    fn view_transformation_matrix_looking_in_positive_z_direction () {
+    fn view_transformation_matrix_looking_in_positive_z_direction() {
         let from = point(0.0, 0.0, 0.0);
         let to = point(0.0, 0.0, 1.0);
         let up = vector(0.0, 1.0, 0.0);
@@ -307,7 +307,7 @@ mod tests {
 
     // The view transformation moves the world
     #[test]
-    fn view_transformation_moves_the_world () {
+    fn view_transformation_moves_the_world() {
         let from = point(0.0, 0.0, 8.0);
         let to = point(0.0, 0.0, 0.0);
         let up = vector(0.0, 1.0, 0.0);
@@ -317,7 +317,7 @@ mod tests {
 
     // An arbitrary view transformation
     #[test]
-    fn arbitrary_view_transformation () {
+    fn arbitrary_view_transformation() {
         let from = point(1.0, 3.0, 2.0);
         let to = point(4.0, -2.0, 8.0);
         let up = vector(1.0, 1.0, 0.0);

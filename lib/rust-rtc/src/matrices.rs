@@ -231,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    fn default_matrix2_is_identity () {
+    fn default_matrix2_is_identity() {
         let A = Matrix2::default();
 
         for r in 0..2 {
@@ -242,7 +242,7 @@ mod tests {
     }
 
     #[test]
-    fn default_matrix3_is_identity () {
+    fn default_matrix3_is_identity() {
         let A = Matrix3::default();
 
         for r in 0..3 {
@@ -253,7 +253,7 @@ mod tests {
     }
 
     #[test]
-    fn default_matrix4_is_identity () {
+    fn default_matrix4_is_identity() {
         let A = Matrix4::default();
 
         for r in 0..4 {
@@ -264,7 +264,7 @@ mod tests {
     }
 /*
     #[test]
-    fn matrix_from_vector () {
+    fn matrix_from_vector() {
         std::vector<double> el = {
             0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
         };
@@ -279,28 +279,28 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn invalid_access_0_4 () {
+    fn invalid_access_0_4() {
         let M = Matrix4::new();
         M.at(0, 4);
     }
 
     #[test]
     #[should_panic]
-    fn invalid_access_4_0 () {
+    fn invalid_access_4_0() {
         let M = Matrix4::new();
         M.at(4, 0);
     }
 
     #[test]
     #[should_panic]
-    fn invalid_access_4_4 () {
+    fn invalid_access_4_4() {
         let M = Matrix4::new();
         M.at(4, 4);
     }
 
     // Constructing and inspecting a 4x4 matrix
     #[test]
-    fn constructing_and_inspecting_4x4 () {
+    fn constructing_and_inspecting_4x4() {
         let _M = Matrix4::from_rows_array(&[
             [ 1.0,  2.0,  3.0,  4.0],
             [ 5.5,  6.5,  7.5,  8.5],
@@ -326,7 +326,7 @@ mod tests {
 
     // Constructing and inspecting a 2x2 matrix
     #[test]
-    fn constructing_and_inspecting_2x2 () {
+    fn constructing_and_inspecting_2x2() {
         let _M22 = Matrix2::from_rows_array(&[
             [ -3.0,  5.0],
             [  1.0, -2.0],
@@ -345,7 +345,7 @@ mod tests {
 
     // Constructing and inspecting a 3x3 matrix
     #[test]
-    fn constructing_and_inspecting_3x3 () {
+    fn constructing_and_inspecting_3x3() {
         let _M33 = Matrix3::from_rows_array(&[
             [-3.0,  5.0,  0.0],
             [ 1.0, -2.0, -7.0],
@@ -365,7 +365,7 @@ mod tests {
 
     // Matrix equality with identical matrices
     #[test]
-    fn equality_with_identical_matrices () {
+    fn equality_with_identical_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
             [ 5.0,  6.0,  7.0,  8.0],
@@ -383,7 +383,7 @@ mod tests {
 
     // Matrix equality with different matrices
     #[test]
-    fn equality_with_different_matrices () {
+    fn equality_with_different_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
             [ 5.0,  6.0,  7.0,  8.0],
@@ -401,7 +401,7 @@ mod tests {
 
     // Multiplying two matrices
     #[test]
-    fn multiplying_two_matrices () {
+    fn multiplying_two_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
             [ 5.0,  6.0,  7.0,  8.0],
@@ -424,7 +424,7 @@ mod tests {
 
     // A matrix multiplied by a tuple
     #[test]
-    fn matrix_multipied_by_tuple () {
+    fn matrix_multipied_by_tuple() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
             [ 2.0,  4.0,  4.0,  2.0],
@@ -437,7 +437,7 @@ mod tests {
 
     // Multiplying a matrix by the identity matrix
     #[test]
-    fn matrix_multiplied_by_identity () {
+    fn matrix_multiplied_by_identity() {
         let A = matrix4(&[
             [ 0.0,  1.0,  2.0,  4.0],
             [ 1.0,  2.0,  4.0,  8.0],
@@ -451,7 +451,7 @@ mod tests {
 
     // Multiplying the identity matrix by a tuple
     #[test]
-    fn identity_multiplied_by_tuple () {
+    fn identity_multiplied_by_tuple() {
         let a = tuple(1.0, 2.0, 3.0, 4.0);
         let I = identity4();
         assert_eq!(I * &a, a);
@@ -459,7 +459,7 @@ mod tests {
 
     // Transposing a matrix
     #[test]
-    fn transposing_a_matrix () {
+    fn transposing_a_matrix() {
         let A = matrix4(&[
             [ 0.0,  9.0,  3.0,  0.0],
             [ 9.0,  8.0,  0.0,  8.0],
@@ -477,14 +477,14 @@ mod tests {
 
     // Transposing the identity matrix
     #[test]
-    fn transposing_the_identity () {
+    fn transposing_the_identity() {
         let I = identity4();
         assert_eq!(I.transpose(), I);
     }
 
     // Calculating the determinant of a 2x2 matrix
     #[test]
-    fn calculate_determinant_2x2 () {
+    fn calculate_determinant_2x2() {
         let A = matrix2(&[
             [ 1.0, 5.0],
             [-3.0, 2.0],
@@ -495,7 +495,7 @@ mod tests {
 /*
     // A submatrix of a 3x3 matrix is a 2x2 matrix
     #[test]
-    fn submatrix_of_3x3 () {
+    fn submatrix_of_3x3() {
         auto A = matrix3x3({
             {  1.0,  5.0,  0.0},
             { -3.0,  2.0,  7.0},
@@ -510,7 +510,7 @@ mod tests {
 
     // A submatrix of a 4x4 matrix is a 3x3 matrix
     #[test]
-    fn submatrix_of_4x4 () {
+    fn submatrix_of_4x4() {
         auto A = matrix4x4({
             {-6.0,  1.0,  1.0,  6.0},
             {-8.0,  5.0,  8.0,  6.0},
@@ -527,7 +527,7 @@ mod tests {
 
     // Calculating a minor of a 3x3 matrix
     #[test]
-    fn calculate_minor_of_3x3 () {
+    fn calculate_minor_of_3x3() {
         auto A = matrix3x3({
             {  3.0,  5.0,  0.0},
             {  2.0, -1.0, -7.0},
@@ -540,7 +540,7 @@ mod tests {
 
     // Calculating a cofactor of a 3x3 matrix
     #[test]
-    fn calculate_cofactor_of_3x3 () {
+    fn calculate_cofactor_of_3x3() {
         auto A = matrix3x3({
             {  3.0,  5.0,  0.0},
             {  2.0, -1.0, -7.0},
@@ -554,7 +554,7 @@ mod tests {
 */
     // Calculating the determinant of a 3x3 matrix
     #[test]
-    fn calculate_determinant_of_3x3 () {
+    fn calculate_determinant_of_3x3() {
         let A = matrix3(&[
             [  1.0,  2.0,  6.0],
             [ -5.0,  8.0, -4.0],
@@ -567,7 +567,7 @@ mod tests {
     }
     // Calculating the determinant of a 4x4 matrix
     #[test]
-    fn calculate_determinant_of_4x4 () {
+    fn calculate_determinant_of_4x4() {
         let A = matrix4(&[
             [-2.0, -8.0,  3.0,  5.0],
             [-3.0,  1.0,  7.0,  3.0],
@@ -583,7 +583,7 @@ mod tests {
 
     // Testing an invertible matrix for invertibility
     #[test]
-    fn invertible_matrix_is_invertible () {
+    fn invertible_matrix_is_invertible() {
         let A = matrix4(&[
             [ 6.0,  4.0,  4.0,  4.0],
             [ 5.0,  5.0,  7.0,  6.0],
@@ -596,7 +596,7 @@ mod tests {
 
     // Testing a noninvertible matrix for invertibility
     #[test]
-    fn noninvertible_matrix_is_not_invertible () {
+    fn noninvertible_matrix_is_not_invertible() {
         let A = matrix4(&[
             [-4.0,  2.0, -2.0, -3.0],
             [ 9.0,  6.0,  2.0,  6.0],
@@ -609,7 +609,7 @@ mod tests {
 
     // Calculating the inverse of a matrix
     #[test]
-    fn calculate_inverse_of_matrix () {
+    fn calculate_inverse_of_matrix() {
         let A = matrix4(&[
             [-5.0,  2.0,  6.0, -8.0],
             [ 1.0, -5.0,  1.0,  8.0],
@@ -632,7 +632,7 @@ mod tests {
 
     // Calculating the inverse of another matrix
     #[test]
-    fn calculate_inverse_of_another_matrix () {
+    fn calculate_inverse_of_another_matrix() {
         let A = matrix4(&[
             [ 8.0, -5.0,  9.0,  2.0],
             [ 7.0,  5.0,  6.0,  1.0],
@@ -649,7 +649,7 @@ mod tests {
 
     // Calculating the inverse of a third matrix
     #[test]
-    fn calculate_inverse_of_a_third_matrix () {
+    fn calculate_inverse_of_a_third_matrix() {
         let A = matrix4(&[
             [ 9.0,  3.0,  0.0,  9.0],
             [-5.0, -2.0, -6.0, -3.0],
@@ -666,7 +666,7 @@ mod tests {
 
     // Multiplying a product by its inverse}
     #[test]
-    fn multiply_product_by_inverse () {
+    fn multiply_product_by_inverse() {
         let A = matrix4(&[
             [ 3.0,  -9.0,   7.0,   3.0],
             [ 3.0,  -8.0,   2.0,  -9.0],

@@ -17,7 +17,7 @@ fn set_pixel(c: &mut Canvas, x: f64, y: f64) {
     write_pixel(c, x, y, &color(1.0, 1.0, 1.0));
 }
 
-fn main () {
+fn main() {
     let mut c = canvas(900, 550);
 
     // 1 hour rotation (15 degrees)

@@ -96,7 +96,7 @@ mod tests {
 
     // An intersection encapsulates t and object
     #[test]
-    fn intersection_encapsulates_t_and_object () {
+    fn intersection_encapsulates_t_and_object() {
         let s = sphere(1);
         let i = intersection(3.5, &s);
         assert_eq!(i.t, 3.5);
@@ -105,7 +105,7 @@ mod tests {
 
     // Aggregating intersections
     #[test]
-    fn aggregating_intersections () {
+    fn aggregating_intersections() {
         let s = sphere(1);
         let i1 = intersection(1.0, &s);
         let i2 = intersection(2.0, &s);
@@ -116,7 +116,7 @@ mod tests {
     }
     // The hit, when all intersections have positive t
     #[test]
-    fn the_hit_when_all_intersections_have_positive_t () {
+    fn the_hit_when_all_intersections_have_positive_t() {
         let s = sphere(1);
         let i1 = intersection(1.0, &s);
         let i2 = intersection(2.0, &s);
@@ -127,7 +127,7 @@ mod tests {
 
     // The hit, when some intersections have negative t
     #[test]
-    fn the_hit_when_some_intersections_have_negative_t () {
+    fn the_hit_when_some_intersections_have_negative_t() {
         let s = sphere(1);
         let i1 = intersection(-1.0, &s);
         let i2 = intersection(1.0, &s);
@@ -138,7 +138,7 @@ mod tests {
 
     // The hit, when all intersections have negative t
     #[test]
-    fn the_hit_when_all_intersections_have_negative_t () {
+    fn the_hit_when_all_intersections_have_negative_t() {
         let s = sphere(1);
         let i1 = intersection(-2.0, &s);
         let i2 = intersection(-1.0, &s);
@@ -149,7 +149,7 @@ mod tests {
 
     // The hit is always the lowest nonnegative intersection
     #[test]
-    fn the_hit_is_always_the_lowest_non_negative () {
+    fn the_hit_is_always_the_lowest_non_negative() {
         let s = sphere(1);
         let i1 = intersection(5.0, &s);
         let i2 = intersection(7.0, &s);
@@ -162,7 +162,7 @@ mod tests {
 
     // Precomputing the state of an intersection
     #[test]
-    fn precomputing_the_state_of_an_intersection () {
+    fn precomputing_the_state_of_an_intersection() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(4.0, &shape);
@@ -176,7 +176,7 @@ mod tests {
 
     // The hit, when an intersection occurs on the outside
     #[test]
-    fn the_hit_when_intersection_occurs_on_outside () {
+    fn the_hit_when_intersection_occurs_on_outside() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(4.0, &shape);
@@ -186,7 +186,7 @@ mod tests {
 
     // The hit, when an intersection occurs on the inside
     #[test]
-    fn the_hit_when_intersection_occurs_on_inside () {
+    fn the_hit_when_intersection_occurs_on_inside() {
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(1.0, &shape);
@@ -200,7 +200,7 @@ mod tests {
 
     // The hit should offset the point
     #[test]
-    fn hit_should_offset_point () {
+    fn hit_should_offset_point() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut shape = sphere(1);
         shape.set_transform(&translation(0.0, 0.0, 1.0));
