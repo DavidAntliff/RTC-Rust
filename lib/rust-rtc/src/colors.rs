@@ -1,5 +1,5 @@
-use super::tuples::{Tuple};
-use derive_more::{Add, Sub, Neg, Mul};
+use super::tuples::Tuple;
+use derive_more::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, Default, PartialEq, Copy, Clone, Add, Sub, Neg, Mul)]
 pub struct Color(Tuple);
@@ -9,9 +9,15 @@ impl Color {
         Color(Tuple::new(r, g, b, 0.0))
     }
 
-    pub fn red(&self) -> f64 { self.0.x() }
-    pub fn green(&self) -> f64 { self.0.y() }
-    pub fn blue(&self) -> f64 { self.0.z() }
+    pub fn red(&self) -> f64 {
+        self.0.x()
+    }
+    pub fn green(&self) -> f64 {
+        self.0.y()
+    }
+    pub fn blue(&self) -> f64 {
+        self.0.z()
+    }
 }
 
 macro_rules! color_mul {
@@ -22,7 +28,7 @@ macro_rules! color_mul {
                 Color(&self.0 * &rhs.0)
             }
         }
-    }
+    };
 }
 
 color_mul!(Color, Color);
@@ -39,7 +45,6 @@ pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
     lhs * rhs
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -53,7 +58,7 @@ mod tests {
         }
 
         fn abs_diff_eq(&self, other: &Self, epsilon: f64) -> bool {
-            self.0.0.abs_diff_eq(other.0.0, epsilon)
+            self.0 .0.abs_diff_eq(other.0 .0, epsilon)
         }
     }
 
@@ -63,10 +68,10 @@ mod tests {
         }
 
         fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
-            f64::relative_eq(&self.0.0.x, &other.0.0.x, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.0.y, &other.0.0.y, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.0.z, &other.0.0.z, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.0.w, &other.0.0.w, epsilon, max_relative)
+            f64::relative_eq(&self.0 .0.x, &other.0 .0.x, epsilon, max_relative)
+                && f64::relative_eq(&self.0 .0.y, &other.0 .0.y, epsilon, max_relative)
+                && f64::relative_eq(&self.0 .0.z, &other.0 .0.z, epsilon, max_relative)
+                && f64::relative_eq(&self.0 .0.w, &other.0 .0.w, epsilon, max_relative)
         }
     }
 

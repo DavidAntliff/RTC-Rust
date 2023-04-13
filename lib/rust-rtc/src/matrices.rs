@@ -1,6 +1,6 @@
 // Chapter 3: Matrices
 
-use super::tuples::{Tuple};
+use super::tuples::Tuple;
 use glam::f64::{DMat2, DMat3, DMat4};
 
 #[derive(Debug, PartialEq)]
@@ -139,7 +139,7 @@ macro_rules! matrix4_mul {
                 Matrix4(self.0 * rhs.0)
             }
         }
-    }
+    };
 }
 
 matrix4_mul!(Matrix4, Matrix4);
@@ -155,7 +155,7 @@ macro_rules! matrix4_tuple_mul {
                 Tuple(self.0 * rhs.0)
             }
         }
-    }
+    };
 }
 
 matrix4_tuple_mul!(Matrix4, Tuple);
@@ -171,14 +171,13 @@ pub fn identity4() -> Matrix4 {
     Matrix4(DMat4::IDENTITY)
 }
 
-
 #[cfg(test)]
 mod tests {
     #![allow(non_snake_case)]
 
     use super::*;
-    use approx::{assert_relative_eq, AbsDiffEq, RelativeEq};
     use crate::tuples::tuple;
+    use approx::{assert_relative_eq, AbsDiffEq, RelativeEq};
 
     // wrap DVec4 so that we can define f64::relative_eq! for it
     #[derive(PartialEq)]
@@ -193,7 +192,6 @@ mod tests {
         fn abs_diff_eq(&self, other: &Self, epsilon: f64) -> bool {
             self.0.abs_diff_eq(other.0, epsilon)
         }
-
     }
     impl RelativeEq for DVec4Wrap {
         fn default_max_relative() -> f64 {
@@ -223,10 +221,27 @@ mod tests {
         }
 
         fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
-            DVec4Wrap::relative_eq(&DVec4Wrap(self.0.x_axis), &DVec4Wrap(other.0.x_axis), epsilon, max_relative) &&
-                DVec4Wrap::relative_eq(&DVec4Wrap(self.0.y_axis), &DVec4Wrap(other.0.y_axis), epsilon, max_relative) &&
-                DVec4Wrap::relative_eq(&DVec4Wrap(self.0.z_axis), &DVec4Wrap(other.0.z_axis), epsilon, max_relative) &&
-                DVec4Wrap::relative_eq(&DVec4Wrap(self.0.w_axis), &DVec4Wrap(other.0.w_axis), epsilon, max_relative)
+            DVec4Wrap::relative_eq(
+                &DVec4Wrap(self.0.x_axis),
+                &DVec4Wrap(other.0.x_axis),
+                epsilon,
+                max_relative,
+            ) && DVec4Wrap::relative_eq(
+                &DVec4Wrap(self.0.y_axis),
+                &DVec4Wrap(other.0.y_axis),
+                epsilon,
+                max_relative,
+            ) && DVec4Wrap::relative_eq(
+                &DVec4Wrap(self.0.z_axis),
+                &DVec4Wrap(other.0.z_axis),
+                epsilon,
+                max_relative,
+            ) && DVec4Wrap::relative_eq(
+                &DVec4Wrap(self.0.w_axis),
+                &DVec4Wrap(other.0.w_axis),
+                epsilon,
+                max_relative,
+            )
         }
     }
 
@@ -236,7 +251,7 @@ mod tests {
 
         for r in 0..2 {
             for c in 0..2 {
-                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
+                assert_eq!(A.at(r, c), if r == c { 1.0 } else { 0.0 });
             }
         }
     }
@@ -247,7 +262,7 @@ mod tests {
 
         for r in 0..3 {
             for c in 0..3 {
-                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
+                assert_eq!(A.at(r, c), if r == c { 1.0 } else { 0.0 });
             }
         }
     }
@@ -258,24 +273,24 @@ mod tests {
 
         for r in 0..4 {
             for c in 0..4 {
-                assert_eq!(A.at(r, c), if r == c {1.0} else {0.0});
+                assert_eq!(A.at(r, c), if r == c { 1.0 } else { 0.0 });
             }
         }
     }
-/*
-    #[test]
-    fn matrix_from_vector() {
-        std::vector<double> el = {
-            0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
-        };
-        Matrix<3> A {el};
-        EXPECT_EQ(A, matrix3x3({
-            { 0.0,  1.0,   2.0},
-            { 3.0,  4.0,   5.0},
-            { 6.0,  7.0,   8.0},
-        }));
-    }
- */
+    /*
+       #[test]
+       fn matrix_from_vector() {
+           std::vector<double> el = {
+               0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
+           };
+           Matrix<3> A {el};
+           EXPECT_EQ(A, matrix3x3({
+               { 0.0,  1.0,   2.0},
+               { 3.0,  4.0,   5.0},
+               { 6.0,  7.0,   8.0},
+           }));
+       }
+    */
 
     #[test]
     #[should_panic]
@@ -300,6 +315,7 @@ mod tests {
 
     // Constructing and inspecting a 4x4 matrix
     #[test]
+    #[rustfmt::skip]
     fn constructing_and_inspecting_4x4() {
         let _M = Matrix4::from_rows_array(&[
             [ 1.0,  2.0,  3.0,  4.0],
@@ -326,6 +342,7 @@ mod tests {
 
     // Constructing and inspecting a 2x2 matrix
     #[test]
+    #[rustfmt::skip]
     fn constructing_and_inspecting_2x2() {
         let _M22 = Matrix2::from_rows_array(&[
             [ -3.0,  5.0],
@@ -345,6 +362,7 @@ mod tests {
 
     // Constructing and inspecting a 3x3 matrix
     #[test]
+    #[rustfmt::skip]
     fn constructing_and_inspecting_3x3() {
         let _M33 = Matrix3::from_rows_array(&[
             [-3.0,  5.0,  0.0],
@@ -365,6 +383,7 @@ mod tests {
 
     // Matrix equality with identical matrices
     #[test]
+    #[rustfmt::skip]
     fn equality_with_identical_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
@@ -383,6 +402,7 @@ mod tests {
 
     // Matrix equality with different matrices
     #[test]
+    #[rustfmt::skip]
     fn equality_with_different_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
@@ -401,6 +421,7 @@ mod tests {
 
     // Multiplying two matrices
     #[test]
+    #[rustfmt::skip]
     fn multiplying_two_matrices() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
@@ -424,6 +445,7 @@ mod tests {
 
     // A matrix multiplied by a tuple
     #[test]
+    #[rustfmt::skip]
     fn matrix_multipied_by_tuple() {
         let A = matrix4(&[
             [ 1.0,  2.0,  3.0,  4.0],
@@ -437,6 +459,7 @@ mod tests {
 
     // Multiplying a matrix by the identity matrix
     #[test]
+    #[rustfmt::skip]
     fn matrix_multiplied_by_identity() {
         let A = matrix4(&[
             [ 0.0,  1.0,  2.0,  4.0],
@@ -451,6 +474,7 @@ mod tests {
 
     // Multiplying the identity matrix by a tuple
     #[test]
+    #[rustfmt::skip]
     fn identity_multiplied_by_tuple() {
         let a = tuple(1.0, 2.0, 3.0, 4.0);
         let I = identity4();
@@ -459,6 +483,7 @@ mod tests {
 
     // Transposing a matrix
     #[test]
+    #[rustfmt::skip]
     fn transposing_a_matrix() {
         let A = matrix4(&[
             [ 0.0,  9.0,  3.0,  0.0],
@@ -484,6 +509,7 @@ mod tests {
 
     // Calculating the determinant of a 2x2 matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_determinant_2x2() {
         let A = matrix2(&[
             [ 1.0, 5.0],
@@ -492,68 +518,73 @@ mod tests {
         assert_eq!(A.determinant(), 17.0);
     }
 
-/*
-    // A submatrix of a 3x3 matrix is a 2x2 matrix
-    #[test]
-    fn submatrix_of_3x3() {
-        auto A = matrix3x3({
-            {  1.0,  5.0,  0.0},
-            { -3.0,  2.0,  7.0},
-            {  0.0,  6.0, -3.0},
-        });
+    /*
+        // A submatrix of a 3x3 matrix is a 2x2 matrix
+        #[test]
+        #[rustfmt::skip]
+        fn submatrix_of_3x3() {
+            auto A = matrix3x3({
+                {  1.0,  5.0,  0.0},
+                { -3.0,  2.0,  7.0},
+                {  0.0,  6.0, -3.0},
+            });
 
-        EXPECT_EQ(submatrix(A, 0, 2), matrix2x2({
-            {-3.0, 2.0},
-            { 0.0, 6.0},
-        }));
-    }
+            EXPECT_EQ(submatrix(A, 0, 2), matrix2x2({
+                {-3.0, 2.0},
+                { 0.0, 6.0},
+            }));
+        }
 
-    // A submatrix of a 4x4 matrix is a 3x3 matrix
-    #[test]
-    fn submatrix_of_4x4() {
-        auto A = matrix4x4({
-            {-6.0,  1.0,  1.0,  6.0},
-            {-8.0,  5.0,  8.0,  6.0},
-            {-1.0,  0.0,  8.0,  2.0},
-            {-7.0,  1.0, -1.0,  1.0},
-        });
+        // A submatrix of a 4x4 matrix is a 3x3 matrix
+        #[test]
+        #[rustfmt::skip]
+        fn submatrix_of_4x4() {
+            auto A = matrix4x4({
+                {-6.0,  1.0,  1.0,  6.0},
+                {-8.0,  5.0,  8.0,  6.0},
+                {-1.0,  0.0,  8.0,  2.0},
+                {-7.0,  1.0, -1.0,  1.0},
+            });
 
-        EXPECT_EQ(submatrix(A, 2, 1), matrix3x3({
-            {-6.0, 1.0, 6.0},
-            {-8.0, 8.0, 6.0},
-            {-7.0,-1.0, 1.0},
-        }));
-    }
+            EXPECT_EQ(submatrix(A, 2, 1), matrix3x3({
+                {-6.0, 1.0, 6.0},
+                {-8.0, 8.0, 6.0},
+                {-7.0,-1.0, 1.0},
+            }));
+        }
 
-    // Calculating a minor of a 3x3 matrix
-    #[test]
-    fn calculate_minor_of_3x3() {
-        auto A = matrix3x3({
-            {  3.0,  5.0,  0.0},
-            {  2.0, -1.0, -7.0},
-            {  6.0, -1.0,  5.0},
-        });
-        auto B = submatrix(A, 1, 0);
-        EXPECT_EQ(determinant(B), 25.0);
-        EXPECT_EQ(minor(A, 1, 0), 25.0);
-    }
+        // Calculating a minor of a 3x3 matrix
+        #[test]
+        #[rustfmt::skip]
+        fn calculate_minor_of_3x3() {
+            auto A = matrix3x3({
+                {  3.0,  5.0,  0.0},
+                {  2.0, -1.0, -7.0},
+                {  6.0, -1.0,  5.0},
+            });
+            auto B = submatrix(A, 1, 0);
+            EXPECT_EQ(determinant(B), 25.0);
+            EXPECT_EQ(minor(A, 1, 0), 25.0);
+        }
 
-    // Calculating a cofactor of a 3x3 matrix
-    #[test]
-    fn calculate_cofactor_of_3x3() {
-        auto A = matrix3x3({
-            {  3.0,  5.0,  0.0},
-            {  2.0, -1.0, -7.0},
-            {  6.0, -1.0,  5.0},
-        });
-        EXPECT_EQ(minor(A, 0, 0), -12.0);
-        EXPECT_EQ(cofactor(A, 0, 0), -12.0);
-        EXPECT_EQ(minor(A, 1, 0), 25.0);
-        EXPECT_EQ(cofactor(A, 1, 0), -25.0);
-    }
-*/
+        // Calculating a cofactor of a 3x3 matrix
+        #[test]
+        #[rustfmt::skip]
+        fn calculate_cofactor_of_3x3() {
+            auto A = matrix3x3({
+                {  3.0,  5.0,  0.0},
+                {  2.0, -1.0, -7.0},
+                {  6.0, -1.0,  5.0},
+            });
+            EXPECT_EQ(minor(A, 0, 0), -12.0);
+            EXPECT_EQ(cofactor(A, 0, 0), -12.0);
+            EXPECT_EQ(minor(A, 1, 0), 25.0);
+            EXPECT_EQ(cofactor(A, 1, 0), -25.0);
+        }
+    */
     // Calculating the determinant of a 3x3 matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_determinant_of_3x3() {
         let A = matrix3(&[
             [  1.0,  2.0,  6.0],
@@ -567,6 +598,7 @@ mod tests {
     }
     // Calculating the determinant of a 4x4 matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_determinant_of_4x4() {
         let A = matrix4(&[
             [-2.0, -8.0,  3.0,  5.0],
@@ -583,6 +615,7 @@ mod tests {
 
     // Testing an invertible matrix for invertibility
     #[test]
+    #[rustfmt::skip]
     fn invertible_matrix_is_invertible() {
         let A = matrix4(&[
             [ 6.0,  4.0,  4.0,  4.0],
@@ -596,6 +629,7 @@ mod tests {
 
     // Testing a noninvertible matrix for invertibility
     #[test]
+    #[rustfmt::skip]
     fn noninvertible_matrix_is_not_invertible() {
         let A = matrix4(&[
             [-4.0,  2.0, -2.0, -3.0],
@@ -609,6 +643,7 @@ mod tests {
 
     // Calculating the inverse of a matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_inverse_of_matrix() {
         let A = matrix4(&[
             [-5.0,  2.0,  6.0, -8.0],
@@ -632,6 +667,7 @@ mod tests {
 
     // Calculating the inverse of another matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_inverse_of_another_matrix() {
         let A = matrix4(&[
             [ 8.0, -5.0,  9.0,  2.0],
@@ -649,6 +685,7 @@ mod tests {
 
     // Calculating the inverse of a third matrix
     #[test]
+    #[rustfmt::skip]
     fn calculate_inverse_of_a_third_matrix() {
         let A = matrix4(&[
             [ 9.0,  3.0,  0.0,  9.0],
@@ -666,6 +703,7 @@ mod tests {
 
     // Multiplying a product by its inverse}
     #[test]
+    #[rustfmt::skip]
     fn multiply_product_by_inverse() {
         let A = matrix4(&[
             [ 3.0,  -9.0,   7.0,   3.0],

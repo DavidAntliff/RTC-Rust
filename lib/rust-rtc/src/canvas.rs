@@ -1,6 +1,6 @@
 // Chapter 2: Drawing On a Canvas
 
-use super::colors::{Color};
+use super::colors::Color;
 
 pub struct Canvas {
     pub width: u32,
@@ -11,8 +11,11 @@ pub struct Canvas {
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Canvas {
         let capacity = usize::try_from(width * height).unwrap();
-        Canvas {width, height,
-            pixels: vec![Color::new(0.0, 0.0, 0.0); capacity] }
+        Canvas {
+            width,
+            height,
+            pixels: vec![Color::new(0.0, 0.0, 0.0); capacity],
+        }
     }
 
     fn _index_of(&self, x: u32, y: u32) -> Option<usize> {
@@ -26,7 +29,7 @@ impl Canvas {
     pub fn pixel_at(&self, x: u32, y: u32) -> &Color {
         match self._index_of(x, y) {
             Some(c) => &self.pixels[c],
-            _ => panic!("panic")
+            _ => panic!("panic"),
         }
     }
 
@@ -102,7 +105,7 @@ pub fn ppm_from_canvas(c: &Canvas) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::colors::{color};
+    use crate::colors::color;
 
     // Creating a canvas
     #[test]
@@ -168,10 +171,22 @@ mod tests {
 
         let lines = ppm.split('\n').collect::<Vec<_>>();
 
-        assert_eq!(lines[3], "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204");
-        assert_eq!(lines[4], "153 255 204 153 255 204 153 255 204 153 255 204 153");
-        assert_eq!(lines[5], "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204");
-        assert_eq!(lines[6], "153 255 204 153 255 204 153 255 204 153 255 204 153");
+        assert_eq!(
+            lines[3],
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204"
+        );
+        assert_eq!(
+            lines[4],
+            "153 255 204 153 255 204 153 255 204 153 255 204 153"
+        );
+        assert_eq!(
+            lines[5],
+            "255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204"
+        );
+        assert_eq!(
+            lines[6],
+            "153 255 204 153 255 204 153 255 204 153 255 204 153"
+        );
     }
 
     // PPM files are terminated by a newline character

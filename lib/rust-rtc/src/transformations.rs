@@ -1,8 +1,9 @@
 // Chapter 4: Transformations
 
-use super::tuples::{Point, Vector, normalize, cross};
-use super::matrices::{Matrix4, matrix4};
+use super::matrices::{matrix4, Matrix4};
+use super::tuples::{cross, normalize, Point, Vector};
 
+#[rustfmt::skip]
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     matrix4(&[
         [1.0, 0.0, 0.0,   x],
@@ -12,6 +13,7 @@ pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     ])
 }
 
+#[rustfmt::skip]
 pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     matrix4(&[
         [  x, 0.0, 0.0, 0.0],
@@ -21,6 +23,7 @@ pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     ])
 }
 
+#[rustfmt::skip]
 pub fn rotation_x(radians: f64) -> Matrix4 {
     let cos_r = f64::cos(radians);
     let sin_r = f64::sin(radians);
@@ -32,6 +35,7 @@ pub fn rotation_x(radians: f64) -> Matrix4 {
     ])
 }
 
+#[rustfmt::skip]
 pub fn rotation_y(radians: f64) -> Matrix4 {
     let cos_r = f64::cos(radians);
     let sin_r = f64::sin(radians);
@@ -43,6 +47,7 @@ pub fn rotation_y(radians: f64) -> Matrix4 {
     ])
 }
 
+#[rustfmt::skip]
 pub fn rotation_z(radians: f64) -> Matrix4 {
     let cos_r = f64::cos(radians);
     let sin_r = f64::sin(radians);
@@ -54,6 +59,7 @@ pub fn rotation_z(radians: f64) -> Matrix4 {
     ])
 }
 
+#[rustfmt::skip]
 pub fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix4 {
     matrix4(&[
         [1.0,  xy,  xz, 0.0],
@@ -69,6 +75,7 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix4 {
     let left = cross(&forward, &upn);
     let true_up = cross(&left, &forward);
 
+    #[rustfmt::skip]
     let orientation = matrix4(&[
         [    left.x(),     left.y(),     left.z(), 0.0],
         [ true_up.x(),  true_up.y(),  true_up.z(), 0.0],
@@ -79,16 +86,15 @@ pub fn view_transform(from: &Point, to: &Point, up: &Vector) -> Matrix4 {
     orientation * translation(-from.x(), -from.y(), -from.z())
 }
 
-
 #[cfg(test)]
 mod tests {
     #![allow(non_snake_case)]
 
     use super::*;
-    use crate::tuples::{point, vector};
     use crate::matrices::{identity4, inverse};
+    use crate::tuples::{point, vector};
+    use approx::assert_relative_eq;
     use std::f64::consts::PI;
-    use approx::{assert_relative_eq};
 
     // Multiplying by a translation matrix
     #[test]
@@ -154,7 +160,10 @@ mod tests {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         let full_quarter = rotation_x(PI / 2.0);
-        assert_relative_eq!(half_quarter * p, point(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0));
+        assert_relative_eq!(
+            half_quarter * p,
+            point(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
+        );
         assert_relative_eq!(full_quarter * p, point(0.0, 0.0, 1.0));
     }
 
@@ -164,7 +173,10 @@ mod tests {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         let inv = inverse(&half_quarter);
-        assert_relative_eq!(inv * p, point(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0));
+        assert_relative_eq!(
+            inv * p,
+            point(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0)
+        );
     }
 
     // Rotating a point around the y axis
@@ -173,7 +185,10 @@ mod tests {
         let p = point(0.0, 0.0, 1.0);
         let half_quarter = rotation_y(PI / 4.0);
         let full_quarter = rotation_y(PI / 2.0);
-        assert_relative_eq!(half_quarter * p, point(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0));
+        assert_relative_eq!(
+            half_quarter * p,
+            point(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0)
+        );
         assert_relative_eq!(full_quarter * p, point(1.0, 0.0, 0.0));
     }
 
@@ -183,7 +198,10 @@ mod tests {
         let p = point(0.0, 1.0, 0.0);
         let half_quarter = rotation_z(PI / 4.0);
         let full_quarter = rotation_z(PI / 2.0);
-        assert_relative_eq!(half_quarter * p, point(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0));
+        assert_relative_eq!(
+            half_quarter * p,
+            point(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0)
+        );
         assert_relative_eq!(full_quarter * p, point(-1.0, 0.0, 0.0));
     }
 
@@ -244,13 +262,13 @@ mod tests {
         let C = translation(10.0, 5.0, 7.0);
 
         let p2 = A * p;
-        assert_relative_eq!(p2, point(1.0, -1.0, 0.0), epsilon=1e-6);
+        assert_relative_eq!(p2, point(1.0, -1.0, 0.0), epsilon = 1e-6);
 
         let p3 = B * p2;
-        assert_relative_eq!(p3, point(5.0, -5.0, 0.0), epsilon=1e-6);
+        assert_relative_eq!(p3, point(5.0, -5.0, 0.0), epsilon = 1e-6);
 
         let p4 = C * p3;
-        assert_relative_eq!(p4, point(15.0, 0.0, 7.0), epsilon=1e-6);
+        assert_relative_eq!(p4, point(15.0, 0.0, 7.0), epsilon = 1e-6);
     }
 
     // Chained transformations must be applied in reverse order
@@ -271,16 +289,16 @@ mod tests {
         let p = point(1.0, 0.0, 1.0);
 
         let M = identity4()
-                .then(&rotation_x(PI / 2.0))
-                .then(&scaling(5.0, 5.0, 5.0))
-                .then(&translation(10.0, 5.0, 7.0));
+            .then(&rotation_x(PI / 2.0))
+            .then(&scaling(5.0, 5.0, 5.0))
+            .then(&translation(10.0, 5.0, 7.0));
 
         assert_eq!(M * p, point(15.0, 0.0, 7.0));
 
         let M2 = identity4()
-                .then(&rotation_x(PI / 2.0))
-                .then(&scaling(3.0, 3.0, 3.0))
-                .then(&translation(10.0, 5.0, 7.0));
+            .then(&rotation_x(PI / 2.0))
+            .then(&scaling(3.0, 3.0, 3.0))
+            .then(&translation(10.0, 5.0, 7.0));
 
         assert_eq!(M2 * p, point(13.0, 2.0, 7.0));
     }
@@ -322,6 +340,7 @@ mod tests {
         let to = point(4.0, -2.0, 8.0);
         let up = vector(1.0, 1.0, 0.0);
         let t = view_transform(&from, &to, &up);
+        #[rustfmt::skip]
         assert_relative_eq!(t, matrix4(&[
                 [ -0.50709, 0.50709,  0.67612, -2.36643],
                 [  0.76772, 0.60609,  0.12122, -2.82843],

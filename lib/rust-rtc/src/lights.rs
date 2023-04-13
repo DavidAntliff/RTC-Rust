@@ -1,7 +1,7 @@
 // Chapter 6: Lights and Shading
 
-use crate::colors::{Color};
-use crate::tuples::{Point};
+use crate::colors::Color;
+use crate::tuples::Point;
 
 pub struct PointLight {
     pub position: Point,
@@ -21,12 +21,11 @@ pub fn point_light(position: Point, intensity: Color) -> PointLight {
     PointLight::new(position, intensity)
 }
 
-
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::colors::color;
     use crate::tuples::point;
-    use super::*;
 
     // A point light has a position and intensity
     #[test]

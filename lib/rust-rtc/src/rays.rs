@@ -1,6 +1,6 @@
 // Chapter 5: Ray-Sphere Intersections
-use super::tuples::{Point, Vector};
 use super::matrices::Matrix4;
+use super::tuples::{Point, Vector};
 
 pub struct Ray {
     pub origin: Point,
@@ -9,7 +9,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(origin: Point, direction: Vector) -> Ray {
-        Ray {origin, direction}
+        Ray { origin, direction }
     }
 
     pub fn position(&self, t: f64) -> Point {
@@ -17,8 +17,10 @@ impl Ray {
     }
 
     pub fn transform(&self, m: &Matrix4) -> Ray {
-        Ray {origin: m * self.origin,
-             direction: m * self.direction}
+        Ray {
+            origin: m * self.origin,
+            direction: m * self.direction,
+        }
     }
 }
 
@@ -34,12 +36,11 @@ pub fn transform(ray: &Ray, m: &Matrix4) -> Ray {
     ray.transform(m)
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::transformations::{scaling, translation};
     use crate::tuples::{point, vector};
-    use crate::transformations::{translation, scaling};
 
     #[test]
     fn creating_and_querying_a_ray() {

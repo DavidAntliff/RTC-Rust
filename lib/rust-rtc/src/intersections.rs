@@ -1,10 +1,10 @@
 // Chapter 5: Ray-Sphere Intersections
 
 use super::math::EPSILON;
-use super::spheres::{Sphere, normal_at};
-use super::rays::{Ray, transform};
 use super::matrices::inverse;
-use super::tuples::{Point, Vector, dot};
+use super::rays::{transform, Ray};
+use super::spheres::{normal_at, Sphere};
+use super::tuples::{dot, Point, Vector};
 
 pub use std::vec as intersections;
 
@@ -16,7 +16,7 @@ pub struct Intersection<'a> {
 
 impl Intersection<'_> {
     pub fn new(t: f64, object: &Sphere) -> Intersection {
-        Intersection {t, object}
+        Intersection { t, object }
     }
 }
 
@@ -60,14 +60,15 @@ impl IntersectionComputation<'_> {
             over_point: Point::default(),
             eyev: Vector::default(),
             normalv: Vector::default(),
-            inside: false
+            inside: false,
         }
     }
 }
 
-pub fn prepare_computations<'a>(intersection: &'a Intersection, ray: &Ray)
-    -> IntersectionComputation<'a> {
-
+pub fn prepare_computations<'a>(
+    intersection: &'a Intersection,
+    ray: &Ray,
+) -> IntersectionComputation<'a> {
     let mut comps = IntersectionComputation::new(intersection.object);
     comps.t = intersection.t;
 
@@ -85,14 +86,13 @@ pub fn prepare_computations<'a>(intersection: &'a Intersection, ray: &Ray)
     comps
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::spheres::{sphere};
     use crate::rays::ray;
+    use crate::spheres::sphere;
     use crate::transformations::translation;
-    use crate::tuples::{vector, point};
+    use crate::tuples::{point, vector};
 
     // An intersection encapsulates t and object
     #[test]

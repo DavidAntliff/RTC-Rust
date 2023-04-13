@@ -1,9 +1,9 @@
 // Chapter 6: Lights and Shading
 
-use crate::colors::{Color, color};
+use crate::colors::{color, Color};
 use crate::lights::PointLight;
 use crate::spheres::Sphere;
-use crate::tuples::{dot, normalize, Point, reflect, Vector};
+use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
 #[derive(Debug, PartialEq)]
 pub struct Material {
@@ -26,14 +26,15 @@ impl Material {
         }
     }
 
-    pub fn lighting(&self,
-                    _object: &Sphere,
-                    light: &PointLight,
-                    point: &Point,
-                    eyev: &Vector,
-                    normalv: &Vector,
-                    in_shadow: bool) -> Color {
-
+    pub fn lighting(
+        &self,
+        _object: &Sphere,
+        light: &PointLight,
+        point: &Point,
+        eyev: &Vector,
+        normalv: &Vector,
+        in_shadow: bool,
+    ) -> Color {
         // TODO
         //let pattern = material.pattern;
         //let material_color = pattern ? pattern_at_shape(*pattern, shape, point) : material.color()};
@@ -60,8 +61,8 @@ impl Material {
         // light is on the other side of the surface.
         let light_dot_normal = dot(&lightv, &normalv);
         if light_dot_normal < 0.0 {
-            diffuse = color(0.0, 0.0, 0.0);  // black
-            specular = color(0.0, 0.0, 0.0);  // black
+            diffuse = color(0.0, 0.0, 0.0); // black
+            specular = color(0.0, 0.0, 0.0); // black
         } else {
             // Compute the diffuse contribution
             diffuse = effective_color * self.diffuse * light_dot_normal;
@@ -101,25 +102,26 @@ pub fn material() -> Material {
     Material::default()
 }
 
-pub fn lighting(material: &Material,
-                object: &Sphere,
-                light: &PointLight,
-                point: &Point,
-                eyev: &Vector,
-                normalv: &Vector,
-                in_shadow: bool) -> Color {
+pub fn lighting(
+    material: &Material,
+    object: &Sphere,
+    light: &PointLight,
+    point: &Point,
+    eyev: &Vector,
+    normalv: &Vector,
+    in_shadow: bool,
+) -> Color {
     material.lighting(object, light, point, eyev, normalv, in_shadow)
 }
 
-
 #[cfg(test)]
 mod tests {
-    use approx::assert_relative_eq;
     use super::*;
-    use rstest::{rstest, fixture};
     use crate::lights::point_light;
     use crate::spheres::sphere;
-    use crate::tuples::{Point, point, vector};
+    use crate::tuples::{point, vector, Point};
+    use approx::assert_relative_eq;
+    use rstest::{fixture, rstest};
 
     // The default material
     #[test]
@@ -152,7 +154,15 @@ mod tests {
         let normalv = vector(0.0, 0.0, -1.0);
 
         let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, false);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            false,
+        );
 
         // intensity = full ambient + full diffuse + full specular
         assert_eq!(result, color(1.9, 1.9, 1.9));
@@ -165,7 +175,15 @@ mod tests {
         let eyev = vector(0.0, k, -k);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, false);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            false,
+        );
 
         // intensity = full ambient + full diffuse + zero specular
         assert_eq!(result, color(1.0, 1.0, 1.0));
@@ -177,10 +195,18 @@ mod tests {
         let eyev = vector(0.0, 0.0, -1.0);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, false);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            false,
+        );
 
         // intensity = full ambient + partial diffuse + zero specular
-        assert_relative_eq!(result, color(0.7364, 0.7364, 0.7364), epsilon=1e-4);
+        assert_relative_eq!(result, color(0.7364, 0.7364, 0.7364), epsilon = 1e-4);
     }
 
     // Lighting with eye in the path of the reflection vector
@@ -190,10 +216,18 @@ mod tests {
         let eyev = vector(0.0, -k, -k);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, false);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            false,
+        );
 
         // intensity = full ambient + partial diffuse + full specular
-        assert_relative_eq!(result, color(1.6364, 1.6364, 1.6364), epsilon=1e-4);
+        assert_relative_eq!(result, color(1.6364, 1.6364, 1.6364), epsilon = 1e-4);
     }
 
     // Lighting with the light behind the surface
@@ -202,7 +236,15 @@ mod tests {
         let eyev = vector(0.0, 0.0, -1.0);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, 10.0), color(1.0, 1.0, 1.0));
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, false);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            false,
+        );
 
         // intensity = full ambient + zero diffuse + zero specular
         assert_eq!(result, color(0.1, 0.1, 0.1));
@@ -217,31 +259,38 @@ mod tests {
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
         let in_shadow = true;
-        let result = lighting(&fix.m, &sphere(1), &light, &fix.position, &eyev, &normalv, in_shadow);
+        let result = lighting(
+            &fix.m,
+            &sphere(1),
+            &light,
+            &fix.position,
+            &eyev,
+            &normalv,
+            in_shadow,
+        );
 
         assert_eq!(result, color(0.1, 0.1, 0.1));
     }
-/*
-    TODO
+    /*
+       TODO
 
-    // Chapter 10: Patterns
+       // Chapter 10: Patterns
 
-    // Lighting with a pattern applied
-    #[rstest]
-    fn lighting_with_pattern_applied(fix: MaterialFixture) {
-        m.set_pattern(stripe_pattern(color(1.0, 1.0, 1.0), color(0.0, 0.0, 0.0)));
-        m.set_ambient(1.0);
-        m.set_diffuse(0.0);
-        m.set_specular(0.0);
-        let eyev = vector(0.0, 0.0, -1.0);
-        let normalv = vector(0.0, 0.0, -1.0);
-        let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
-        let c1 = lighting(m, sphere(1), light, point(0.9, 0.0, 0.0), eyev, normalv, false);
-        let c2 = lighting(m, sphere(1), light, point(1.1, 0.0, 0.0), eyev, normalv, false);
-        assert_eq!(c1, color(1.0, 1.0, 1.0));
-        assert_eq!(c2, color(0.0, 0.0, 0.0));
-    }
+       // Lighting with a pattern applied
+       #[rstest]
+       fn lighting_with_pattern_applied(fix: MaterialFixture) {
+           m.set_pattern(stripe_pattern(color(1.0, 1.0, 1.0), color(0.0, 0.0, 0.0)));
+           m.set_ambient(1.0);
+           m.set_diffuse(0.0);
+           m.set_specular(0.0);
+           let eyev = vector(0.0, 0.0, -1.0);
+           let normalv = vector(0.0, 0.0, -1.0);
+           let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
+           let c1 = lighting(m, sphere(1), light, point(0.9, 0.0, 0.0), eyev, normalv, false);
+           let c2 = lighting(m, sphere(1), light, point(1.1, 0.0, 0.0), eyev, normalv, false);
+           assert_eq!(c1, color(1.0, 1.0, 1.0));
+           assert_eq!(c2, color(0.0, 0.0, 0.0));
+       }
 
- */
-
+    */
 }

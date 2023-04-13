@@ -1,6 +1,6 @@
 use glam::f64::DVec4;
 
-use derive_more::{Add, Neg, Div};
+use derive_more::{Add, Div, Neg};
 
 #[derive(Debug, Default, PartialEq, Copy, Clone, Add, Neg, Div)]
 pub struct Tuple(pub(crate) glam::f64::DVec4);
@@ -10,17 +10,25 @@ pub type Vector = Tuple;
 
 impl Tuple {
     pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
-        Self(DVec4 {x, y, z, w})
+        Self(DVec4 { x, y, z, w })
     }
 
     // pub fn from_inner(inner: DVec4) -> Self {
     //     Self(inner)
     // }
 
-    pub fn x(&self) -> f64 { self.0.x }
-    pub fn y(&self) -> f64 { self.0.y }
-    pub fn z(&self) -> f64 { self.0.z }
-    pub fn w(&self) -> f64 { self.0.w }
+    pub fn x(&self) -> f64 {
+        self.0.x
+    }
+    pub fn y(&self) -> f64 {
+        self.0.y
+    }
+    pub fn z(&self) -> f64 {
+        self.0.z
+    }
+    pub fn w(&self) -> f64 {
+        self.0.w
+    }
     pub fn at(&self, index: usize) -> Option<f64> {
         match index {
             0 => Some(self.0.x),
@@ -31,11 +39,19 @@ impl Tuple {
         }
     }
 
-    pub fn set_x(&mut self, value: f64) { self.0.x = value; }
-    pub fn set_y(&mut self, value: f64) { self.0.y = value; }
-    pub fn set_z(&mut self, value: f64) { self.0.z = value; }
-    pub fn set_w(&mut self, value: f64) { self.0.w = value; }
-    
+    pub fn set_x(&mut self, value: f64) {
+        self.0.x = value;
+    }
+    pub fn set_y(&mut self, value: f64) {
+        self.0.y = value;
+    }
+    pub fn set_z(&mut self, value: f64) {
+        self.0.z = value;
+    }
+    pub fn set_w(&mut self, value: f64) {
+        self.0.w = value;
+    }
+
     pub fn is_point(&self) -> bool {
         self.0.w == 1.0
     }
@@ -67,7 +83,7 @@ impl Tuple {
             x: self.0.y * rhs.0.z - rhs.0.y * self.0.z,
             y: self.0.z * rhs.0.x - rhs.0.z * self.0.x,
             z: self.0.x * rhs.0.y - rhs.0.x * self.0.y,
-            w: 0.0
+            w: 0.0,
         })
     }
 }
@@ -80,7 +96,7 @@ macro_rules! tuple_muls {
                 Tuple(self.0 * rhs.0)
             }
         }
-    }
+    };
 }
 
 tuple_muls!(Tuple, Tuple);
@@ -96,7 +112,7 @@ macro_rules! tuple_mul {
                 Tuple(self.0 * rhs)
             }
         }
-    }
+    };
 }
 
 tuple_mul!(Tuple, f64);
@@ -120,7 +136,7 @@ macro_rules! tuple_sub {
                 Tuple(self.0 - rhs.0)
             }
         }
-    }
+    };
 }
 
 tuple_sub!(Tuple, Tuple);
@@ -189,10 +205,10 @@ mod tests {
         }
 
         fn relative_eq(&self, other: &Self, epsilon: f64, max_relative: f64) -> bool {
-            f64::relative_eq(&self.0.x, &other.0.x, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.y, &other.0.y, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.z, &other.0.z, epsilon, max_relative) &&
-                f64::relative_eq(&self.0.w, &other.0.w, epsilon, max_relative)
+            f64::relative_eq(&self.0.x, &other.0.x, epsilon, max_relative)
+                && f64::relative_eq(&self.0.y, &other.0.y, epsilon, max_relative)
+                && f64::relative_eq(&self.0.z, &other.0.z, epsilon, max_relative)
+                && f64::relative_eq(&self.0.w, &other.0.w, epsilon, max_relative)
         }
     }
 
@@ -387,7 +403,7 @@ mod tests {
     fn compute_magnitude_vector_1_2_3() {
         let v = vector(1., 2., 3.);
         assert_eq!(magnitude(&v), f64::sqrt(14.0));
-        assert_eq!(magnitude(&v), (14.0 as f64).sqrt());  // equivalent
+        assert_eq!(magnitude(&v), (14.0 as f64).sqrt()); // equivalent
     }
 
     // Computing the magnitude of vector(-1, -2, -3)

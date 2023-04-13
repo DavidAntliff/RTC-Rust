@@ -1,9 +1,9 @@
 use std::f64::consts::PI;
 
-use rust_rtc::tuples::{point};
+use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel, Canvas};
 use rust_rtc::colors::color;
-use rust_rtc::canvas::{canvas, Canvas, write_pixel, ppm_from_canvas};
-use rust_rtc::transformations::{rotation_z};
+use rust_rtc::transformations::rotation_z;
+use rust_rtc::tuples::point;
 
 fn set_pixel(c: &mut Canvas, x: f64, y: f64) {
     let x_off = f64::from(c.width / 2);

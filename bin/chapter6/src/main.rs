@@ -1,17 +1,16 @@
 use std::f64::consts::PI;
 
-use rust_rtc::tuples::{point, normalize};
+use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
 use rust_rtc::colors::color;
-use rust_rtc::canvas::{canvas, write_pixel, ppm_from_canvas};
-use rust_rtc::transformations::{scaling, rotation_z};
+use rust_rtc::intersections::{hit, intersect};
+use rust_rtc::lights::point_light;
+use rust_rtc::materials::{lighting, material};
 use rust_rtc::rays::ray;
-use rust_rtc::spheres::{sphere};
-use rust_rtc::intersections::{intersect, hit};
-use rust_rtc::lights::{point_light};
-use rust_rtc::materials::{material, lighting};
+use rust_rtc::spheres::sphere;
+use rust_rtc::transformations::{rotation_z, scaling};
+use rust_rtc::tuples::{normalize, point};
 
 fn main() {
-
     // Sphere is at 0.0, 0.0, 0.0
     // Ray origin is z = -5.0
     // Wall is z = 10.0
@@ -79,13 +78,15 @@ fn main() {
                 let normal = h.object.local_normal_at(&point);
                 let eye = -r.direction;
 
-                let color = lighting(&h.object.material,
-                                     &h.object,
-                                     &light,
-                                     &point,
-                                     &eye,
-                                     &normal,
-                                     false);
+                let color = lighting(
+                    &h.object.material,
+                    &h.object,
+                    &light,
+                    &point,
+                    &eye,
+                    &normal,
+                    false,
+                );
 
                 write_pixel(&mut c, x, y, &color);
             }

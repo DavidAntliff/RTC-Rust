@@ -1,21 +1,25 @@
 // Chapter 5: Ray-Sphere Intersections
 
-use super::tuples::{point, normalize, dot, Point, Vector};
-use super::matrices::{identity4, inverse, transpose, Matrix4};
-use super::rays::Ray;
 use super::intersections::{intersection, intersections, Intersections};
 use super::materials::{material, Material};
+use super::matrices::{identity4, inverse, transpose, Matrix4};
+use super::rays::Ray;
+use super::tuples::{dot, normalize, point, Point, Vector};
 
 #[derive(Debug, PartialEq)]
 pub struct Sphere {
     pub id: i32,
     pub transform: Matrix4,
-    pub material: Material,  // copy, for now
+    pub material: Material, // copy, for now
 }
 
 impl Sphere {
     pub fn new(id: i32) -> Sphere {
-        Sphere {id, transform: identity4(), material: material() }
+        Sphere {
+            id,
+            transform: identity4(),
+            material: material(),
+        }
     }
 
     pub fn set_transform(&mut self, m: &Matrix4) {
@@ -50,8 +54,7 @@ impl Sphere {
         let t1 = (-b - f64::sqrt(discriminant)) / (2.0 * a);
         let t2 = (-b + f64::sqrt(discriminant)) / (2.0 * a);
 
-        intersections!(intersection(t1, self),
-                       intersection(t2, self))
+        intersections!(intersection(t1, self), intersection(t2, self))
     }
 }
 
@@ -83,17 +86,16 @@ pub fn normal_at(object: &Sphere, world_point: &Point) -> Vector {
     normalize(&world_normal)
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tuples::{point, vector};
-    use crate::rays::{ray};
-    use crate::transformations::{translation, scaling, rotation_z};
     use crate::intersections::intersect;
-    use std::f64::consts::{PI, FRAC_1_SQRT_2};
+    use crate::rays::ray;
+    use crate::transformations::{rotation_z, scaling, translation};
+    use crate::tuples::{point, vector};
+    use std::f64::consts::{FRAC_1_SQRT_2, PI};
 
-    use approx::{assert_relative_eq};
+    use approx::assert_relative_eq;
 
     // A ray intersects a sphere at two points
     #[test]
@@ -247,7 +249,11 @@ mod tests {
         let mut s = sphere(1);
         set_transform(&mut s, &translation(0.0, 1.0, 0.0));
         let n = normal_at(&s, &point(0.0, 1.70711, -0.70711));
-        assert_relative_eq!(n, vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2), epsilon=1e-6);
+        assert_relative_eq!(
+            n,
+            vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2),
+            epsilon = 1e-6
+        );
     }
 
     // Computing the normal on a transformed sphere
@@ -258,30 +264,29 @@ mod tests {
         set_transform(&mut s, &m);
         let k = f64::sqrt(2.0) / 2.0;
         let n = normal_at(&s, &point(0.0, k, -k));
-        assert_relative_eq!(n, vector(0.0, 0.97014, -0.24245), epsilon=1e-4);
+        assert_relative_eq!(n, vector(0.0, 0.97014, -0.24245), epsilon = 1e-4);
     }
 
     /*
-    TODO
+       TODO
 
-    // A sphere has a default material
-    #[test]
-    fn sphere_has_default_material() {
-        let s = sphere(1);
-        let m = s.material();
-        assert_eq!(m, material());
-    }
+       // A sphere has a default material
+       #[test]
+       fn sphere_has_default_material() {
+           let s = sphere(1);
+           let m = s.material();
+           assert_eq!(m, material());
+       }
 
-    // A sphere may be assigned a material
-    #[test]
-    fn sphere_may_be_assigned_material() {
-        let s = sphere(1);
-        let m = material();
-        m.set_ambient(1.0);
-        s.set_material(m);
-        assert_eq!(s.material(), m);
-    }
+       // A sphere may be assigned a material
+       #[test]
+       fn sphere_may_be_assigned_material() {
+           let s = sphere(1);
+           let m = material();
+           m.set_ambient(1.0);
+           s.set_material(m);
+           assert_eq!(s.material(), m);
+       }
 
- */
-
+    */
 }
