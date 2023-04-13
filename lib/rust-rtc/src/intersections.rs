@@ -1,10 +1,10 @@
 // Chapter 5: Ray-Sphere Intersections
 
-use super::math::EPSILON;
-use super::matrices::inverse;
-use super::rays::{transform, Ray};
-use super::spheres::{normal_at, Sphere};
-use super::tuples::{dot, Point, Vector};
+use crate::math::EPSILON;
+use crate::matrices::inverse;
+use crate::rays::{transform, Ray};
+use crate::spheres::{normal_at, Sphere};
+use crate::tuples::{dot, Point, Vector};
 
 pub use std::vec as intersections;
 
@@ -42,13 +42,13 @@ pub fn hit<'a>(intersections: &'a mut Intersections<'a>) -> Option<&'a Intersect
 }
 
 pub struct IntersectionComputation<'a> {
-    t: f64,
-    object: &'a Sphere,
-    point: Point,
-    over_point: Point,
-    eyev: Vector,
-    normalv: Vector,
-    inside: bool,
+    pub t: f64,
+    pub object: &'a Sphere,
+    pub point: Point,
+    pub over_point: Point,
+    pub eyev: Vector,
+    pub normalv: Vector,
+    pub inside: bool,
 }
 
 impl IntersectionComputation<'_> {

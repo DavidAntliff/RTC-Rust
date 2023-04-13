@@ -1,6 +1,6 @@
 // Chapter 2: Drawing On a Canvas
 
-use super::colors::Color;
+use crate::colors::Color;
 
 pub struct Canvas {
     pub width: u32,

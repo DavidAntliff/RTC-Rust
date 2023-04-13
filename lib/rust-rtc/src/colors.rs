@@ -1,4 +1,4 @@
-use super::tuples::Tuple;
+use crate::tuples::Tuple;
 use derive_more::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, Default, PartialEq, Copy, Clone, Add, Sub, Neg, Mul)]

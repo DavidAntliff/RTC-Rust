@@ -4,7 +4,7 @@ use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
 use rust_rtc::colors::{WHITE, GREEN};
 use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::lights::point_light;
-use rust_rtc::materials::{lighting, material};
+use rust_rtc::materials::{default_material, lighting};
 use rust_rtc::rays::ray;
 use rust_rtc::spheres::sphere;
 use rust_rtc::transformations::{rotation_z, scaling};
@@ -28,7 +28,7 @@ fn main() {
     let mut c = canvas(canvas_pixels, canvas_pixels);
     let mut shape = sphere(1);
 
-    let mut mat = material();
+    let mut mat = default_material();
     //mat.color = rust_rtc::colors::GREY75;
     mat.color = GREEN;
     mat.specular = 0.5;
@@ -51,7 +51,7 @@ fn main() {
     //let light_position = point(-10.0, 10.0, -10.0);
     let light_position = point(10.0, -10.0, -10.0);
     let light_color = WHITE;
-    let light = point_light(light_position, light_color);
+    let light = Some(point_light(light_position, light_color));
 
     // for each row of pixels in the canvas
     for y in 0..canvas_pixels {

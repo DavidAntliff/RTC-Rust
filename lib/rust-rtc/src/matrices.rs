@@ -1,6 +1,6 @@
 // Chapter 3: Matrices
 
-use super::tuples::Tuple;
+use crate::tuples::Tuple;
 use glam::f64::{DMat2, DMat3, DMat4};
 
 #[derive(Debug, PartialEq)]

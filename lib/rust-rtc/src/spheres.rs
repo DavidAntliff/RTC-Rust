@@ -1,12 +1,12 @@
 // Chapter 5: Ray-Sphere Intersections
 
-use super::intersections::{intersection, intersections, Intersections};
-use super::materials::{material, Material};
-use super::matrices::{identity4, inverse, transpose, Matrix4};
-use super::rays::Ray;
-use super::tuples::{dot, normalize, point, Point, Vector};
+use crate::intersections::{intersection, intersections, Intersections};
+use crate::materials::{default_material, Material};
+use crate::matrices::{identity4, inverse, transpose, Matrix4};
+use crate::rays::Ray;
+use crate::tuples::{dot, normalize, point, Point, Vector};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, /*Copy,*/ Clone)]
 pub struct Sphere {
     pub id: i32,
     pub transform: Matrix4,
@@ -18,7 +18,7 @@ impl Sphere {
         Sphere {
             id,
             transform: identity4(),
-            material: material(),
+            material: default_material(),
         }
     }
 

@@ -1,6 +1,7 @@
 // Chapter 5: Ray-Sphere Intersections
-use super::matrices::Matrix4;
-use super::tuples::{Point, Vector};
+
+use crate::matrices::Matrix4;
+use crate::tuples::{Point, Vector};
 
 pub struct Ray {
     pub origin: Point,

@@ -5,7 +5,7 @@ use crate::lights::PointLight;
 use crate::spheres::Sphere;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, /*Copy,*/ Clone)]
 pub struct Material {
     pub color: Color,
     pub ambient: f64,
@@ -16,20 +16,24 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new() -> Self {
+    pub fn new(color: Color,
+               ambient: f64,
+               diffuse: f64,
+               specular: f64,
+               shininess: f64) -> Self {
         Material {
-            color: color(0.0, 0.0, 0.0),
-            ambient: 0.0,
-            diffuse: 1.0,
-            specular: 0.0,
-            shininess: 0.0,
+            color,
+            ambient,
+            diffuse,
+            specular,
+            shininess,
         }
     }
 
     pub fn lighting(
         &self,
         _object: &Sphere,
-        light: &PointLight,
+        light: &Option<PointLight>,
         point: &Point,
         eyev: &Vector,
         normalv: &Vector,
@@ -40,11 +44,22 @@ impl Material {
         //let material_color = pattern ? pattern_at_shape(*pattern, shape, point) : material.color()};
         let material_color = self.color;
 
+        // Light is optional
+        let light_intensity: Color;
+        let light_position: Point;
+        if let Some(light) = light {
+            light_intensity = light.intensity;
+            light_position = light.position;
+        } else {
+            light_intensity = color(0.0, 0.0, 0.0);
+            light_position = crate::tuples::point(0.0, 0.0, 0.0);
+        }
+
         // Combine the surface color with the light's color/intensity
-        let effective_color = material_color * light.intensity;
+        let effective_color = material_color * light_intensity;
 
         // Find the direction to the light source
-        let lightv = normalize(&(light.position - point));
+        let lightv = normalize(&(light_position - point));
 
         // Compute the ambient contribution
         let ambient = effective_color * self.ambient;
@@ -78,7 +93,7 @@ impl Material {
             } else {
                 // Compute the specular contribution
                 let factor = f64::powf(reflect_dot_eye, self.shininess);
-                specular = light.intensity * self.specular * factor;
+                specular = light_intensity * self.specular * factor;
             }
         }
 
@@ -98,14 +113,22 @@ impl Default for Material {
     }
 }
 
-pub fn material() -> Material {
+pub fn default_material() -> Material {
     Material::default()
+}
+
+pub fn material(color: Color,
+                ambient: f64,
+                diffuse: f64,
+                specular: f64,
+                shininess: f64) -> Material {
+    Material::new(color, ambient, diffuse, specular, shininess)
 }
 
 pub fn lighting(
     material: &Material,
     object: &Sphere,
-    light: &PointLight,
+    light: &Option<PointLight>,
     point: &Point,
     eyev: &Vector,
     normalv: &Vector,
@@ -125,8 +148,8 @@ mod tests {
 
     // The default material
     #[test]
-    fn default_material() {
-        let m = material();
+    fn the_default_material() {
+        let m = default_material();
         assert_eq!(m.color, color(1.0, 1.0, 1.0));
         assert_eq!(m.ambient, 0.1);
         assert_eq!(m.diffuse, 0.9);
@@ -142,7 +165,7 @@ mod tests {
     #[fixture]
     fn fix() -> MaterialFixture {
         MaterialFixture {
-            m: material(),
+            m: default_material(),
             position: point(0.0, 0.0, 0.0),
         }
     }
@@ -157,7 +180,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,
@@ -178,7 +201,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,
@@ -198,7 +221,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,
@@ -219,7 +242,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,
@@ -239,7 +262,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,
@@ -262,7 +285,7 @@ mod tests {
         let result = lighting(
             &fix.m,
             &sphere(1),
-            &light,
+            &Some(light),
             &fix.position,
             &eyev,
             &normalv,

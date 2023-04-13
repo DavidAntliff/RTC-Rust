@@ -1,7 +1,7 @@
 // Chapter 4: Transformations
 
-use super::matrices::{matrix4, Matrix4};
-use super::tuples::{cross, normalize, Point, Vector};
+use crate::matrices::{matrix4, Matrix4};
+use crate::tuples::{cross, normalize, Point, Vector};
 
 #[rustfmt::skip]
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
