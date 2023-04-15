@@ -6,7 +6,7 @@ use crate::matrices::{identity4, inverse, transpose, Matrix4};
 use crate::rays::Ray;
 use crate::tuples::{dot, normalize, point, Point, Vector};
 
-#[derive(Debug, PartialEq, /*Copy,*/ Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Sphere {
     pub id: i32,
     pub transform: Matrix4,

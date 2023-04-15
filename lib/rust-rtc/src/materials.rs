@@ -5,7 +5,7 @@ use crate::lights::PointLight;
 use crate::spheres::Sphere;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
-#[derive(Debug, PartialEq, /*Copy,*/ Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Material {
     pub color: Color,
     pub ambient: f64,
