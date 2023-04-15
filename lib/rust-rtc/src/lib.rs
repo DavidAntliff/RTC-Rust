@@ -1,3 +1,4 @@
+pub mod camera;
 pub mod canvas;
 pub mod colors;
 pub mod intersections;
@@ -10,4 +11,3 @@ pub mod spheres;
 pub mod transformations;
 pub mod tuples;
 pub mod world;
-pub mod camera;

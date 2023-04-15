@@ -1,11 +1,11 @@
 // Chapter 7: Implementing a Camera
 
-use std::f64::consts::PI;
-use crate::canvas::{Canvas, canvas};
+use crate::canvas::{canvas, Canvas};
 use crate::matrices::{identity4, Matrix4};
-use crate::rays::{Ray, ray};
+use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
+use std::f64::consts::PI;
 
 pub struct Camera {
     hsize: u32,
@@ -56,8 +56,8 @@ impl Camera {
 
     pub fn render(&self, world: &World) -> Canvas {
         let mut image = canvas(self.hsize, self.vsize);
-        for y in 0 .. self.vsize {
-            for x in 0 .. self.hsize {
+        for y in 0..self.vsize {
+            for x in 0..self.hsize {
                 let ray = ray_for_pixel(self, x, y);
                 let color = color_at(world, &ray);
                 image.write_pixel(x, y, &color);
@@ -185,13 +185,13 @@ inline auto camera(unsigned int hsize, unsigned int vsize, fp_t field_of_view) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f64::consts::{PI};
-    use approx::assert_relative_eq;
+    use crate::colors::color;
     use crate::matrices::identity4;
     use crate::transformations::{rotation_y, translation, view_transform};
     use crate::tuples::vector;
-    use crate::colors::color;
     use crate::world::default_world;
+    use approx::assert_relative_eq;
+    use std::f64::consts::PI;
 
     // Constructing a camera
     #[test]
@@ -235,7 +235,11 @@ mod tests {
         let c = camera(201, 101, PI / 2.0);
         let r = ray_for_pixel(&c, 0, 0);
         assert_eq!(r.origin, point(0.0, 0.0, 0.0));
-        assert_relative_eq!(r.direction, vector(0.66519, 0.33259, -0.66851), epsilon=1e-5);
+        assert_relative_eq!(
+            r.direction,
+            vector(0.66519, 0.33259, -0.66851),
+            epsilon = 1e-5
+        );
     }
 
     // Constructing a ray when the camera is transformed
@@ -259,6 +263,10 @@ mod tests {
         let up = vector(0.0, 1.0, 0.0);
         c.transform = view_transform(&from, &to, &up);
         let image = render(&c, &w);
-        assert_relative_eq!(image.pixel_at(5, 5), &color(0.38066, 0.47583, 0.2855), epsilon=1e-5);
+        assert_relative_eq!(
+            image.pixel_at(5, 5),
+            &color(0.38066, 0.47583, 0.2855),
+            epsilon = 1e-5
+        );
     }
 }

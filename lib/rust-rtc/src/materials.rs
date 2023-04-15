@@ -16,11 +16,7 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new(color: Color,
-               ambient: f64,
-               diffuse: f64,
-               specular: f64,
-               shininess: f64) -> Self {
+    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64) -> Self {
         Material {
             color,
             ambient,
@@ -117,11 +113,13 @@ pub fn default_material() -> Material {
     Material::default()
 }
 
-pub fn material(color: Color,
-                ambient: f64,
-                diffuse: f64,
-                specular: f64,
-                shininess: f64) -> Material {
+pub fn material(
+    color: Color,
+    ambient: f64,
+    diffuse: f64,
+    specular: f64,
+    shininess: f64,
+) -> Material {
     Material::new(color, ambient, diffuse, specular, shininess)
 }
 

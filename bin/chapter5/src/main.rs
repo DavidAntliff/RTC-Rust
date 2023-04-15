@@ -1,5 +1,5 @@
 use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
-use rust_rtc::colors::{RED};
+use rust_rtc::colors::RED;
 use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::rays::ray;
 use rust_rtc::spheres::sphere;

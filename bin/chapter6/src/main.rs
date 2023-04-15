@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
 use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
-use rust_rtc::colors::{WHITE, GREEN};
+use rust_rtc::colors::{GREEN, WHITE};
 use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, lighting};

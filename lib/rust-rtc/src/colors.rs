@@ -18,7 +18,6 @@ impl Color {
     pub fn blue(&self) -> f64 {
         self.0.z()
     }
-
 }
 
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
@@ -57,7 +56,6 @@ pub fn color(r: f64, g: f64, b: f64) -> Color {
 pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
     lhs * rhs
 }
-
 
 #[cfg(test)]
 mod tests {

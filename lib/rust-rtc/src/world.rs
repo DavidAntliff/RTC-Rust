@@ -1,11 +1,13 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{hit, intersect, IntersectionComputation, Intersections, prepare_computations};
+use crate::intersections::{
+    hit, intersect, prepare_computations, IntersectionComputation, Intersections,
+};
 use crate::lights::{point_light, PointLight};
-use crate::materials::{material};
-use crate::rays::{Ray, ray};
-use crate::spheres::{Sphere, sphere};
+use crate::materials::material;
+use crate::rays::{ray, Ray};
+use crate::spheres::{sphere, Sphere};
 use crate::transformations::scaling;
 use crate::tuples::{magnitude, normalize, point, Point};
 
@@ -63,19 +65,21 @@ impl World {
                 false
             }
         } else {
-            false  // everything is in shadow
+            false // everything is in shadow
         }
     }
 
     // Returns the color at the intersection encapsulated by comps, in the given world.
     fn shade_hit(&self, comps: &IntersectionComputation) -> Color {
         let shadowed = is_shadowed(self, &comps.over_point);
-        comps.object.material.lighting(comps.object,
-                            &self.light,
-                            &comps.over_point,  // avoid boundary issues
-                            &comps.eyev,
-                            &comps.normalv,
-                            shadowed)
+        comps.object.material.lighting(
+            comps.object,
+            &self.light,
+            &comps.over_point, // avoid boundary issues
+            &comps.eyev,
+            &comps.normalv,
+            shadowed,
+        )
     }
 
     fn color_at(&self, ray: &Ray) -> Color {
@@ -94,16 +98,11 @@ pub fn world() -> World {
 }
 
 pub fn default_world() -> World {
-    let light = point_light(point(-10.0, 10.0, -10.0),
-                            color(1.0, 1.0, 1.0));
+    let light = point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
 
-    let mut objects = vec!();
+    let mut objects = vec![];
 
-    let m = material(color(0.8, 1.0, 0.6),
-                     0.1,
-                     0.7,
-                     0.2,
-                     200.0);
+    let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0);
     let mut s1 = sphere(1);
     s1.material = m;
     objects.push(s1);
@@ -115,7 +114,7 @@ pub fn default_world() -> World {
     World::new(light, objects)
 }
 
-pub fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a>  {
+pub fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a> {
     world.intersect(ray)
 }
 
@@ -131,15 +130,14 @@ pub fn color_at(world: &World, ray: &Ray) -> Color {
     world.color_at(ray)
 }
 
-
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::intersections::{intersection, prepare_computations};
     use crate::rays::ray;
-    use crate::tuples::vector;
-    use approx::{assert_relative_eq};
     use crate::transformations::translation;
-    use super::*;
+    use crate::tuples::vector;
+    use approx::assert_relative_eq;
 
     // Creating an empty world
     #[test]
@@ -153,11 +151,7 @@ mod tests {
     #[test]
     fn creating_the_default_world() {
         let light = point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
-        let m = material(color(0.8, 1.0, 0.6),
-                          0.1,
-                          0.7,
-                          0.2,
-                          200.0);
+        let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0);
         let mut s1 = sphere(1);
         s1.material = m;
         let mut s2 = sphere(2);
@@ -191,7 +185,7 @@ mod tests {
         let i = intersection(4.0, shape);
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps);
-        assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon=1e-5);
+        assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon = 1e-5);
     }
 
     // Shading an intersection from the inside
@@ -204,7 +198,7 @@ mod tests {
         let i = intersection(0.5, shape);
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps);
-        assert_relative_eq!(c, color(0.90498, 0.90498, 0.90498), epsilon=1e-5);
+        assert_relative_eq!(c, color(0.90498, 0.90498, 0.90498), epsilon = 1e-5);
     }
 
     // The color when a ray misses
@@ -222,7 +216,7 @@ mod tests {
         let w = default_world();
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let c = color_at(&w, &r);
-        assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon=1e-5);
+        assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon = 1e-5);
     }
 
     // The color with an intersection behind the ray
