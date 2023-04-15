@@ -18,7 +18,7 @@ fn set_pixel(c: &mut Canvas, x: f64, y: f64) {
 }
 
 fn main() {
-    let mut c = canvas(900, 550);
+    let mut c = canvas(900 / 2, 550 / 2);
 
     // 1 hour rotation (15 degrees)
     let hour = rotation_z(2.0 * PI / 12.0);
