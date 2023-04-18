@@ -11,3 +11,8 @@ pub mod spheres;
 pub mod transformations;
 pub mod tuples;
 pub mod world;
+pub mod shapes;
+pub mod planes;
+
+// test support
+pub mod test_shape;

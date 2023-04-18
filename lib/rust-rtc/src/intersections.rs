@@ -3,35 +3,37 @@
 use crate::math::EPSILON;
 use crate::matrices::inverse;
 use crate::rays::{transform, Ray};
-use crate::spheres::{normal_at, Sphere};
 use crate::tuples::{dot, Point, Vector};
+use crate::shapes::{normal_at, Shape, ShapeTrait};
 
 pub use std::vec as intersections;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Intersection<'a> {
     pub t: f64,
-    pub object: &'a Sphere,
+    pub object: Option<&'a Shape>,
 }
 
 impl Intersection<'_> {
-    pub fn new(t: f64, object: &Sphere) -> Intersection {
+    pub fn new(t: f64, object: Option<&Shape>) -> Intersection {
         Intersection { t, object }
     }
 }
 
-pub fn intersection(t: f64, object: &Sphere) -> Intersection {
+pub fn intersection(t: f64, object: Option<&Shape>) -> Intersection {
     Intersection::new(t, object)
 }
 
 pub type Intersections<'a> = Vec<Intersection<'a>>;
 
-pub fn intersect<'a>(object: &'a Sphere, ray: &Ray) -> Intersections<'a> {
+pub fn intersect<'a>(object: &'a Shape, ray: &Ray) -> Intersections<'a> {
     // Apply the inverse of the shape's transformation
     let local_ray = transform(ray, &inverse(&object.transform));
-
-    // TODO: virtual function call?
-    object.local_intersect(&local_ray)
+    let mut intersections = object.shape.local_intersect(&local_ray);
+    for mut intersection in &mut intersections {
+        intersection.object = Some(object);
+    }
+    intersections
 }
 
 pub fn hit<'a>(intersections: &'a mut Intersections<'a>) -> Option<&'a Intersection<'a>> {
@@ -43,7 +45,7 @@ pub fn hit<'a>(intersections: &'a mut Intersections<'a>) -> Option<&'a Intersect
 
 pub struct IntersectionComputation<'a> {
     pub t: f64,
-    pub object: &'a Sphere,
+    pub object: &'a Shape,
     pub point: Point,
     pub over_point: Point,
     pub eyev: Vector,
@@ -52,7 +54,7 @@ pub struct IntersectionComputation<'a> {
 }
 
 impl IntersectionComputation<'_> {
-    pub fn new(object: &Sphere) -> IntersectionComputation {
+    pub fn new(object: &Shape) -> IntersectionComputation {
         IntersectionComputation {
             t: 0.0,
             object,
@@ -69,11 +71,12 @@ pub fn prepare_computations<'a>(
     intersection: &'a Intersection,
     ray: &Ray,
 ) -> IntersectionComputation<'a> {
-    let mut comps = IntersectionComputation::new(intersection.object);
+    let mut comps = IntersectionComputation::new(intersection.object.expect("no shape ref"));
     comps.t = intersection.t;
 
     comps.point = ray.position(comps.t);
     comps.eyev = -ray.direction;
+    //comps.normalv = normal_at(comps.object.shape, &comps.point);
     comps.normalv = normal_at(comps.object, &comps.point);
 
     if dot(&comps.normalv, &comps.eyev) < 0.0 {
@@ -90,7 +93,7 @@ pub fn prepare_computations<'a>(
 mod tests {
     use super::*;
     use crate::rays::ray;
-    use crate::spheres::sphere;
+    use crate::shapes::{sphere};
     use crate::transformations::translation;
     use crate::tuples::{point, vector};
 
@@ -98,17 +101,17 @@ mod tests {
     #[test]
     fn intersection_encapsulates_t_and_object() {
         let s = sphere(1);
-        let i = intersection(3.5, &s);
+        let i = intersection(3.5, Some(&s));
         assert_eq!(i.t, 3.5);
-        assert!(std::ptr::eq(i.object, &s));
+        assert!(std::ptr::eq(i.object.unwrap(), &s));
     }
 
     // Aggregating intersections
     #[test]
     fn aggregating_intersections() {
         let s = sphere(1);
-        let i1 = intersection(1.0, &s);
-        let i2 = intersection(2.0, &s);
+        let i1 = intersection(1.0, Some(&s));
+        let i2 = intersection(2.0, Some(&s));
         let xs = intersections!(i1, i2);
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0].t, 1.0);
@@ -118,8 +121,8 @@ mod tests {
     #[test]
     fn the_hit_when_all_intersections_have_positive_t() {
         let s = sphere(1);
-        let i1 = intersection(1.0, &s);
-        let i2 = intersection(2.0, &s);
+        let i1 = intersection(1.0, Some(&s));
+        let i2 = intersection(2.0, Some(&s));
         let mut xs = intersections!(i2, i1);
         let i = hit(&mut xs);
         assert_eq!(i, Some(&i1));
@@ -129,8 +132,8 @@ mod tests {
     #[test]
     fn the_hit_when_some_intersections_have_negative_t() {
         let s = sphere(1);
-        let i1 = intersection(-1.0, &s);
-        let i2 = intersection(1.0, &s);
+        let i1 = intersection(-1.0, Some(&s));
+        let i2 = intersection(1.0, Some(&s));
         let mut xs = intersections!(i2, i1);
         let i = hit(&mut xs);
         assert_eq!(i, Some(&i2));
@@ -140,8 +143,8 @@ mod tests {
     #[test]
     fn the_hit_when_all_intersections_have_negative_t() {
         let s = sphere(1);
-        let i1 = intersection(-2.0, &s);
-        let i2 = intersection(-1.0, &s);
+        let i1 = intersection(-2.0, Some(&s));
+        let i2 = intersection(-1.0, Some(&s));
         let mut xs = intersections!(i2, i1);
         let i = hit(&mut xs);
         assert_eq!(i, None);
@@ -151,10 +154,10 @@ mod tests {
     #[test]
     fn the_hit_is_always_the_lowest_non_negative() {
         let s = sphere(1);
-        let i1 = intersection(5.0, &s);
-        let i2 = intersection(7.0, &s);
-        let i3 = intersection(-3.0, &s);
-        let i4 = intersection(2.0, &s);
+        let i1 = intersection(5.0, Some(&s));
+        let i2 = intersection(7.0, Some(&s));
+        let i3 = intersection(-3.0, Some(&s));
+        let i4 = intersection(2.0, Some(&s));
         let mut xs = intersections!(i1, i2, i3, i4);
         let i = hit(&mut xs);
         assert_eq!(i, Some(&i4));
@@ -165,10 +168,10 @@ mod tests {
     fn precomputing_the_state_of_an_intersection() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
-        let i = intersection(4.0, &shape);
+        let i = intersection(4.0, Some(&shape));
         let comps = prepare_computations(&i, &r);
         assert_eq!(comps.t, i.t);
-        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.object, i.object.expect("no shape"));
         assert_eq!(comps.point, point(0.0, 0.0, -1.0));
         assert_eq!(comps.eyev, vector(0.0, 0.0, -1.0));
         assert_eq!(comps.normalv, vector(0.0, 0.0, -1.0));
@@ -179,7 +182,7 @@ mod tests {
     fn the_hit_when_intersection_occurs_on_outside() {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
-        let i = intersection(4.0, &shape);
+        let i = intersection(4.0, Some(&shape));
         let comps = prepare_computations(&i, &r);
         assert!(!comps.inside);
     }
@@ -189,7 +192,7 @@ mod tests {
     fn the_hit_when_intersection_occurs_on_inside() {
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
-        let i = intersection(1.0, &shape);
+        let i = intersection(1.0, Some(&shape));
         let comps = prepare_computations(&i, &r);
         assert_eq!(comps.point, point(0.0, 0.0, 1.0));
         assert_eq!(comps.eyev, vector(0.0, 0.0, -1.0));
@@ -204,7 +207,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut shape = sphere(1);
         shape.set_transform(&translation(0.0, 0.0, 1.0));
-        let i = intersection(5.0, &shape);
+        let i = intersection(5.0, Some(&shape));
         let comps = prepare_computations(&i, &r);
         assert!(comps.over_point.z() < -EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());

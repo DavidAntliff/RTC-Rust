@@ -3,6 +3,7 @@
 use crate::matrices::Matrix4;
 use crate::tuples::{Point, Vector};
 
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,

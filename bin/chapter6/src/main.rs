@@ -6,7 +6,7 @@ use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, lighting};
 use rust_rtc::rays::ray;
-use rust_rtc::spheres::sphere;
+use rust_rtc::shapes::{ShapeTrait, sphere};
 use rust_rtc::transformations::{rotation_z, scaling};
 use rust_rtc::tuples::{normalize, point};
 
@@ -72,21 +72,23 @@ fn main() {
             let mut xs = intersect(&shape, &r);
 
             if let Some(h) = hit(&mut xs) {
-                let point = r.position(h.t);
-                let normal = h.object.local_normal_at(&point);
-                let eye = -r.direction;
+                if let Some(object) = h.object {
+                    let point = r.position(h.t);
+                    let normal = object.shape.local_normal_at(&point);
+                    let eye = -r.direction;
 
-                let color = lighting(
-                    &h.object.material,
-                    h.object,
-                    &light,
-                    &point,
-                    &eye,
-                    &normal,
-                    false,
-                );
+                    let color = lighting(
+                        &object.material,
+                        object,
+                        &light,
+                        &point,
+                        &eye,
+                        &normal,
+                        false,
+                    );
 
-                write_pixel(&mut c, x, y, &color);
+                    write_pixel(&mut c, x, y, &color);
+                }
             }
         }
     }

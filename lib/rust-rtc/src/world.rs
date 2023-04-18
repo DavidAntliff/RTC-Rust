@@ -7,18 +7,18 @@ use crate::intersections::{
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
-use crate::spheres::{sphere, Sphere};
+use crate::shapes::{Shape, sphere};
 use crate::transformations::scaling;
 use crate::tuples::{magnitude, normalize, point, Point};
 
 #[derive(Default)]
 pub struct World {
     light: Option<PointLight>,
-    objects: Vec<Sphere>,
+    objects: Vec<Shape>,
 }
 
 impl World {
-    fn new(light: PointLight, objects: Vec<Sphere>) -> World {
+    fn new(light: PointLight, objects: Vec<Shape>) -> World {
         World {
             light: Some(light),
             objects,
@@ -30,7 +30,7 @@ impl World {
         self.light = Some(light);
     }
 
-    pub fn add_object(&mut self, object: Sphere) {
+    pub fn add_object(&mut self, object: Shape) {
         self.objects.push(object);
     }
 
@@ -182,7 +182,7 @@ mod tests {
         let w = default_world();
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[0];
-        let i = intersection(4.0, shape);
+        let i = intersection(4.0, Some(shape));
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps);
         assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon = 1e-5);
@@ -195,7 +195,7 @@ mod tests {
         w.light = Some(point_light(point(0.0, 0.25, 0.0), color(1.0, 1.0, 1.0)));
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[1];
-        let i = intersection(0.5, shape);
+        let i = intersection(0.5, Some(shape));
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps);
         assert_relative_eq!(c, color(0.90498, 0.90498, 0.90498), epsilon = 1e-5);
@@ -277,7 +277,7 @@ mod tests {
         s2.transform = translation(0.0, 0.0, 10.0);
         w.add_object(s2.clone());
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
-        let i = intersection(4.0, &s2);
+        let i = intersection(4.0, Some(&s2));
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps);
         assert_eq!(c, color(0.1, 0.1, 0.1));

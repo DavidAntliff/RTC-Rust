@@ -2,7 +2,7 @@
 
 use crate::colors::{color, Color};
 use crate::lights::PointLight;
-use crate::spheres::Sphere;
+use crate::shapes::Shape;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -28,7 +28,7 @@ impl Material {
 
     pub fn lighting(
         &self,
-        _object: &Sphere,
+        _object: &Shape,
         light: &Option<PointLight>,
         point: &Point,
         eyev: &Vector,
@@ -125,7 +125,7 @@ pub fn material(
 
 pub fn lighting(
     material: &Material,
-    object: &Sphere,
+    object: &Shape,
     light: &Option<PointLight>,
     point: &Point,
     eyev: &Vector,
@@ -139,7 +139,7 @@ pub fn lighting(
 mod tests {
     use super::*;
     use crate::lights::point_light;
-    use crate::spheres::sphere;
+    use crate::shapes::sphere;
     use crate::tuples::{point, vector, Point};
     use approx::assert_relative_eq;
     use rstest::{fixture, rstest};

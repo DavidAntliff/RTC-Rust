@@ -3,7 +3,7 @@ use rust_rtc::canvas::ppm_from_canvas;
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::spheres::sphere;
+use rust_rtc::shapes::sphere;
 use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;

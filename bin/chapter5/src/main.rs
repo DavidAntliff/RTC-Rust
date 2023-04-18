@@ -2,7 +2,7 @@ use rust_rtc::canvas::{canvas, ppm_from_canvas, write_pixel};
 use rust_rtc::colors::RED;
 use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::rays::ray;
-use rust_rtc::spheres::sphere;
+use rust_rtc::shapes::sphere;
 use rust_rtc::transformations::{scaling, /*rotation_z,*/ shearing};
 use rust_rtc::tuples::{normalize, point};
 
