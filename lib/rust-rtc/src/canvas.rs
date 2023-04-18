@@ -86,6 +86,11 @@ impl Canvas {
 
         header + &data
     }
+
+    pub fn to_ppm_file(&self, filename: &str) {
+        let data = self.to_ppm();
+        std::fs::write(filename, data).expect("Unable to write file");
+    }
 }
 
 pub fn canvas(width: u32, height: u32) -> Canvas {

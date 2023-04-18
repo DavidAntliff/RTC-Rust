@@ -54,9 +54,11 @@ fn main() {
 
     w.add_light(point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
 
-    //et mut cam = camera(100, 50, PI / 3.0);
+    //let mut cam = camera(100, 50, PI / 3.0);
+    let mut cam = camera(1024, 768, PI / 3.0);
     //let mut cam = camera(1600, 800, PI / 3.0);
-    let mut cam = camera(2048, 1536, PI / 3.0);
+    //let mut cam = camera(2048, 1536, PI / 3.0);
+    //let mut cam = camera(3840, 2160, PI / 3.0);
 
     cam.transform = view_transform(
         &point(0.0, 1.5, -5.0),
