@@ -80,5 +80,5 @@ fn main() {
 
     let canvas = render(&cam, &w);
     let ppm = ppm_from_canvas(&canvas);
-    println!("{}", ppm);
+    print!("{}", ppm);
 }

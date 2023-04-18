@@ -53,7 +53,7 @@ impl Canvas {
         let mut lines = Vec::new();
         let mut view = line;
         while view.len() >= limit {
-            let head = &view[0..limit - 1];
+            let head = &view[0..limit];
             let idx = head.rfind(' ').expect("No space character found");
             let left = &view[0..idx];
             lines.push(left.to_string());

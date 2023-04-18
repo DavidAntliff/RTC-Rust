@@ -59,5 +59,5 @@ fn main() {
     }
 
     let ppm = ppm_from_canvas(&c);
-    println!("{}", ppm);
+    print!("{}", ppm);
 }
