@@ -7,7 +7,7 @@ use crate::intersections::{
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
-use crate::shapes::{Shape, sphere};
+use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{magnitude, normalize, point, Point};
 
@@ -275,7 +275,7 @@ mod tests {
         w.add_object(s1);
         let mut s2 = sphere(2);
         s2.transform = translation(0.0, 0.0, 10.0);
-        w.add_object(s2.clone());
+        w.add_object(s2);
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let i = intersection(4.0, Some(&s2));
         let comps = prepare_computations(&i, &r);

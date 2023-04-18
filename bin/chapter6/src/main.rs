@@ -6,7 +6,7 @@ use rust_rtc::intersections::{hit, intersect};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, lighting};
 use rust_rtc::rays::ray;
-use rust_rtc::shapes::{ShapeTrait, sphere};
+use rust_rtc::shapes::{sphere, ShapeTrait};
 use rust_rtc::transformations::{rotation_z, scaling};
 use rust_rtc::tuples::{normalize, point};
 

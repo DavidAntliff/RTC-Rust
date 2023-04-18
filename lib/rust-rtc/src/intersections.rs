@@ -3,8 +3,8 @@
 use crate::math::EPSILON;
 use crate::matrices::inverse;
 use crate::rays::{transform, Ray};
-use crate::tuples::{dot, Point, Vector};
 use crate::shapes::{normal_at, Shape, ShapeTrait};
+use crate::tuples::{dot, Point, Vector};
 
 pub use std::vec as intersections;
 
@@ -93,7 +93,7 @@ pub fn prepare_computations<'a>(
 mod tests {
     use super::*;
     use crate::rays::ray;
-    use crate::shapes::{sphere};
+    use crate::shapes::sphere;
     use crate::transformations::translation;
     use crate::tuples::{point, vector};
 

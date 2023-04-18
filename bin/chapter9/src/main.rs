@@ -3,7 +3,7 @@ use rust_rtc::canvas::ppm_from_canvas;
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::shapes::{sphere, plane};
+use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
@@ -21,8 +21,8 @@ fn main() {
 
     let mut wall = plane();
     wall.transform = rotation_x(PI / 2.0)
-                    .then(&rotation_y(0.3))
-                    .then(&translation(0.0, 0.0, 7.0));
+        .then(&rotation_y(0.3))
+        .then(&translation(0.0, 0.0, 7.0));
     wall.material = default_material();
     wall.material.color = color(1.0, 0.8, 0.8);
     wall.material.specular = 0.0;

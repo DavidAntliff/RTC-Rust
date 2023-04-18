@@ -2,13 +2,11 @@
 
 use crate::intersections::Intersections;
 use crate::materials::Material;
-use crate::matrices::{inverse, Matrix4, transpose};
-use crate::spheres::Sphere;
+use crate::matrices::{inverse, transpose, Matrix4};
 use crate::planes::Plane;
 use crate::rays::Ray;
+use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
-//use crate::test_shape::TestShape;
-
 
 #[derive(Debug, PartialEq, Default, Copy, Clone)]
 pub struct Shape {
@@ -39,7 +37,7 @@ impl Shape {
         // Why multiply by the inverse transpose?
         // https://stackoverflow.com/questions/13654401/why-transform-normals-with-the-transpose-of-the-inverse-of-the-modelview-matrix
         let inverse_transform = inverse(&self.transform);
-        let local_point = &inverse_transform * world_point;
+        let local_point = inverse_transform * world_point;
         let local_normal = self.shape.local_normal_at(&local_point);
         let mut world_normal = transpose(&inverse_transform) * local_normal;
         world_normal.set_w(0.0);
@@ -51,7 +49,6 @@ impl Shape {
 pub enum ShapeEnum {
     Sphere(Sphere),
     Plane(Plane),
-    //TestShape(TestShape),
 }
 
 impl Default for ShapeEnum {
@@ -61,8 +58,6 @@ impl Default for ShapeEnum {
 }
 
 pub trait ShapeTrait {
-    //fn get_transform(&self) -> Matrix4;
-
     fn local_intersect(&self, local_ray: &Ray) -> Intersections;
     fn local_normal_at(&self, local_point: &Point) -> Vector;
 }
@@ -72,15 +67,13 @@ impl ShapeTrait for ShapeEnum {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_intersect(local_ray),
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
-            //ShapeEnum::TestShape(ref shape) => shape.local_intersect(local_ray),
         }
     }
 
     fn local_normal_at(&self, local_point: &Point) -> Vector {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_normal_at(local_point),
-            ShapeEnum::Plane(ref plane ) => plane.local_normal_at(local_point),
-            //ShapeEnum::TestShape(shape) => shape.local_normal_at(local_point),
+            ShapeEnum::Plane(ref plane) => plane.local_normal_at(local_point),
         }
     }
 }
@@ -93,32 +86,36 @@ pub fn sphere(id: i32) -> Shape {
     Shape::sphere(id)
 }
 
-pub fn plane() -> Shape { Shape::plane() }
+pub fn plane() -> Shape {
+    Shape::plane()
+}
 
 #[cfg(test)]
 mod test {
-    use std::f64::consts::{FRAC_1_SQRT_2, PI};
-    use approx::assert_relative_eq;
+    use super::*;
     use crate::intersections::intersect;
     use crate::materials::default_material;
     use crate::matrices::identity4;
     use crate::rays::ray;
     use crate::transformations::{rotation_z, scaling, translation};
     use crate::tuples::{point, vector};
-    use super::*;
+    use approx::assert_relative_eq;
+    use std::f64::consts::{FRAC_1_SQRT_2, PI};
 
     #[test]
     fn test_vec_of_shapes() {
-        let v = vec!(Shape {
-            shape: ShapeEnum::Sphere(Sphere::new(1)),
-            transform: identity4(),
-            material: default_material(),
-        },
-        Shape {
-            shape: ShapeEnum::Plane(Plane::new()),
-            transform: identity4(),
-            material: default_material(),
-        });
+        let v = vec![
+            Shape {
+                shape: ShapeEnum::Sphere(Sphere::new(1)),
+                transform: identity4(),
+                material: default_material(),
+            },
+            Shape {
+                shape: ShapeEnum::Plane(Plane::new()),
+                transform: identity4(),
+                material: default_material(),
+            },
+        ];
         assert!(matches!(v[0].shape, ShapeEnum::Sphere { .. }));
         assert!(matches!(v[1].shape, ShapeEnum::Plane { .. }));
     }
@@ -189,5 +186,21 @@ mod test {
         assert_relative_eq!(n, vector(0.0, 0.97014, -0.24245), epsilon = 1e-4);
     }
 
+    // A sphere has a default material
+    #[test]
+    fn sphere_has_default_material() {
+        let s = sphere(1);
+        let m = s.material;
+        assert_eq!(m, default_material());
+    }
 
+    // A sphere may be assigned a material
+    #[test]
+    fn sphere_may_be_assigned_material() {
+        let mut s = sphere(1);
+        let mut m = default_material();
+        m.ambient = 1.0;
+        s.material = m;
+        assert_eq!(s.material, m);
+    }
 }
