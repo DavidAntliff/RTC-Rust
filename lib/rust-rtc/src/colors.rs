@@ -1,7 +1,7 @@
 use crate::tuples::Tuple;
-use derive_more::{Add, Mul, Neg, Sub};
+use derive_more::{Mul, Neg};
 
-#[derive(Debug, Default, PartialEq, Copy, Clone, Add, Sub, Neg, Mul)]
+#[derive(Debug, Default, PartialEq, Copy, Clone, Neg, Mul)]
 pub struct Color(Tuple);
 
 impl Color {
@@ -48,6 +48,52 @@ color_mul!(Color, &Color);
 color_mul!(&Color, Color);
 color_mul!(&Color, &Color);
 
+macro_rules! color_div {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Div<$rhs> for $lhs {
+            type Output = Color;
+            fn div(self, rhs: $rhs) -> Color {
+                Color(self.0 / rhs)
+            }
+        }
+    };
+}
+
+color_div!(Color, f64);
+color_div!(&Color, f64);
+
+macro_rules! color_add {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Add<$rhs> for $lhs {
+            type Output = Color;
+            fn add(self, rhs: $rhs) -> Color {
+                Color(&self.0 + &rhs.0)
+            }
+        }
+    };
+}
+
+color_add!(Color, Color);
+color_add!(Color, &Color);
+color_add!(&Color, Color);
+color_add!(&Color, &Color);
+
+macro_rules! color_sub {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Sub<$rhs> for $lhs {
+            type Output = Color;
+            fn sub(self, rhs: $rhs) -> Color {
+                Color(&self.0 - &rhs.0)
+            }
+        }
+    };
+}
+
+color_sub!(Color, Color);
+color_sub!(Color, &Color);
+color_sub!(&Color, Color);
+color_sub!(&Color, &Color);
+
 pub fn color(r: f64, g: f64, b: f64) -> Color {
     Color::new(r, g, b)
 }
@@ -55,6 +101,13 @@ pub fn color(r: f64, g: f64, b: f64) -> Color {
 /// Hadamard or Shur Product
 pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
     lhs * rhs
+}
+
+// Blending function (linear interpolation)
+pub fn linear_blend(t: f64, a: &Color, b :&Color) -> Color {
+    let distance = b - a;
+    let fraction = t - t.floor();
+    a + distance * fraction
 }
 
 #[cfg(test)]

@@ -1,8 +1,8 @@
 use glam::f64::DVec4;
 
-use derive_more::{Add, Div, Neg};
+use derive_more::{Neg};
 
-#[derive(Debug, Default, PartialEq, Copy, Clone, Add, Neg, Div)]
+#[derive(Debug, Default, PartialEq, Copy, Clone, Neg)]
 pub struct Tuple(pub(crate) glam::f64::DVec4);
 
 pub type Point = Tuple;
@@ -120,6 +120,20 @@ tuple_mul!(Tuple, f64);
 tuple_mul!(&Tuple, f64);
 //tuple_mul!(&Tuple, &f64);
 
+macro_rules! tuple_div {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Div<$rhs> for $lhs {
+            type Output = Tuple;
+            fn div(self, rhs: $rhs) -> Tuple {
+                Tuple(self.0 / rhs)
+            }
+        }
+    };
+}
+
+tuple_div!(Tuple, f64);
+tuple_div!(&Tuple, f64);
+
 impl std::ops::Mul<Tuple> for f64 {
     type Output = Tuple;
 
@@ -127,6 +141,22 @@ impl std::ops::Mul<Tuple> for f64 {
         rhs * self
     }
 }
+
+macro_rules! tuple_add {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::Add<$rhs> for $lhs {
+            type Output = Tuple;
+            fn add(self, rhs: $rhs) -> Tuple {
+                Tuple(self.0 + rhs.0)
+            }
+        }
+    };
+}
+
+tuple_add!(Tuple, Tuple);
+tuple_add!(Tuple, &Tuple);
+tuple_add!(&Tuple, Tuple);
+tuple_add!(&Tuple, &Tuple);
 
 macro_rules! tuple_sub {
     ( $lhs:ty , $rhs:ty ) => {

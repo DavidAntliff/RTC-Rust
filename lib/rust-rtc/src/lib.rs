@@ -14,3 +14,4 @@ pub mod transformations;
 pub mod tuples;
 pub mod world;
 pub mod patterns;
+pub mod perlin_noise;
