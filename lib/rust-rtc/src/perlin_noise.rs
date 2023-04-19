@@ -114,9 +114,9 @@ fn perlin_impl(x: f64, y: f64, z: f64, repeat: i32) -> f64 {
     // Calculate the "unit cube" that the point asked will be located in
     // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that
     // plus 1.  Next we calculate the location (from 0.0 to 1.0) in that cube.
-    let xi: usize = x.floor() as usize & 255;
-    let yi: usize = y.floor() as usize & 255;
-    let zi: usize = z.floor() as usize & 255;
+    let xi: usize = (x.floor() as i32 & 255) as usize;
+    let yi: usize = (y.floor() as i32 & 255) as usize;
+    let zi: usize = (z.floor() as i32 & 255) as usize;
 
     // We also fade the location to smooth the result.
     let xf = x - x.floor();
@@ -137,14 +137,14 @@ fn perlin_impl(x: f64, y: f64, z: f64, repeat: i32) -> f64 {
         num
     };
 
-    let aaa = p[(p[(p[    xi ] +     yi  as usize) as usize] +     zi  as usize) as usize];
-    let aba = p[(p[(p[    xi ] + inc(yi) as usize) as usize] +     zi  as usize) as usize];
-    let aab = p[(p[(p[    xi ] +     yi  as usize) as usize] + inc(zi) as usize) as usize];
-    let abb = p[(p[(p[    xi ] + inc(yi) as usize) as usize] + inc(zi) as usize) as usize];
-    let baa = p[(p[(p[inc(xi)] +     yi  as usize) as usize] +     zi  as usize) as usize];
-    let bba = p[(p[(p[inc(xi)] + inc(yi) as usize) as usize] +     zi  as usize) as usize];
-    let bab = p[(p[(p[inc(xi)] +     yi  as usize) as usize] + inc(zi) as usize) as usize];
-    let bbb = p[(p[(p[inc(xi)] + inc(yi) as usize) as usize] + inc(zi) as usize) as usize];
+    let aaa = p[(p[(p[    xi ] +     yi)]  +     zi)];
+    let aba = p[(p[(p[    xi ] + inc(yi))] +     zi)];
+    let aab = p[(p[(p[    xi ] +     yi)]  + inc(zi))];
+    let abb = p[(p[(p[    xi ] + inc(yi))] + inc(zi))];
+    let baa = p[(p[(p[inc(xi)] +     yi)]  +     zi)];
+    let bba = p[(p[(p[inc(xi)] + inc(yi))] +     zi)];
+    let bab = p[(p[(p[inc(xi)] +     yi)]  + inc(zi))];
+    let bbb = p[(p[(p[inc(xi)] + inc(yi))] + inc(zi))];
 
     // The gradient function calculates the dot product between a pseudorandom
     // gradient vector and the vector from the input coordinate to the 8
@@ -217,5 +217,14 @@ mod tests {
         println!("min {}, max {}", min_vv, max_vv);
 
         assert_eq!(0.5, perlin(0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn debug() {
+        let x = -3.3273440166393975;
+        let y = 2.1870538633277339;
+        let z = -0.38154583713770984;
+        let x = octave_perlin(x, y, z, 3, 0.8);
+        println!("{}", x);
     }
 }

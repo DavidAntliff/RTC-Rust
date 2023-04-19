@@ -78,6 +78,9 @@ pub fn pattern_at_shape(pattern: &Pattern, shape: &Shape, world_point: &Point) -
 // Trait to allow Patterns or Colors to be used
 // as parameters to pattern factory functions
 pub trait IntoPattern {
+    // FIXME: this should probably not be "Into":
+    // https://rust-lang.github.io/api-guidelines/naming.html
+    // Consider ownership to choose into_, to_, or as_
     fn into_pattern(&self) -> Pattern;
 }
 
@@ -471,7 +474,7 @@ mod tests {
             for x in 0..image.width {
                 let dx = scale * x as f64 / image.width as f64;
                 let dy  = scale * y as f64 / image.height as f64;
-                let v = pattern_at(&pattern, &point(dx, 0.0, dy));
+                let v = pattern_at(pattern, &point(dx, 0.0, dy));
                 image.write_pixel(x, y, &v);
             }
         }
@@ -509,14 +512,14 @@ mod tests {
         };
 
         // Second level is a solid pattern
-        assert!(matches!((*(inner.a)).pattern, PatternEnum::SolidPattern { .. }));
-        assert!(matches!((*(inner.b)).pattern, PatternEnum::SolidPattern { .. }));
-        let inner_a = match (*(inner.a)).pattern {
+        assert!(matches!(inner.a.pattern, PatternEnum::SolidPattern { .. }));
+        assert!(matches!(inner.b.pattern, PatternEnum::SolidPattern { .. }));
+        let inner_a = match inner.a.pattern {
             PatternEnum::SolidPattern(inner) => inner,
             _ => unreachable!(),
         };
         assert_eq!(inner_a.color, WHITE);
-        let inner_b = match (*(inner.b)).pattern {
+        let inner_b = match inner.b.pattern {
             PatternEnum::SolidPattern(inner) => inner,
             _ => unreachable!(),
         };

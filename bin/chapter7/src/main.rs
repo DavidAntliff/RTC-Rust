@@ -31,7 +31,7 @@ fn main() {
         * rotation_y(PI / 4.0)
         * rotation_x(PI / 2.0)
         * scaling(10.0, 0.01, 10.0);
-    right_wall.material = floor.material.clone();
+    right_wall.material = floor.material;
     w.add_object(right_wall);
 
     let mut middle = sphere(4);

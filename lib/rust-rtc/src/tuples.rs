@@ -3,7 +3,7 @@ use glam::f64::DVec4;
 use derive_more::{Neg};
 
 #[derive(Debug, Default, PartialEq, Copy, Clone, Neg)]
-pub struct Tuple(pub(crate) glam::f64::DVec4);
+pub struct Tuple(pub(crate) DVec4);
 
 pub type Point = Tuple;
 pub type Vector = Tuple;
@@ -79,7 +79,7 @@ impl Tuple {
 
     pub fn cross(&self, rhs: &Self) -> Self {
         // 3D cross-product, ignore .w
-        Self(glam::f64::DVec4 {
+        Self(DVec4 {
             x: self.0.y * rhs.0.z - rhs.0.y * self.0.z,
             y: self.0.z * rhs.0.x - rhs.0.z * self.0.x,
             z: self.0.x * rhs.0.y - rhs.0.x * self.0.y,

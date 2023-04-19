@@ -39,7 +39,7 @@ impl Material {
     ) -> Color {
 
         let material_color = match &self.pattern {
-            Some(inner) => inner.pattern_at_shape(&object, &point),
+            Some(inner) => inner.pattern_at_shape(object, point),
             None => self.color,
         };
 
