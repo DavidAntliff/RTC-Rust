@@ -8,7 +8,7 @@ use crate::rays::Ray;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
 
-#[derive(Debug, PartialEq, Default, Copy, Clone)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
     pub shape: ShapeEnum,
     pub transform: Matrix4,
@@ -200,7 +200,7 @@ mod test {
         let mut s = sphere(1);
         let mut m = default_material();
         m.ambient = 1.0;
-        s.material = m;
+        s.material = m.clone();
         assert_eq!(s.material, m);
     }
 }

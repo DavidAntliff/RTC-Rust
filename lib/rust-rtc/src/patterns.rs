@@ -23,7 +23,7 @@ impl Pattern {
         self.pattern.pattern_at(&pattern_point)
     }
 
-    pub fn color_at_shape(&self, shape: &Shape, world_point: &Point) -> Color {
+    pub fn pattern_at_shape(&self, shape: &Shape, world_point: &Point) -> Color {
         // Convert world-space point to object-space point:
         let object_point = shape.transform.inverse() * world_point;
         self.pattern_at(&object_point)
@@ -72,7 +72,7 @@ pub fn pattern_at(pattern: &Pattern, object_point: &Point) -> Color {
 }
 
 pub fn pattern_at_shape(pattern: &Pattern, shape: &Shape, world_point: &Point) -> Color {
-    pattern.color_at_shape(shape, world_point)
+    pattern.pattern_at_shape(shape, world_point)
 }
 
 // Trait to allow Patterns or Colors to be used

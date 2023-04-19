@@ -1,18 +1,19 @@
 // Chapter 6: Lights and Shading
 
+use crate::patterns::Pattern;
 use crate::colors::{color, Color};
 use crate::lights::PointLight;
 use crate::shapes::Shape;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Material {
     pub color: Color,
     pub ambient: f64,
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
-    //TODO pattern: &Pattern,
+    pub pattern: Option<Box<Pattern>>,
 }
 
 impl Material {
@@ -23,22 +24,24 @@ impl Material {
             diffuse,
             specular,
             shininess,
+            pattern: Default::default()
         }
     }
 
     pub fn lighting(
         &self,
-        _object: &Shape,
+        object: &Shape,
         light: &Option<PointLight>,
         point: &Point,
         eyev: &Vector,
         normalv: &Vector,
         in_shadow: bool,
     ) -> Color {
-        // TODO
-        //let pattern = material.pattern;
-        //let material_color = pattern ? pattern_at_shape(*pattern, shape, point) : material.color()};
-        let material_color = self.color;
+
+        let material_color = match &self.pattern {
+            Some(inner) => inner.pattern_at_shape(&object, &point),
+            None => self.color,
+        };
 
         // Light is optional
         let light_intensity: Color;
@@ -105,6 +108,7 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: None,
         }
     }
 }

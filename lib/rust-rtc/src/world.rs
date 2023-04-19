@@ -275,7 +275,7 @@ mod tests {
         w.add_object(s1);
         let mut s2 = sphere(2);
         s2.transform = translation(0.0, 0.0, 10.0);
-        w.add_object(s2);
+        w.add_object(s2.clone());
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let i = intersection(4.0, Some(&s2));
         let comps = prepare_computations(&i, &r);

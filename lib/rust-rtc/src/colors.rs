@@ -98,6 +98,10 @@ pub fn color(r: f64, g: f64, b: f64) -> Color {
     Color::new(r, g, b)
 }
 
+pub fn colori(r: i32, g: i32, b: i32) -> Color {
+    Color::new(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0)
+}
+
 /// Hadamard or Shur Product
 pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
     lhs * rhs

@@ -12,7 +12,6 @@ use std::f64::consts::PI;
 fn main() {
     let mut w = world();
 
-    // FIXME
     let mut floor = plane();
     floor.material = default_material();
     floor.material.color = color(1.0, 0.9, 0.9);

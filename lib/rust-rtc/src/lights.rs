@@ -18,6 +18,7 @@ impl PointLight {
     }
 }
 
+// FIXME: take reference rather than ownership?
 pub fn point_light(position: Point, intensity: Color) -> PointLight {
     PointLight::new(position, intensity)
 }
