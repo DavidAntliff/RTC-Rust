@@ -1,10 +1,10 @@
 // Chapter 10 - Patterns
 
-use crate::colors::{Color, linear_blend, WHITE};
+use crate::colors::{linear_blend, Color, WHITE};
 use crate::matrices::Matrix4;
 use crate::perlin_noise;
 use crate::shapes::Shape;
-use crate::tuples::{Point, point};
+use crate::tuples::{point, Point};
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Pattern {
@@ -96,7 +96,6 @@ impl IntoPattern for Color {
     }
 }
 
-
 // ------[ SolidPattern ]------
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub struct SolidPattern {
@@ -137,7 +136,6 @@ impl From<Color> for Pattern {
     }
 }
 
-
 // ------[ StripePattern ]------
 #[derive(Debug, PartialEq, Clone)]
 pub struct StripePattern {
@@ -147,7 +145,10 @@ pub struct StripePattern {
 
 impl StripePattern {
     pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> StripePattern {
-        StripePattern { a: Box::new(a.into_pattern()), b: Box::new(b.into_pattern()) }
+        StripePattern {
+            a: Box::new(a.into_pattern()),
+            b: Box::new(b.into_pattern()),
+        }
     }
 }
 
@@ -164,11 +165,16 @@ impl PatternTrait for StripePattern {
 }
 
 impl Pattern {
-       pub fn stripe_pattern<T, U>(a: &T, b: &U) -> Pattern
-           where T: IntoPattern, U: IntoPattern {
+    pub fn stripe_pattern<T, U>(a: &T, b: &U) -> Pattern
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::StripePattern(
-                StripePattern::new(&a.into_pattern(), &b.into_pattern())),
+            pattern: PatternEnum::StripePattern(StripePattern::new(
+                &a.into_pattern(),
+                &b.into_pattern(),
+            )),
             ..Default::default()
         }
     }
@@ -178,7 +184,6 @@ pub fn stripe_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
     Pattern::stripe_pattern(&a.into_pattern(), &b.into_pattern())
 }
 
-
 // ------[ GradientPattern ]------
 #[derive(Debug, PartialEq, Clone)]
 pub struct GradientPattern {
@@ -187,8 +192,11 @@ pub struct GradientPattern {
 }
 
 impl GradientPattern {
-        pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> GradientPattern {
-            GradientPattern { a: Box::new(a.into_pattern()), b: Box::new(b.into_pattern()) }
+    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> GradientPattern {
+        GradientPattern {
+            a: Box::new(a.into_pattern()),
+            b: Box::new(b.into_pattern()),
+        }
     }
 }
 
@@ -196,18 +204,25 @@ impl PatternTrait for GradientPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
         let pattern_point_a = self.a.transform.inverse() * local_point;
         let pattern_point_b = self.b.transform.inverse() * local_point;
-        linear_blend(local_point.x(),
-                     &self.a.pattern.pattern_at(&pattern_point_a),
-                     &self.b.pattern.pattern_at(&pattern_point_b))
+        linear_blend(
+            local_point.x(),
+            &self.a.pattern.pattern_at(&pattern_point_a),
+            &self.b.pattern.pattern_at(&pattern_point_b),
+        )
     }
 }
 
 impl Pattern {
     pub fn gradient_pattern<T, U>(a: &T, b: &U) -> Pattern
-        where T: IntoPattern, U: IntoPattern {
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::GradientPattern(
-                GradientPattern::new(&a.into_pattern(), &b.into_pattern())),
+            pattern: PatternEnum::GradientPattern(GradientPattern::new(
+                &a.into_pattern(),
+                &b.into_pattern(),
+            )),
             ..Default::default()
         }
     }
@@ -216,7 +231,6 @@ impl Pattern {
 pub fn gradient_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
     Pattern::gradient_pattern(&a.into_pattern(), &b.into_pattern())
 }
-
 
 // ------[ RingPattern ]------
 #[derive(Debug, PartialEq, Clone)]
@@ -227,15 +241,18 @@ pub struct RingPattern {
 
 impl RingPattern {
     pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> RingPattern {
-        RingPattern { a: Box::new(a.into_pattern()), b: Box::new(b.into_pattern()) }
+        RingPattern {
+            a: Box::new(a.into_pattern()),
+            b: Box::new(b.into_pattern()),
+        }
     }
 }
 
 impl PatternTrait for RingPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let distance  = f64::sqrt(local_point.x() * local_point.x()
-                                + local_point.z() * local_point.z());
-        if distance.floor() as i32  % 2 == 0 {
+        let distance =
+            f64::sqrt(local_point.x() * local_point.x() + local_point.z() * local_point.z());
+        if distance.floor() as i32 % 2 == 0 {
             let pattern_point_a = self.a.transform.inverse() * local_point;
             self.a.pattern.pattern_at(&pattern_point_a)
         } else {
@@ -247,10 +264,12 @@ impl PatternTrait for RingPattern {
 
 impl Pattern {
     pub fn ring_pattern<T, U>(a: &T, b: &U) -> Pattern
-        where T: IntoPattern, U: IntoPattern {
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::RingPattern(
-                RingPattern::new(a, b)),
+            pattern: PatternEnum::RingPattern(RingPattern::new(a, b)),
             ..Default::default()
         }
     }
@@ -259,7 +278,6 @@ impl Pattern {
 pub fn ring_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
     Pattern::ring_pattern(&a.into_pattern(), &b.into_pattern())
 }
-
 
 // ------[ CheckersPattern ]------
 #[derive(Debug, PartialEq, Clone)]
@@ -270,15 +288,16 @@ pub struct CheckersPattern {
 
 impl CheckersPattern {
     pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> CheckersPattern {
-        CheckersPattern { a: Box::new(a.into_pattern()), b: Box::new(b.into_pattern()) }
+        CheckersPattern {
+            a: Box::new(a.into_pattern()),
+            b: Box::new(b.into_pattern()),
+        }
     }
 }
 
 impl PatternTrait for CheckersPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let sum = local_point.x().floor() +
-                       local_point.y().floor() +
-                       local_point.z().floor();
+        let sum = local_point.x().floor() + local_point.y().floor() + local_point.z().floor();
         if sum.floor() as i32 % 2 == 0 {
             let pattern_point = self.a.transform.inverse() * local_point;
             self.a.pattern.pattern_at(&pattern_point)
@@ -291,10 +310,12 @@ impl PatternTrait for CheckersPattern {
 
 impl Pattern {
     pub fn checkers_pattern<T, U>(a: &T, b: &U) -> Pattern
-        where T: IntoPattern, U: IntoPattern {
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::CheckersPattern(
-                CheckersPattern::new(a, b)),
+            pattern: PatternEnum::CheckersPattern(CheckersPattern::new(a, b)),
             ..Default::default()
         }
     }
@@ -303,7 +324,6 @@ impl Pattern {
 pub fn checkers_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
     Pattern::checkers_pattern(&a.into_pattern(), &b.into_pattern())
 }
-
 
 // ------[ RadialGradientPattern ]------
 #[derive(Debug, PartialEq, Clone)]
@@ -314,33 +334,44 @@ pub struct RadialGradientPattern {
 }
 
 impl RadialGradientPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U, y_factor: f64) -> RadialGradientPattern {
+    pub fn new<T: IntoPattern, U: IntoPattern>(
+        a: &T,
+        b: &U,
+        y_factor: f64,
+    ) -> RadialGradientPattern {
         RadialGradientPattern {
             a: Box::new(a.into_pattern()),
             b: Box::new(b.into_pattern()),
-            y_factor}
+            y_factor,
+        }
     }
 }
 
 impl PatternTrait for RadialGradientPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let distance = f64::sqrt(local_point.x() * local_point.x()
-            + self.y_factor * local_point.y() * local_point.y() +
-            local_point.z() * local_point.z());
+        let distance = f64::sqrt(
+            local_point.x() * local_point.x()
+                + self.y_factor * local_point.y() * local_point.y()
+                + local_point.z() * local_point.z(),
+        );
         let pattern_point_a = self.a.transform.inverse() * local_point;
         let pattern_point_b = self.b.transform.inverse() * local_point;
-        linear_blend(distance,
-                     &self.a.pattern.pattern_at(&pattern_point_a),
-                     &self.b.pattern.pattern_at(&pattern_point_b))
+        linear_blend(
+            distance,
+            &self.a.pattern.pattern_at(&pattern_point_a),
+            &self.b.pattern.pattern_at(&pattern_point_b),
+        )
     }
 }
 
 impl Pattern {
     pub fn radial_gradient_pattern<T, U>(a: &T, b: &U, y_factor: f64) -> Pattern
-        where T: IntoPattern, U: IntoPattern {
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::RadialGradientPattern(
-                RadialGradientPattern::new(a, b, y_factor)),
+            pattern: PatternEnum::RadialGradientPattern(RadialGradientPattern::new(a, b, y_factor)),
             ..Default::default()
         }
     }
@@ -350,10 +381,13 @@ impl Pattern {
 //   //
 //   radial_gradient_pattern(&WHITE, &BLACK, YFactor::default)
 //
-pub fn radial_gradient_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U, y_factor: f64) -> Pattern {
+pub fn radial_gradient_pattern<T: IntoPattern, U: IntoPattern>(
+    a: &T,
+    b: &U,
+    y_factor: f64,
+) -> Pattern {
     Pattern::radial_gradient_pattern(&a.into_pattern(), &b.into_pattern(), y_factor)
 }
-
 
 // ------[ BlendedPattern ]------
 #[derive(Debug, PartialEq, Clone)]
@@ -383,10 +417,12 @@ impl PatternTrait for BlendedPattern {
 
 impl Pattern {
     pub fn blended_pattern<T, U>(a: &T, b: &U) -> Pattern
-        where T: IntoPattern, U: IntoPattern {
+    where
+        T: IntoPattern,
+        U: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::BlendedPattern(
-                BlendedPattern::new(a, b)),
+            pattern: PatternEnum::BlendedPattern(BlendedPattern::new(a, b)),
             ..Default::default()
         }
     }
@@ -395,7 +431,6 @@ impl Pattern {
 pub fn blended_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
     Pattern::blended_pattern(&a.into_pattern(), &b.into_pattern())
 }
-
 
 // ------[ PerturbedPattern ]------
 #[derive(Debug, PartialEq, Clone)]
@@ -418,7 +453,12 @@ impl Default for PerturbedPattern {
 }
 
 impl PerturbedPattern {
-    pub fn new<T: IntoPattern>(a: &T, scale: f64, num_octaves: u32, persistence: f64) -> PerturbedPattern {
+    pub fn new<T: IntoPattern>(
+        a: &T,
+        scale: f64,
+        num_octaves: u32,
+        persistence: f64,
+    ) -> PerturbedPattern {
         PerturbedPattern {
             a: Box::new(a.into_pattern()),
             scale,
@@ -430,9 +470,30 @@ impl PerturbedPattern {
 
 impl PatternTrait for PerturbedPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let new_x = local_point.x() + perlin_noise::octave_perlin(local_point.x(), local_point.y(), local_point.z(), self.num_octaves, self.persistence) * self.scale;
-        let new_y = local_point.y() + perlin_noise::octave_perlin(local_point.x(), local_point.y(), local_point.z() + 1.0, self.num_octaves, self.persistence) * self.scale;
-        let new_z = local_point.z() + perlin_noise::octave_perlin(local_point.x(), local_point.y(), local_point.z() + 2.0, self.num_octaves, self.persistence) * self.scale;
+        let new_x = local_point.x()
+            + perlin_noise::octave_perlin(
+                local_point.x(),
+                local_point.y(),
+                local_point.z(),
+                self.num_octaves,
+                self.persistence,
+            ) * self.scale;
+        let new_y = local_point.y()
+            + perlin_noise::octave_perlin(
+                local_point.x(),
+                local_point.y(),
+                local_point.z() + 1.0,
+                self.num_octaves,
+                self.persistence,
+            ) * self.scale;
+        let new_z = local_point.z()
+            + perlin_noise::octave_perlin(
+                local_point.x(),
+                local_point.y(),
+                local_point.z() + 2.0,
+                self.num_octaves,
+                self.persistence,
+            ) * self.scale;
         let perturbed_point = point(new_x, new_y, new_z);
 
         let pattern_point = self.a.transform.inverse() * perturbed_point;
@@ -442,38 +503,48 @@ impl PatternTrait for PerturbedPattern {
 
 impl Pattern {
     pub fn perturbed_pattern<T>(a: &T, scale: f64, num_octaves: u32, persistence: f64) -> Pattern
-        where T: IntoPattern {
+    where
+        T: IntoPattern,
+    {
         Pattern {
-            pattern: PatternEnum::PerturbedPattern(
-                PerturbedPattern::new(a, scale, num_octaves, persistence)),
+            pattern: PatternEnum::PerturbedPattern(PerturbedPattern::new(
+                a,
+                scale,
+                num_octaves,
+                persistence,
+            )),
             ..Default::default()
         }
     }
 }
 
-pub fn perturbed_pattern<T: IntoPattern>(a: &T, scale: f64, num_octaves: u32, persistence: f64) -> Pattern {
+pub fn perturbed_pattern<T: IntoPattern>(
+    a: &T,
+    scale: f64,
+    num_octaves: u32,
+    persistence: f64,
+) -> Pattern {
     Pattern::perturbed_pattern(&a.into_pattern(), scale, num_octaves, persistence)
 }
 
-
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::PI;
-    use approx::assert_relative_eq;
-    use crate::canvas::{canvas};
-    use crate::colors::{WHITE, BLACK, GREEN, RED, color, GREY50};
+    use super::*;
+    use crate::canvas::canvas;
+    use crate::colors::{color, BLACK, GREEN, GREY50, RED, WHITE};
     use crate::math::EPSILON;
     use crate::shapes::sphere;
     use crate::transformations::{rotation_y, scaling, translation};
     use crate::tuples::point;
-    use super::*;
+    use approx::assert_relative_eq;
+    use std::f64::consts::PI;
 
     fn dump_pattern(pattern: &Pattern, filename: &str, size: u32, scale: f64) {
         let mut image = canvas(size, size);
         for y in 0..image.height {
             for x in 0..image.width {
                 let dx = scale * x as f64 / image.width as f64;
-                let dy  = scale * y as f64 / image.height as f64;
+                let dy = scale * y as f64 / image.height as f64;
                 let v = pattern_at(pattern, &point(dx, 0.0, dy));
                 image.write_pixel(x, y, &v);
             }
@@ -577,7 +648,12 @@ mod tests {
         let c = pattern_at_shape(&pattern, &shape, &point(1.5, 0.0, 0.0));
         assert_eq!(c, WHITE);
 
-        dump_pattern(&pattern, "stripes_with_a_pattern_transformation.ppm", 100, 4.0);
+        dump_pattern(
+            &pattern,
+            "stripes_with_a_pattern_transformation.ppm",
+            100,
+            4.0,
+        );
     }
 
     // Stripes with an object and a pattern transformation
@@ -619,11 +695,25 @@ mod tests {
     fn gradient_linearly_interpolates_between_colors() {
         let pattern = gradient_pattern(&WHITE, &BLACK);
         assert_eq!(pattern_at(&pattern, &point(0.0, 0.0, 0.0)), WHITE);
-        assert_eq!(pattern_at(&pattern, &point(0.25, 0.0, 0.0)), color(0.75, 0.75, 0.75));
-        assert_eq!(pattern_at(&pattern, &point(0.5, 0.0, 0.0)), color(0.5, 0.5, 0.5));
-        assert_eq!(pattern_at(&pattern, &point(0.75, 0.0, 0.0)), color(0.25, 0.25, 0.25));
+        assert_eq!(
+            pattern_at(&pattern, &point(0.25, 0.0, 0.0)),
+            color(0.75, 0.75, 0.75)
+        );
+        assert_eq!(
+            pattern_at(&pattern, &point(0.5, 0.0, 0.0)),
+            color(0.5, 0.5, 0.5)
+        );
+        assert_eq!(
+            pattern_at(&pattern, &point(0.75, 0.0, 0.0)),
+            color(0.25, 0.25, 0.25)
+        );
 
-        dump_pattern(&pattern, "gradient_linearly_interpolates_between_colors.ppm", 100, 1.0);
+        dump_pattern(
+            &pattern,
+            "gradient_linearly_interpolates_between_colors.ppm",
+            100,
+            1.0,
+        );
     }
 
     // Rings
@@ -676,10 +766,23 @@ mod tests {
     fn radial_gradient_linearly_interpolates_between_colors() {
         let pattern = radial_gradient_pattern(&WHITE, &BLACK, 0.0);
         assert_eq!(pattern_at(&pattern, &point(0.0, 0.0, 0.0)), WHITE);
-        assert_eq!(pattern_at(&pattern, &point(0.25, 0.0, 0.0)), color(0.75, 0.75, 0.75));
-        assert_eq!(pattern_at(&pattern, &point(0.5, 0.0, 0.0)), color(0.5, 0.5, 0.5));
-        assert_eq!(pattern_at(&pattern, &point(0.75, 0.0, 0.0)), color(0.25, 0.25, 0.25));
-        assert_relative_eq!(pattern_at(&pattern, &point(1.0 - EPSILON, 0.0, 0.0)), BLACK, epsilon=1e-5);
+        assert_eq!(
+            pattern_at(&pattern, &point(0.25, 0.0, 0.0)),
+            color(0.75, 0.75, 0.75)
+        );
+        assert_eq!(
+            pattern_at(&pattern, &point(0.5, 0.0, 0.0)),
+            color(0.5, 0.5, 0.5)
+        );
+        assert_eq!(
+            pattern_at(&pattern, &point(0.75, 0.0, 0.0)),
+            color(0.25, 0.25, 0.25)
+        );
+        assert_relative_eq!(
+            pattern_at(&pattern, &point(1.0 - EPSILON, 0.0, 0.0)),
+            BLACK,
+            epsilon = 1e-5
+        );
 
         fn side(radius: f64) -> f64 {
             f64::sqrt(radius * radius / 2.0)
@@ -690,23 +793,41 @@ mod tests {
         let x1 = side(0.5);
         let x2 = side(0.75);
         let x3 = side(1.0 - EPSILON);
-        assert_relative_eq!(pattern_at(&pattern, &point(x0, 0.0, x0)), color(0.75, 0.75, 0.75));
-        assert_relative_eq!(pattern_at(&pattern, &point(x1, 0.0, x1)), color(0.5, 0.5, 0.5));
-        assert_relative_eq!(pattern_at(&pattern, &point(x2, 0.0, x2)), color(0.25, 0.25, 0.25));
-        assert_relative_eq!(pattern_at(&pattern, &point(x3, 0.0, x3)), BLACK, epsilon=1e-5);
+        assert_relative_eq!(
+            pattern_at(&pattern, &point(x0, 0.0, x0)),
+            color(0.75, 0.75, 0.75)
+        );
+        assert_relative_eq!(
+            pattern_at(&pattern, &point(x1, 0.0, x1)),
+            color(0.5, 0.5, 0.5)
+        );
+        assert_relative_eq!(
+            pattern_at(&pattern, &point(x2, 0.0, x2)),
+            color(0.25, 0.25, 0.25)
+        );
+        assert_relative_eq!(
+            pattern_at(&pattern, &point(x3, 0.0, x3)),
+            BLACK,
+            epsilon = 1e-5
+        );
 
-        dump_pattern(&pattern, "radial_gradient_linearly_interpolates_between_colors.ppm", 100, 4.0);
+        dump_pattern(
+            &pattern,
+            "radial_gradient_linearly_interpolates_between_colors.ppm",
+            100,
+            4.0,
+        );
     }
 
     // Nested Patterns
     #[test]
     fn nested_patterns() {
         let mut p0 = stripe_pattern(&WHITE, &BLACK);
-        p0.set_transform(&scaling(0.5, 0.5, 0.5));    // four stripes per unit
+        p0.set_transform(&scaling(0.5, 0.5, 0.5)); // four stripes per unit
         let mut p1 = stripe_pattern(&GREEN, &RED);
-        p1.set_transform(&scaling(0.5, 0.5, 0.5));    // four stripes per unit
+        p1.set_transform(&scaling(0.5, 0.5, 0.5)); // four stripes per unit
         let mut pattern = stripe_pattern(&p0, &p1);
-        pattern.set_transform(&scaling(0.5, 0.5, 0.5));  // two stripes per unit
+        pattern.set_transform(&scaling(0.5, 0.5, 0.5)); // two stripes per unit
 
         assert_eq!(pattern_at(&pattern, &point(0.125, 0.0, 0.0)), WHITE);
         assert_eq!(pattern_at(&pattern, &point(0.375, 0.0, 0.0)), BLACK);
@@ -735,10 +856,11 @@ mod tests {
     #[test]
     fn perturbed_patterns() {
         let p0 = stripe_pattern(&WHITE, &BLACK);
-        let pattern = perturbed_pattern(&p0,
-                                              1.9,  // scale
-                                        4,    // num_octaves,
-                                         0.9); // persistence
+        let pattern = perturbed_pattern(
+            &p0, 1.9, // scale
+            4,   // num_octaves,
+            0.9,
+        ); // persistence
         dump_pattern(&pattern, "perturbed_patterns.ppm", 100, 4.0);
     }
 }

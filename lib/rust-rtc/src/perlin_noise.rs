@@ -5,7 +5,6 @@
 // C++ implementation:
 // https://github.com/DavidAntliff/RTC-CPP/blob/main/src/lib/include/ray_tracer_challenge/perlin_noise.h
 
-
 // Hash lookup table as defined by Ken Perlin. This is a randomly
 // arranged array of all numbers from 0-255 inclusive, repeated once.
 #[rustfmt::skip]
@@ -53,19 +52,19 @@ static PERMUTATION: [usize; 512] = [
 
 pub fn grad(hash: usize, x: f64, y: f64, z: f64) -> f64 {
     // Take the hashed value and take the first 4 bits of it (15 == 0b1111)
-    let h = hash & 15;
+    let h = hash & 0b1111;
 
-    // If the most significant bit (MSB) of the hash is 0 then set u = x.  Otherwise y.
-    let u = if h < 8 /* 0b1000 */ { x } else { y };
+    // If the most significant bit (MSB) of the hash is 0 then set u = x. Otherwise y.
+    let u = if h < 0b1000 { x } else { y };
 
     // In Ken Perlin's original implementation this was another conditional operator (?:).
     // Expand it for readability.
     let v: f64;
 
-    if h < 4 /* 0b0100 */ {
+    if h < 0b0100 {
         // If the first and second significant bits are 0 set v = y
         v = y;
-    } else if h == 12 /* 0b1100 */ || h == 14 /* 0b1110*/ {
+    } else if h == 0b1100 || h == 0b1110 {
         // If the first and second significant bits are 1 set v = x
         v = x;
     } else {
@@ -73,7 +72,7 @@ pub fn grad(hash: usize, x: f64, y: f64, z: f64) -> f64 {
         v = z;
     }
 
-    // Use the last 2 bits to decide if u and v are positive or negative.  Then return their addition.
+    // Use the last 2 bits to decide if u and v are positive or negative. Then return their addition.
     let m = if (h & 1) == 0 { u } else { -u };
     let n = if (h & 2) == 0 { v } else { -v };
     m + n
@@ -83,7 +82,7 @@ fn fade(t: f64) -> f64 {
     // Fade function as defined by Ken Perlin.  This eases coordinate values
     // so that they will "ease" towards integral values.  This ends up smoothing
     // the final output.
-    t * t * t * (t * (t * 6.0 - 15.0) + 10.0)  // 6t^5 - 15t^4 + 10t^3
+    t * t * t * (t * (t * 6.0 - 15.0) + 10.0) // 6t^5 - 15t^4 + 10t^3
 }
 
 fn lerp(a: f64, b: f64, x: f64) -> f64 {
@@ -175,9 +174,9 @@ pub fn octave_perlin(x: f64, y: f64, z: f64, octaves: u32, persistence: f64) -> 
     let mut total = 0.0;
     let mut frequency = 1.0;
     let mut amplitude = 1.0;
-    let mut max_value = 0.0;            // Used for normalizing result to 0.0 - 1.0
+    let mut max_value = 0.0; // Used for normalizing result to 0.0 - 1.0
 
-    for _ in 0 .. octaves {
+    for _ in 0..octaves {
         total += perlin(x * frequency, y * frequency, z * frequency) * amplitude;
         max_value += amplitude;
         amplitude *= persistence;
@@ -187,22 +186,21 @@ pub fn octave_perlin(x: f64, y: f64, z: f64, octaves: u32, persistence: f64) -> 
     total / max_value
 }
 
-
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::canvas::canvas;
     use crate::colors::color;
-    use super::*;
 
     #[test]
     fn generate_octave_perlin_noise_image() {
         let mut image = canvas(512, 512);
         let coordinate_scale = 4.0;
-        let value_scale = 2.4;  // use to keep min and max between [0.0, 1.0]
+        let value_scale = 2.4; // use to keep min and max between [0.0, 1.0]
         let mut min_vv = 1.0;
         let mut max_vv = 0.0;
-        for x in 0 .. image.width {
-            for y in 0 .. image.height {
+        for x in 0..image.width {
+            for y in 0..image.height {
                 let dx = coordinate_scale * x as f64 / image.width as f64;
                 let dy = coordinate_scale * y as f64 / image.height as f64;
                 let v = octave_perlin(dx, dy, 0.0, 8, 0.6);

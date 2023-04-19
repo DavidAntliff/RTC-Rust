@@ -108,7 +108,7 @@ pub fn hadamard(lhs: &Color, rhs: &Color) -> Color {
 }
 
 // Blending function (linear interpolation)
-pub fn linear_blend(t: f64, a: &Color, b :&Color) -> Color {
+pub fn linear_blend(t: f64, a: &Color, b: &Color) -> Color {
     let distance = b - a;
     let fraction = t - t.floor();
     a + distance * fraction

@@ -1,8 +1,8 @@
 // Chapter 6: Lights and Shading
 
-use crate::patterns::Pattern;
 use crate::colors::{color, Color};
 use crate::lights::PointLight;
+use crate::patterns::Pattern;
 use crate::shapes::Shape;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
@@ -24,7 +24,7 @@ impl Material {
             diffuse,
             specular,
             shininess,
-            pattern: Default::default()
+            pattern: Default::default(),
         }
     }
 
@@ -37,7 +37,6 @@ impl Material {
         normalv: &Vector,
         in_shadow: bool,
     ) -> Color {
-
         let material_color = match &self.pattern {
             Some(inner) => inner.pattern_at_shape(object, point),
             None => self.color,

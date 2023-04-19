@@ -1,6 +1,6 @@
 use glam::f64::DVec4;
 
-use derive_more::{Neg};
+use derive_more::Neg;
 
 #[derive(Debug, Default, PartialEq, Copy, Clone, Neg)]
 pub struct Tuple(pub(crate) DVec4);
