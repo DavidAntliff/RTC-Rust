@@ -1,9 +1,11 @@
 use rust_rtc::camera::{camera, render};
 use rust_rtc::canvas::ppm_from_canvas;
-use rust_rtc::colors::{BLACK, BLUE, color, GREEN, RED, WHITE, YELLOW};
+use rust_rtc::colors::{color, BLACK, BLUE, GREEN, RED, WHITE, YELLOW};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::patterns::{checkers_pattern, gradient_pattern, radial_gradient_pattern, ring_pattern, stripe_pattern};
+use rust_rtc::patterns::{
+    checkers_pattern, gradient_pattern, radial_gradient_pattern, ring_pattern, stripe_pattern,
+};
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{
     rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
@@ -27,9 +29,11 @@ fn main() {
     w.add_object(floor);
 
     let mut wall = plane();
-    wall.set_transform(&rotation_x(PI / 2.0)
-        //                    .then(rotation_y(0.3))
-        .then(&translation(0.0, 0.0, 7.0)));
+    wall.set_transform(
+        &rotation_x(PI / 2.0)
+            //                    .then(rotation_y(0.3))
+            .then(&translation(0.0, 0.0, 7.0)),
+    );
     wall.material = default_material();
     wall.material.color = color(1.0, 0.8, 0.8);
     wall.material.diffuse = 0.3;
@@ -64,16 +68,17 @@ fn main() {
     let mut right_pattern_2 = radial_gradient_pattern(&WHITE, &BLACK, 0.0);
     right_pattern_2.set_transform(&rotation_x(PI / 2.0));
     let mut right_pattern = checkers_pattern(&GREEN, &right_pattern_2);
-    right_pattern.set_transform(&scaling(1.0, 1.0, 1.0)
-        .then(&rotation_z(-PI / 6.0)
-        .then(&translation(0.5, 0.0, 0.0))));
+    right_pattern.set_transform(
+        &scaling(1.0, 1.0, 1.0).then(&rotation_z(-PI / 6.0).then(&translation(0.5, 0.0, 0.0))),
+    );
     right.material.set_pattern(&right_pattern);
     w.add_object(right);
 
     let mut left = sphere(6);
-    left.set_transform(&rotation_z(PI / 4.0)
-        .then(&scaling(0.33, 0.33, 0.33)
-        .then(&translation(-1.5, 0.33, -0.75))));
+    left.set_transform(
+        &rotation_z(PI / 4.0)
+            .then(&scaling(0.33, 0.33, 0.33).then(&translation(-1.5, 0.33, -0.75))),
+    );
     left.material = default_material();
     left.material.color = color(1.0, 0.8, 0.1);
     left.material.diffuse = 0.7;

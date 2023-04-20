@@ -1,15 +1,11 @@
 use rust_rtc::camera::{camera, render};
 use rust_rtc::canvas::ppm_from_canvas;
-use rust_rtc::colors::{color, Color, colori, WHITE};
+use rust_rtc::colors::{color, colori, Color, WHITE};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::patterns::{
-    blended_pattern, ring_pattern, stripe_pattern,
-};
+use rust_rtc::patterns::{blended_pattern, ring_pattern, stripe_pattern};
 use rust_rtc::shapes::{plane, sphere};
-use rust_rtc::transformations::{
-    rotation_x, rotation_y, scaling, translation, view_transform,
-};
+use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;

@@ -4,10 +4,8 @@ use rust_rtc::colors::{color, colori};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
 use rust_rtc::patterns::{checkers_pattern, stripe_pattern};
-use rust_rtc::shapes::{plane};
-use rust_rtc::transformations::{
-    rotation_y, scaling, view_transform,
-};
+use rust_rtc::shapes::plane;
+use rust_rtc::transformations::{rotation_y, scaling, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;

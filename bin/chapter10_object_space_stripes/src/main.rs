@@ -1,8 +1,8 @@
 use rust_rtc::camera::{camera, render};
 use rust_rtc::canvas::ppm_from_canvas;
-use rust_rtc::colors::{BLACK, color, WHITE};
+use rust_rtc::colors::{color, BLACK, WHITE};
 use rust_rtc::lights::point_light;
-use rust_rtc::patterns::{stripe_pattern};
+use rust_rtc::patterns::stripe_pattern;
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
@@ -33,8 +33,7 @@ fn main() {
     w.add_object(right);
 
     let mut left = sphere(6);
-    left.set_transform(&scaling(0.33, 0.33, 0.33)
-        .then(&translation(-1.5, 0.33, -0.75)));
+    left.set_transform(&scaling(0.33, 0.33, 0.33).then(&translation(-1.5, 0.33, -0.75)));
     let left_pattern = stripe_pattern(&BLACK, &WHITE);
     left.material.set_pattern(&left_pattern);
     w.add_object(left);
