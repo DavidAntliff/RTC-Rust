@@ -1,0 +1,49 @@
+use rust_rtc::camera::{camera, render};
+use rust_rtc::canvas::ppm_from_canvas;
+use rust_rtc::colors::{color, colori};
+use rust_rtc::lights::point_light;
+use rust_rtc::materials::default_material;
+use rust_rtc::patterns::{checkers_pattern, stripe_pattern};
+use rust_rtc::shapes::{plane};
+use rust_rtc::transformations::{
+    rotation_y, scaling, view_transform,
+};
+use rust_rtc::tuples::{point, vector};
+use rust_rtc::world::world;
+use std::f64::consts::PI;
+
+fn main() {
+    let mut w = world();
+
+    let mut floor = plane();
+    floor.material = default_material();
+    floor.material.color = color(1.0, 0.9, 0.9);
+    floor.material.specular = 0.0;
+    let scale = 0.3;
+    let mut floor_pattern_1 = stripe_pattern(&colori(167, 83, 104), &colori(124, 41, 62));
+    floor_pattern_1.set_transform(&scaling(scale, scale, scale).then(&rotation_y(PI / 4.0)));
+    let mut floor_pattern_2 = stripe_pattern(&colori(63, 63, 63), &colori(104, 104, 104));
+    floor_pattern_2.set_transform(&scaling(scale, scale, scale).then(&rotation_y(-PI / 4.0)));
+    let mut floor_pattern = checkers_pattern(&floor_pattern_1, &floor_pattern_2);
+    floor_pattern.set_transform(&scaling(1.0, 1.0, 1.0));
+    floor.material.set_pattern(&floor_pattern);
+    w.add_object(floor);
+
+    w.add_light(point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
+
+    //let mut cam = camera(100, 50, PI / 3.0);
+    //let mut cam = camera(1024, 768, PI / 3.0);
+    //let mut cam = camera(1600, 800, PI / 3.0);
+    let mut cam = camera(2048, 1536, PI / 3.0);
+    //let mut cam = camera(3840, 2160, PI / 3.0);
+
+    cam.transform = view_transform(
+        &point(0.0, 1.5, -5.0),
+        &point(0.0, 1.0, 0.0),
+        &vector(0.0, 1.0, 0.0),
+    );
+
+    let canvas = render(&cam, &w);
+    let ppm = ppm_from_canvas(&canvas);
+    print!("{}", ppm);
+}

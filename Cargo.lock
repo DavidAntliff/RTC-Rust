@@ -24,7 +24,70 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "chapter10_blended_patterns"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_checkers"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_gradients"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_nested_patterns"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_object_space_stripes"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter10_perturbed_patterns"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_radial_gradients"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_rings"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_stripes"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter10_tiled_floor"
 version = "0.1.0"
 dependencies = [
  "rust-rtc",

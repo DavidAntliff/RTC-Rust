@@ -33,7 +33,7 @@ fn main() {
     floor_pattern_2.set_transform(&scaling(scale, scale, scale).then(&rotation_y(-PI / 4.0)));
     let mut floor_pattern = blended_pattern(&floor_pattern_1, &floor_pattern_2);
     floor_pattern.set_transform(&rotation_y(-PI / 8.0));
-    floor.material.pattern = Some(Box::new(floor_pattern));
+    floor.material.set_pattern(&floor_pattern);
     w.add_object(floor);
 
     let mut middle = sphere(4);
@@ -53,7 +53,7 @@ fn main() {
             .then(&rotation_z(-PI / 4.0))
             .then(&rotation_y(-PI / 4.0)),
     );
-    middle.material.pattern = Some(Box::new(middle_pattern));
+    middle.material.set_pattern(&middle_pattern);
     w.add_object(middle);
 
     let mut right = sphere(5);
@@ -73,7 +73,7 @@ fn main() {
             .then(&rotation_z(PI / 6.0))
             .then(&translation(2.0, 0.0, 0.0)),
     );
-    right.material.pattern = Some(Box::new(right_pattern));
+    right.material.set_pattern(&right_pattern);
     w.add_object(right);
 
     let mut left = sphere(6);
@@ -93,7 +93,7 @@ fn main() {
             .then(&rotation_x(-PI / 3.0))
             .then(&rotation_y(-0.2)),
     );
-    left.material.pattern = Some(Box::new(left_pattern));
+    left.material.set_pattern(&left_pattern);
     w.add_object(left);
 
     w.add_light(point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));

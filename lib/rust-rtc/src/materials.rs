@@ -13,7 +13,7 @@ pub struct Material {
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
-    pub pattern: Option<Box<Pattern>>,
+    pattern: Option<Box<Pattern>>,
 }
 
 impl Material {
@@ -26,6 +26,10 @@ impl Material {
             shininess,
             pattern: Default::default(),
         }
+    }
+
+    pub fn set_pattern(&mut self, pattern: &Pattern) {
+        self.pattern = Some(Box::new(pattern.clone()));
     }
 
     pub fn lighting(
