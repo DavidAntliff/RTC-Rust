@@ -83,7 +83,7 @@ fn main() {
     //let mut cam = camera(100, 50, PI / 3.0);
     //let mut cam = camera(1024, 768, PI / 3.0);
     //let mut cam = camera(1600, 800, PI / 3.0);
-    let mut cam = camera(2048, 1536, PI / 3.0);
+    let mut cam = camera(20480, 15360, PI / 3.0);
     //let mut cam = camera(3840, 2160, PI / 3.0);
 
     cam.set_transform(&view_transform(

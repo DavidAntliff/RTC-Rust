@@ -139,3 +139,50 @@ $ perf stat -e L1-dcache-load-misses,L1-icache-load-misses target/release/chapte
        2.264039000 seconds user
        0.060001000 seconds sys
 ```
+
+
+## Converting Large Images
+
+When converting large PPM images to PNG, ImageMagick needs certain limits increased, otherwise this error occurs:
+
+```
+$ convert image.ppm hires.png
+convert-im6.q16: width or height exceeds limit `image.ppm' @ error/cache.c/OpenPixelCache/3909.
+convert-im6.q16: no images defined `hires.png' @ error/convert.c/ConvertImageCommand/3229.
+```
+
+Copy `/etc/ImageMagick-6/policy.xml` into the current directory and change the following lines:
+
+```
+$ diff -u /etc/ImageMagick-6/policy.xml policy.xml 
+--- /etc/ImageMagick-6/policy.xml	2022-02-06 23:53:27.000000000 +1100
++++ policy.xml	2023-04-21 22:41:05.691912163 +1000
+@@ -57,13 +57,13 @@
+ -->
+ <policymap>
+   <!-- <policy domain="resource" name="temporary-path" value="/tmp"/> -->
+-  <policy domain="resource" name="memory" value="256MiB"/>
+-  <policy domain="resource" name="map" value="512MiB"/>
+-  <policy domain="resource" name="width" value="16KP"/>
+-  <policy domain="resource" name="height" value="16KP"/>
++  <policy domain="resource" name="memory" value="16GiB"/>
++  <policy domain="resource" name="map" value="4GiB"/>
++  <policy domain="resource" name="width" value="32KP"/>
++  <policy domain="resource" name="height" value="32KP"/>
+   <!-- <policy domain="resource" name="list-length" value="128"/> -->
+-  <policy domain="resource" name="area" value="128MP"/>
+-  <policy domain="resource" name="disk" value="1GiB"/>
++  <policy domain="resource" name="area" value="1024MP"/>
++  <policy domain="resource" name="disk" value="10GiB"/>
+   <!-- <policy domain="resource" name="file" value="768"/> -->
+   <!-- <policy domain="resource" name="thread" value="4"/> -->
+   <!-- <policy domain="resource" name="throttle" value="0"/> -->
+```
+
+The conversion can now take place, using `MAGICK_CONFIGURE_PATH` to set the location of the temporary `policy.xml` file:
+
+```
+$ MAGICK_CONFIGURE_PATH=. convert -verbose image.ppm hires.png
+image.ppm PPM 20480x15360 20480x15360+0+0 8-bit sRGB 2.68126GiB 18.050u 0:18.058
+image.ppm=>hires.png PPM 20480x15360 20480x15360+0+0 8-bit sRGB 21.1562MiB 13.000u 0:10.258
+```
