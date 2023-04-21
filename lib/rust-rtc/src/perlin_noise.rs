@@ -136,14 +136,14 @@ fn perlin_impl(x: f64, y: f64, z: f64, repeat: i32) -> f64 {
         num
     };
 
-    let aaa = p[(p[(p[    xi ] +     yi)]  +     zi)];
-    let aba = p[(p[(p[    xi ] + inc(yi))] +     zi)];
-    let aab = p[(p[(p[    xi ] +     yi)]  + inc(zi))];
-    let abb = p[(p[(p[    xi ] + inc(yi))] + inc(zi))];
-    let baa = p[(p[(p[inc(xi)] +     yi)]  +     zi)];
-    let bba = p[(p[(p[inc(xi)] + inc(yi))] +     zi)];
-    let bab = p[(p[(p[inc(xi)] +     yi)]  + inc(zi))];
-    let bbb = p[(p[(p[inc(xi)] + inc(yi))] + inc(zi))];
+    let aaa = p[p[p[    xi ] +     yi]  +     zi];
+    let aba = p[p[p[    xi ] + inc(yi)] +     zi];
+    let aab = p[p[p[    xi ] +     yi]  + inc(zi)];
+    let abb = p[p[p[    xi ] + inc(yi)] + inc(zi)];
+    let baa = p[p[p[inc(xi)] +     yi]  +     zi];
+    let bba = p[p[p[inc(xi)] + inc(yi)] +     zi];
+    let bab = p[p[p[inc(xi)] +     yi]  + inc(zi)];
+    let bbb = p[p[p[inc(xi)] + inc(yi)] + inc(zi)];
 
     // The gradient function calculates the dot product between a pseudorandom
     // gradient vector and the vector from the input coordinate to the 8
@@ -220,7 +220,7 @@ mod tests {
     #[test]
     fn debug() {
         let x = -3.3273440166393975;
-        let y = 2.1870538633277339;
+        let y = 2.187_053_863_327_734;
         let z = -0.38154583713770984;
         let x = octave_perlin(x, y, z, 3, 0.8);
         println!("{}", x);

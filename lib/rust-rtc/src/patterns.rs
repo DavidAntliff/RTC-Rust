@@ -77,7 +77,7 @@ pub fn pattern_at_shape(pattern: &Pattern, shape: &Shape, world_point: &Point) -
 
 impl From<&Color> for Pattern {
     fn from(value: &Color) -> Self {
-        Pattern::solid_pattern(&value)
+        Pattern::solid_pattern(value)
     }
 }
 
