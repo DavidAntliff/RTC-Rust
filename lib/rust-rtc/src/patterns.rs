@@ -25,7 +25,7 @@ impl Pattern {
 
     pub fn pattern_at_shape(&self, shape: &Shape, world_point: &Point) -> Color {
         // Convert world-space point to object-space point:
-        let object_point = shape.transform.inverse() * world_point;
+        let object_point = shape.transform().inverse() * world_point;
         self.pattern_at(&object_point)
     }
 }

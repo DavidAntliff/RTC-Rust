@@ -11,7 +11,7 @@ use crate::tuples::{normalize, Point, Vector};
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
     pub shape: ShapeEnum,
-    pub transform: Matrix4,
+    transform: Matrix4,
     pub material: Material,
 }
 
@@ -31,6 +31,10 @@ impl Shape {
 
     pub fn set_transform(&mut self, m: &Matrix4) {
         self.transform = *m;
+    }
+
+    pub fn transform(&self) -> &Matrix4 {
+        &self.transform
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {

@@ -104,11 +104,11 @@ fn main() {
     let mut cam = camera(2048, 1536, PI / 3.0);
     //let mut cam = camera(3840, 2160, PI / 3.0);
 
-    cam.transform = view_transform(
+    cam.set_transform(&view_transform(
         &point(0.0, 1.5, -5.0),
         &point(0.0, 1.0, 0.0),
         &vector(0.0, 1.0, 0.0),
-    );
+    ));
 
     let canvas = render(&cam, &w);
     let ppm = ppm_from_canvas(&canvas);

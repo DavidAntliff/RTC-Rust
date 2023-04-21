@@ -12,7 +12,7 @@ pub struct Camera {
     vsize: u32,
     #[allow(dead_code)]
     field_of_view: f64,
-    pub transform: Matrix4,
+    transform: Matrix4,
 
     half_width: f64,
     half_height: f64,
@@ -31,6 +31,14 @@ impl Camera {
             half_height: c.half_height,
             pixel_size: c.pixel_size,
         }
+    }
+
+    pub fn set_transform(&mut self, transform: &Matrix4) {
+        self.transform = *transform;
+    }
+
+    pub fn transform(&self) -> &Matrix4 {
+        &self.transform
     }
 
     pub fn ray_for_pixel(&self, px: u32, py: u32) -> Ray {
@@ -170,7 +178,7 @@ mod tests {
     #[test]
     fn constructing_ray_when_camera_is_transformed() {
         let mut c = camera(201, 101, PI / 2.0);
-        c.transform = rotation_y(PI / 4.0) * translation(0.0, -2.0, 5.0);
+        c.set_transform(&(rotation_y(PI / 4.0) * translation(0.0, -2.0, 5.0)));
         let r = ray_for_pixel(&c, 100, 50);
         assert_eq!(r.origin, point(0.0, 2.0, -5.0));
         let k = f64::sqrt(2.0) / 2.0;
@@ -185,7 +193,7 @@ mod tests {
         let from = point(0.0, 0.0, -5.0);
         let to = point(0.0, 0.0, 0.0);
         let up = vector(0.0, 1.0, 0.0);
-        c.transform = view_transform(&from, &to, &up);
+        c.set_transform(&view_transform(&from, &to, &up));
         let image = render(&c, &w);
         assert_relative_eq!(
             image.pixel_at(5, 5),

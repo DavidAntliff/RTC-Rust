@@ -19,16 +19,16 @@ fn main() {
     w.add_object(floor);
 
     let mut wall = plane();
-    wall.transform = rotation_x(PI / 2.0)
+    wall.set_transform(&rotation_x(PI / 2.0)
         .then(&rotation_y(0.3))
-        .then(&translation(0.0, 0.0, 7.0));
+        .then(&translation(0.0, 0.0, 7.0)));
     wall.material = default_material();
     wall.material.color = color(1.0, 0.8, 0.8);
     wall.material.specular = 0.0;
     w.add_object(wall);
 
     let mut middle = sphere(4);
-    middle.transform = translation(-0.5, 1.0, 0.5);
+    middle.set_transform(&translation(-0.5, 1.0, 0.5));
     middle.material = default_material();
     middle.material.color = color(0.1, 1.0, 0.5);
     middle.material.diffuse = 0.7;
@@ -36,7 +36,7 @@ fn main() {
     w.add_object(middle);
 
     let mut right = sphere(5);
-    right.transform = translation(1.5, 0.5, -0.5) * scaling(0.5, 0.5, 0.5);
+    right.set_transform(&(translation(1.5, 0.5, -0.5) * scaling(0.5, 0.5, 0.5)));
     right.material = default_material();
     right.material.color = color(0.5, 1.0, 0.1);
     right.material.diffuse = 0.7;
@@ -44,7 +44,7 @@ fn main() {
     w.add_object(right);
 
     let mut left = sphere(6);
-    left.transform = translation(-1.5, 0.33, -0.75) * scaling(0.33, 0.33, 0.33);
+    left.set_transform(&(translation(-1.5, 0.33, -0.75) * scaling(0.33, 0.33, 0.33)));
     left.material = default_material();
     left.material.color = color(1.0, 0.8, 0.1);
     left.material.diffuse = 0.7;
@@ -59,11 +59,11 @@ fn main() {
     //let mut cam = camera(2048, 1536, PI / 3.0);
     //let mut cam = camera(3840, 2160, PI / 3.0);
 
-    cam.transform = view_transform(
+    cam.set_transform(&view_transform(
         &point(0.0, 1.5, -5.0),
         &point(0.0, 1.0, 0.0),
         &vector(0.0, 1.0, 0.0),
-    );
+    ));
 
     let canvas = render(&cam, &w);
     let ppm = ppm_from_canvas(&canvas);

@@ -108,7 +108,7 @@ pub fn default_world() -> World {
     objects.push(s1);
 
     let mut s2 = sphere(2);
-    s2.transform = scaling(0.5, 0.5, 0.5);
+    s2.set_transform(&scaling(0.5, 0.5, 0.5));
     objects.push(s2);
 
     World::new(light, objects)
@@ -155,7 +155,7 @@ mod tests {
         let mut s1 = sphere(1);
         s1.material = m;
         let mut s2 = sphere(2);
-        s2.transform = scaling(0.5, 0.5, 0.5);
+        s2.set_transform(&scaling(0.5, 0.5, 0.5));
 
         let w = default_world();
         assert_eq!(w.light, Some(light));
@@ -274,7 +274,7 @@ mod tests {
         let s1 = sphere(1);
         w.add_object(s1);
         let mut s2 = sphere(2);
-        s2.transform = translation(0.0, 0.0, 10.0);
+        s2.set_transform(&translation(0.0, 0.0, 10.0));
         w.add_object(s2.clone());
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let i = intersection(4.0, Some(&s2));
