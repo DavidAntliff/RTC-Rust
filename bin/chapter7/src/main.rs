@@ -19,18 +19,22 @@ fn main() {
     w.add_object(floor.clone());
 
     let mut left_wall = sphere(2);
-    left_wall.set_transform(&(translation(0.0, 0.0, 5.0)
-        * rotation_y(-PI / 4.0)
-        * rotation_x(PI / 2.0)
-        * scaling(10.0, 0.01, 10.0)));
+    left_wall.set_transform(
+        &(translation(0.0, 0.0, 5.0)
+            * rotation_y(-PI / 4.0)
+            * rotation_x(PI / 2.0)
+            * scaling(10.0, 0.01, 10.0)),
+    );
     left_wall.material = floor.material.clone();
     w.add_object(left_wall);
 
     let mut right_wall = sphere(3);
-    right_wall.set_transform(&(translation(0.0, 0.0, 5.0)
-        * rotation_y(PI / 4.0)
-        * rotation_x(PI / 2.0)
-        * scaling(10.0, 0.01, 10.0)));
+    right_wall.set_transform(
+        &(translation(0.0, 0.0, 5.0)
+            * rotation_y(PI / 4.0)
+            * rotation_x(PI / 2.0)
+            * scaling(10.0, 0.01, 10.0)),
+    );
     right_wall.material = floor.material;
     w.add_object(right_wall);
 

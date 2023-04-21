@@ -1,12 +1,12 @@
 // Chapter 7: Implementing a Camera
 
 use crate::canvas::{canvas, Canvas};
+use crate::math::MAX_RECURSIVE_DEPTH;
 use crate::matrices::{identity4, Matrix4};
 use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
 use std::f64::consts::PI;
-use crate::math::MAX_RECURSIVE_DEPTH;
 
 pub struct Camera {
     hsize: u32,
@@ -42,7 +42,7 @@ impl Camera {
     }
 
     pub fn transform(&self) -> &Matrix4 {
-       &self.transform
+        &self.transform
     }
 
     pub fn inverse_transform(&self) -> &Matrix4 {

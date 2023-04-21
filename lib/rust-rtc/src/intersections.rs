@@ -1,9 +1,9 @@
 // Chapter 5: Ray-Sphere Intersections
 
 use crate::math::EPSILON;
-use crate::rays::{Ray};
+use crate::rays::Ray;
 use crate::shapes::{normal_at, Shape, ShapeTrait};
-use crate::tuples::{dot, Point, reflect, Vector};
+use crate::tuples::{dot, reflect, Point, Vector};
 
 pub use std::vec as intersections;
 

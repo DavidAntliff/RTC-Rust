@@ -18,7 +18,14 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64, reflective: f64) -> Self {
+    pub fn new(
+        color: Color,
+        ambient: f64,
+        diffuse: f64,
+        specular: f64,
+        shininess: f64,
+        reflective: f64,
+    ) -> Self {
         Material {
             color,
             ambient,
@@ -150,11 +157,11 @@ pub fn lighting(
 mod tests {
     use super::*;
     use crate::lights::point_light;
+    use crate::patterns::stripe_pattern;
     use crate::shapes::sphere;
     use crate::tuples::{point, vector, Point};
     use approx::assert_relative_eq;
     use rstest::{fixture, rstest};
-    use crate::patterns::stripe_pattern;
 
     // The default material
     #[test]
@@ -310,15 +317,34 @@ mod tests {
     // Lighting with a pattern applied
     #[rstest]
     fn lighting_with_pattern_applied(mut fix: MaterialFixture) {
-        fix.m.set_pattern(&stripe_pattern(&color(1.0, 1.0, 1.0), &color(0.0, 0.0, 0.0)));
+        fix.m.set_pattern(&stripe_pattern(
+            &color(1.0, 1.0, 1.0),
+            &color(0.0, 0.0, 0.0),
+        ));
         fix.m.ambient = 1.0;
         fix.m.diffuse = 0.0;
         fix.m.specular = 0.0;
         let eyev = vector(0.0, 0.0, -1.0);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
-        let c1 = lighting(&fix.m, &sphere(1), &Some(light), &point(0.9, 0.0, 0.0), &eyev, &normalv, false);
-        let c2 = lighting(&fix.m, &sphere(1), &Some(light), &point(1.1, 0.0, 0.0), &eyev, &normalv, false);
+        let c1 = lighting(
+            &fix.m,
+            &sphere(1),
+            &Some(light),
+            &point(0.9, 0.0, 0.0),
+            &eyev,
+            &normalv,
+            false,
+        );
+        let c2 = lighting(
+            &fix.m,
+            &sphere(1),
+            &Some(light),
+            &point(1.1, 0.0, 0.0),
+            &eyev,
+            &normalv,
+            false,
+        );
         assert_eq!(c1, color(1.0, 1.0, 1.0));
         assert_eq!(c2, color(0.0, 0.0, 0.0));
     }
@@ -331,5 +357,4 @@ mod tests {
         let m = default_material();
         assert_eq!(m.reflective, 0.0);
     }
-
 }

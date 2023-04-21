@@ -19,9 +19,11 @@ fn main() {
     w.add_object(floor);
 
     let mut wall = plane();
-    wall.set_transform(&rotation_x(PI / 2.0)
-        .then(&rotation_y(0.3))
-        .then(&translation(0.0, 0.0, 7.0)));
+    wall.set_transform(
+        &rotation_x(PI / 2.0)
+            .then(&rotation_y(0.3))
+            .then(&translation(0.0, 0.0, 7.0)),
+    );
     wall.material = default_material();
     wall.material.color = color(1.0, 0.8, 0.8);
     wall.material.specular = 0.0;

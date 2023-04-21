@@ -78,7 +78,8 @@ impl World {
             &comps.over_point, // avoid boundary issues
             &comps.eyev,
             &comps.normalv,
-            shadowed);
+            shadowed,
+        );
         let reflected = self.reflected_color(comps, depth);
         surface + reflected
     }
@@ -150,10 +151,10 @@ mod tests {
     use super::*;
     use crate::intersections::{intersection, prepare_computations};
     use crate::rays::ray;
+    use crate::shapes::plane;
     use crate::transformations::translation;
     use crate::tuples::vector;
     use approx::assert_relative_eq;
-    use crate::shapes::plane;
 
     // Creating an empty world
     #[test]
@@ -331,7 +332,7 @@ mod tests {
         let i = intersection(f64::sqrt(2.0), Some(shape));
         let comps = prepare_computations(&i, &r);
         let color_ = reflected_color(&w, &comps, 1);
-        assert_relative_eq!(color_, color(0.19032, 0.2379, 0.14274), epsilon=1e-4);
+        assert_relative_eq!(color_, color(0.19032, 0.2379, 0.14274), epsilon = 1e-4);
     }
 
     // shade_hit() with a reflective material
@@ -348,7 +349,7 @@ mod tests {
         let i = intersection(f64::sqrt(2.0), Some(shape));
         let comps = prepare_computations(&i, &r);
         let color_ = shade_hit(&w, &comps, 1);
-        assert_relative_eq!(color_, color(0.87677, 0.92436, 0.82918), epsilon=1e-4);
+        assert_relative_eq!(color_, color(0.87677, 0.92436, 0.82918), epsilon = 1e-4);
     }
 
     // color_at() with mutually reflective surfaces

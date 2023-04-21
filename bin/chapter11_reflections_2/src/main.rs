@@ -1,22 +1,16 @@
 use rust_rtc::camera::{camera, render};
 use rust_rtc::canvas::ppm_from_canvas;
-use rust_rtc::colors::{BLACK, color, colori, GREEN, GREY25, GREY50, GREY75, RED, WHITE};
+use rust_rtc::colors::{color, GREEN, GREY25, GREY75, RED};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::patterns::{
-    blended_pattern, gradient_pattern, perturbed_pattern, ring_pattern, stripe_pattern,
-};
+use rust_rtc::patterns::{blended_pattern, stripe_pattern};
 use rust_rtc::shapes::{plane, sphere};
-use rust_rtc::transformations::{
-    rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
-};
+use rust_rtc::transformations::{rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;
 
 fn main() {
-    let perturb_factor = 1.0;
-
     let mut w = world();
 
     let mut floor = plane();
@@ -36,8 +30,7 @@ fn main() {
     w.add_object(floor);
 
     let mut sphere1 = sphere(1);
-    sphere1.set_transform(&scaling(1.5, 1.5, 1.5)
-        .then(&translation(0.0, 0.5, 0.0)));
+    sphere1.set_transform(&scaling(1.5, 1.5, 1.5).then(&translation(0.0, 0.5, 0.0)));
     sphere1.material.color = GREY25;
     sphere1.material.specular = 1.0;
     sphere1.material.shininess = 1000.0;
@@ -45,8 +38,7 @@ fn main() {
     w.add_object(sphere1);
 
     let mut sphere2 = sphere(2);
-    sphere2.set_transform(&scaling(0.4, 0.4, 0.4)
-        .then(&translation(-2.0, 1.7, -1.0)));
+    sphere2.set_transform(&scaling(0.4, 0.4, 0.4).then(&translation(-2.0, 1.7, -1.0)));
     sphere2.material.color = RED;
     sphere2.material.specular = 0.7;
     sphere2.material.shininess = 100.0;
@@ -54,8 +46,7 @@ fn main() {
     w.add_object(sphere2);
 
     let mut sphere3 = sphere(3);
-    sphere3.set_transform(&scaling(0.5, 0.5, 0.5)
-        .then(&translation(1.8, 1.8, -1.0)));
+    sphere3.set_transform(&scaling(0.5, 0.5, 0.5).then(&translation(1.8, 1.8, -1.0)));
     sphere3.material.color = GREEN;
     sphere3.material.specular = 0.7;
     sphere3.material.shininess = 100.0;
@@ -63,8 +54,7 @@ fn main() {
     w.add_object(sphere3);
 
     let mut sphere4 = sphere(4);
-    sphere4.set_transform(&scaling(0.2, 0.2, 0.2)
-        .then(&translation(1.5, 0.2, -1.8)));
+    sphere4.set_transform(&scaling(0.2, 0.2, 0.2).then(&translation(1.5, 0.2, -1.8)));
     sphere4.material.color = color(0.8, 0.0, 0.8);
     sphere4.material.specular = 0.5;
     sphere4.material.shininess = 10.0;
@@ -72,8 +62,7 @@ fn main() {
     w.add_object(sphere4);
 
     let mut sphere5 = sphere(5);
-    sphere5.set_transform(&scaling(0.5, 0.5, 0.5)
-        .then(&translation(-1.0, 0.5, -3.5)));
+    sphere5.set_transform(&scaling(0.5, 0.5, 0.5).then(&translation(-1.0, 0.5, -3.5)));
     sphere5.material.color = color(0.1, 0.0, 1.0);
     sphere5.material.specular = 1.0;
     sphere5.material.shininess = 1000.0;
@@ -82,15 +71,14 @@ fn main() {
 
     // yellow sphere behind the camera
     let mut sphere6 = sphere(6);
-    sphere6.set_transform(&scaling(2.0, 2.0, 2.0)
-        .then(&translation(4.0, 2.0, -5.0)));
+    sphere6.set_transform(&scaling(2.0, 2.0, 2.0).then(&translation(4.0, 2.0, -5.0)));
     sphere6.material.color = color(0.9, 0.7, 0.0);
     sphere6.material.specular = 0.2;
     sphere6.material.shininess = 10.0;
     sphere6.material.reflective = 0.8;
     w.add_object(sphere6);
 
-    w.add_light(point_light(point(10.0, 10.0, -5.0), color(1.0, 1.0, 1.0)));
+    w.add_light(point_light(point(-10.0, 10.0, -5.0), color(1.0, 1.0, 1.0)));
 
     //let mut cam = camera(100, 50, PI / 3.0);
     //let mut cam = camera(1024, 768, PI / 3.0);
