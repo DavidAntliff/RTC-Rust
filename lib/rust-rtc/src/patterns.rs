@@ -10,22 +10,28 @@ use crate::tuples::{point, Point};
 pub struct Pattern {
     pattern: PatternEnum,
     transform: Matrix4,
+    inverse_transform: Matrix4,
 }
 
 impl Pattern {
     pub fn set_transform(&mut self, transform: &Matrix4) {
         self.transform = *transform;
+        self.inverse_transform = self.transform.inverse();
+    }
+
+    pub fn inverse_transform(&self) -> &Matrix4 {
+        &self.inverse_transform
     }
 
     pub fn pattern_at(&self, object_point: &Point) -> Color {
         // Convert object-space point to pattern-space point:
-        let pattern_point = self.transform.inverse() * object_point;
+        let pattern_point = self.inverse_transform * object_point;
         self.pattern.pattern_at(&pattern_point)
     }
 
     pub fn pattern_at_shape(&self, shape: &Shape, world_point: &Point) -> Color {
         // Convert world-space point to object-space point:
-        let object_point = shape.transform().inverse() * world_point;
+        let object_point = shape.inverse_transform() * world_point;
         self.pattern_at(&object_point)
     }
 }
@@ -141,10 +147,10 @@ impl StripePattern {
 impl PatternTrait for StripePattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
         if local_point.x().floor() as i32 % 2 == 0 {
-            let pattern_point = self.a.transform.inverse() * local_point;
+            let pattern_point = self.a.inverse_transform() * local_point;
             self.a.pattern.pattern_at(&pattern_point)
         } else {
-            let pattern_point = self.b.transform.inverse() * local_point;
+            let pattern_point = self.b.inverse_transform() * local_point;
             self.b.pattern.pattern_at(&pattern_point)
         }
     }
@@ -185,8 +191,8 @@ impl GradientPattern {
 
 impl PatternTrait for GradientPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let pattern_point_a = self.a.transform.inverse() * local_point;
-        let pattern_point_b = self.b.transform.inverse() * local_point;
+        let pattern_point_a = self.a.inverse_transform() * local_point;
+        let pattern_point_b = self.b.inverse_transform() * local_point;
         linear_blend(
             local_point.x(),
             &self.a.pattern.pattern_at(&pattern_point_a),
@@ -233,10 +239,10 @@ impl PatternTrait for RingPattern {
         let distance =
             f64::sqrt(local_point.x() * local_point.x() + local_point.z() * local_point.z());
         if distance.floor() as i32 % 2 == 0 {
-            let pattern_point_a = self.a.transform.inverse() * local_point;
+            let pattern_point_a = self.a.inverse_transform() * local_point;
             self.a.pattern.pattern_at(&pattern_point_a)
         } else {
-            let pattern_point_b = self.b.transform.inverse() * local_point;
+            let pattern_point_b = self.b.inverse_transform() * local_point;
             self.b.pattern.pattern_at(&pattern_point_b)
         }
     }
@@ -279,10 +285,10 @@ impl PatternTrait for CheckersPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
         let sum = local_point.x().floor() + local_point.y().floor() + local_point.z().floor();
         if sum.floor() as i32 % 2 == 0 {
-            let pattern_point = self.a.transform.inverse() * local_point;
+            let pattern_point = self.a.inverse_transform() * local_point;
             self.a.pattern.pattern_at(&pattern_point)
         } else {
-            let pattern_point = self.b.transform.inverse() * local_point;
+            let pattern_point = self.b.inverse_transform() * local_point;
             self.b.pattern.pattern_at(&pattern_point)
         }
     }
@@ -334,8 +340,8 @@ impl PatternTrait for RadialGradientPattern {
                 + self.y_factor * local_point.y() * local_point.y()
                 + local_point.z() * local_point.z(),
         );
-        let pattern_point_a = self.a.transform.inverse() * local_point;
-        let pattern_point_b = self.b.transform.inverse() * local_point;
+        let pattern_point_a = self.a.inverse_transform() * local_point;
+        let pattern_point_b = self.b.inverse_transform() * local_point;
         linear_blend(
             distance,
             &self.a.pattern.pattern_at(&pattern_point_a),
@@ -388,8 +394,8 @@ impl BlendedPattern {
 
 impl PatternTrait for BlendedPattern {
     fn pattern_at(&self, local_point: &Point) -> Color {
-        let pattern_point_a = self.a.transform.inverse() * local_point;
-        let pattern_point_b = self.b.transform.inverse() * local_point;
+        let pattern_point_a = self.a.inverse_transform() * local_point;
+        let pattern_point_b = self.b.inverse_transform() * local_point;
         let color_a = self.a.pattern.pattern_at(&pattern_point_a);
         let color_b = self.b.pattern.pattern_at(&pattern_point_b);
         (color_a + color_b) / 2.0
@@ -477,7 +483,7 @@ impl PatternTrait for PerturbedPattern {
             ) * self.scale;
         let perturbed_point = point(new_x, new_y, new_z);
 
-        let pattern_point = self.a.transform.inverse() * perturbed_point;
+        let pattern_point = self.a.inverse_transform() * perturbed_point;
         self.a.pattern.pattern_at(&pattern_point)
     }
 }

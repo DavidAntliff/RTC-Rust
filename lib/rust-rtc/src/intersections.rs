@@ -1,7 +1,6 @@
 // Chapter 5: Ray-Sphere Intersections
 
 use crate::math::EPSILON;
-use crate::matrices::inverse;
 use crate::rays::{Ray};
 use crate::shapes::{normal_at, Shape, ShapeTrait};
 use crate::tuples::{dot, Point, Vector};
@@ -28,7 +27,7 @@ pub type Intersections<'a> = Vec<Intersection<'a>>;
 
 pub fn intersect<'a>(object: &'a Shape, ray: &Ray) -> Intersections<'a> {
     // Apply the inverse of the shape's transformation
-    let local_ray = ray.transform(&inverse(object.transform()));
+    let local_ray = ray.transform(object.inverse_transform());
     let mut intersections = object.shape.local_intersect(&local_ray);
     for mut intersection in &mut intersections {
         intersection.object = Some(object);

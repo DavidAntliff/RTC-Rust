@@ -12,6 +12,7 @@ use crate::tuples::{normalize, Point, Vector};
 pub struct Shape {
     pub shape: ShapeEnum,
     transform: Matrix4,
+    inverse_transform: Matrix4,
     pub material: Material,
 }
 
@@ -31,10 +32,15 @@ impl Shape {
 
     pub fn set_transform(&mut self, m: &Matrix4) {
         self.transform = *m;
+        self.inverse_transform = self.transform.inverse();
     }
 
     pub fn transform(&self) -> &Matrix4 {
         &self.transform
+    }
+
+    pub fn inverse_transform(&self) -> &Matrix4 {
+        &self.inverse_transform
     }
 
     pub fn normal_at(&self, world_point: &Point) -> Vector {
@@ -113,11 +119,13 @@ mod test {
                 shape: ShapeEnum::Sphere(Sphere::new(1)),
                 transform: identity4(),
                 material: default_material(),
+                ..Default::default()
             },
             Shape {
                 shape: ShapeEnum::Plane(Plane::new()),
                 transform: identity4(),
                 material: default_material(),
+                ..Default::default()
             },
         ];
         assert!(matches!(v[0].shape, ShapeEnum::Sphere { .. }));

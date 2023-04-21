@@ -13,6 +13,7 @@ pub struct Camera {
     #[allow(dead_code)]
     field_of_view: f64,
     transform: Matrix4,
+    inverse_transform: Matrix4,
 
     half_width: f64,
     half_height: f64,
@@ -27,6 +28,7 @@ impl Camera {
             vsize,
             field_of_view,
             transform: identity4(),
+            inverse_transform: identity4(),
             half_width: c.half_width,
             half_height: c.half_height,
             pixel_size: c.pixel_size,
@@ -35,10 +37,15 @@ impl Camera {
 
     pub fn set_transform(&mut self, transform: &Matrix4) {
         self.transform = *transform;
+        self.inverse_transform = self.transform.inverse();
     }
 
     pub fn transform(&self) -> &Matrix4 {
-        &self.transform
+       &self.transform
+    }
+
+    pub fn inverse_transform(&self) -> &Matrix4 {
+        &self.inverse_transform
     }
 
     pub fn ray_for_pixel(&self, px: u32, py: u32) -> Ray {
@@ -54,9 +61,8 @@ impl Camera {
         // using the camera matrix, transform the canvas point and the origin,
         // and then compute the ray's direction vector.
         // (the canvas is at Z=-1)
-        let inverse_camera_transform = self.transform.inverse();
-        let pixel = inverse_camera_transform * point(world_x, world_y, -1.0);
-        let origin = inverse_camera_transform * point(0.0, 0.0, 0.0);
+        let pixel = self.inverse_transform * point(world_x, world_y, -1.0);
+        let origin = self.inverse_transform * point(0.0, 0.0, 0.0);
         let direction = normalize(&(pixel - origin));
 
         ray(origin, direction)
