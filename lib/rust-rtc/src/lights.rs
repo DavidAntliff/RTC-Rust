@@ -3,13 +3,14 @@
 use crate::colors::Color;
 use crate::tuples::Point;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct PointLight {
     pub position: Point,
     pub intensity: Color,
 }
 
 impl PointLight {
+    // FIXME: should these be references?
     fn new(position: Point, intensity: Color) -> PointLight {
         PointLight {
             position,

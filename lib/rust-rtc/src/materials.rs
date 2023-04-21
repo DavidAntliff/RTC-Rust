@@ -13,17 +13,19 @@ pub struct Material {
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
+    pub reflective: f64,
     pattern: Option<Box<Pattern>>,
 }
 
 impl Material {
-    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64) -> Self {
+    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64, reflective: f64) -> Self {
         Material {
             color,
             ambient,
             diffuse,
             specular,
             shininess,
+            reflective,
             pattern: Default::default(),
         }
     }
@@ -111,6 +113,7 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            reflective: 0.0,
             pattern: None,
         }
     }
@@ -126,8 +129,9 @@ pub fn material(
     diffuse: f64,
     specular: f64,
     shininess: f64,
+    reflective: f64,
 ) -> Material {
-    Material::new(color, ambient, diffuse, specular, shininess)
+    Material::new(color, ambient, diffuse, specular, shininess, reflective)
 }
 
 pub fn lighting(
@@ -150,6 +154,7 @@ mod tests {
     use crate::tuples::{point, vector, Point};
     use approx::assert_relative_eq;
     use rstest::{fixture, rstest};
+    use crate::patterns::stripe_pattern;
 
     // The default material
     #[test]
@@ -299,26 +304,32 @@ mod tests {
 
         assert_eq!(result, color(0.1, 0.1, 0.1));
     }
-    /*
-       TODO
 
-       // Chapter 10: Patterns
+    // Chapter 10: Patterns
 
-       // Lighting with a pattern applied
-       #[rstest]
-       fn lighting_with_pattern_applied(fix: MaterialFixture) {
-           m.set_pattern(stripe_pattern(color(1.0, 1.0, 1.0), color(0.0, 0.0, 0.0)));
-           m.set_ambient(1.0);
-           m.set_diffuse(0.0);
-           m.set_specular(0.0);
-           let eyev = vector(0.0, 0.0, -1.0);
-           let normalv = vector(0.0, 0.0, -1.0);
-           let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
-           let c1 = lighting(m, sphere(1), light, point(0.9, 0.0, 0.0), eyev, normalv, false);
-           let c2 = lighting(m, sphere(1), light, point(1.1, 0.0, 0.0), eyev, normalv, false);
-           assert_eq!(c1, color(1.0, 1.0, 1.0));
-           assert_eq!(c2, color(0.0, 0.0, 0.0));
-       }
+    // Lighting with a pattern applied
+    #[rstest]
+    fn lighting_with_pattern_applied(mut fix: MaterialFixture) {
+        fix.m.set_pattern(&stripe_pattern(&color(1.0, 1.0, 1.0), &color(0.0, 0.0, 0.0)));
+        fix.m.ambient = 1.0;
+        fix.m.diffuse = 0.0;
+        fix.m.specular = 0.0;
+        let eyev = vector(0.0, 0.0, -1.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
+        let c1 = lighting(&fix.m, &sphere(1), &Some(light), &point(0.9, 0.0, 0.0), &eyev, &normalv, false);
+        let c2 = lighting(&fix.m, &sphere(1), &Some(light), &point(1.1, 0.0, 0.0), &eyev, &normalv, false);
+        assert_eq!(c1, color(1.0, 1.0, 1.0));
+        assert_eq!(c2, color(0.0, 0.0, 0.0));
+    }
 
-    */
+    // Chapter 11: Reflection
+
+    // Reflectivity for the default material
+    #[test]
+    fn reflectivity_of_default_material() {
+        let m = default_material();
+        assert_eq!(m.reflective, 0.0);
+    }
+
 }

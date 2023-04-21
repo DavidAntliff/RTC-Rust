@@ -94,6 +94,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter11_reflections"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
+name = "chapter11_reflections_2"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter4"
 version = "0.1.0"
 dependencies = [

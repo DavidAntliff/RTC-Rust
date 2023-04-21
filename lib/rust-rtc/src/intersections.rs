@@ -3,7 +3,7 @@
 use crate::math::EPSILON;
 use crate::rays::{Ray};
 use crate::shapes::{normal_at, Shape, ShapeTrait};
-use crate::tuples::{dot, Point, Vector};
+use crate::tuples::{dot, Point, reflect, Vector};
 
 pub use std::vec as intersections;
 
@@ -49,6 +49,7 @@ pub struct IntersectionComputation<'a> {
     pub over_point: Point,
     pub eyev: Vector,
     pub normalv: Vector,
+    pub reflectv: Vector,
     pub inside: bool,
 }
 
@@ -61,6 +62,7 @@ impl IntersectionComputation<'_> {
             over_point: Point::default(),
             eyev: Vector::default(),
             normalv: Vector::default(),
+            reflectv: Vector::default(),
             inside: false,
         }
     }
@@ -75,7 +77,6 @@ pub fn prepare_computations<'a>(
 
     comps.point = ray.position(comps.t);
     comps.eyev = -ray.direction;
-    //comps.normalv = normal_at(comps.object.shape, &comps.point);
     comps.normalv = normal_at(comps.object, &comps.point);
 
     if dot(&comps.normalv, &comps.eyev) < 0.0 {
@@ -85,6 +86,8 @@ pub fn prepare_computations<'a>(
 
     comps.over_point = comps.point + comps.normalv * EPSILON;
 
+    comps.reflectv = reflect(&ray.direction, &comps.normalv);
+
     comps
 }
 
@@ -92,7 +95,7 @@ pub fn prepare_computations<'a>(
 mod tests {
     use super::*;
     use crate::rays::ray;
-    use crate::shapes::sphere;
+    use crate::shapes::{plane, sphere};
     use crate::transformations::translation;
     use crate::tuples::{point, vector};
 
@@ -210,5 +213,18 @@ mod tests {
         let comps = prepare_computations(&i, &r);
         assert!(comps.over_point.z() < -EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
+    }
+
+    // Chapter 11: Reflections
+
+    // Precomputing the reflection vector
+    #[test]
+    fn precompute_reflection_vector() {
+        let shape = plane();
+        let k = f64::sqrt(2.0) / 2.0;
+        let r = ray(point(0.0, 1.0, -1.0), vector(0.0, -k, k));
+        let i = intersection(f64::sqrt(2.0), Some(&shape));
+        let comps = prepare_computations(&i, &r);
+        assert_eq!(comps.reflectv, vector(0.0, k, k));
     }
 }

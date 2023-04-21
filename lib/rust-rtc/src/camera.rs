@@ -6,6 +6,7 @@ use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
 use std::f64::consts::PI;
+use crate::math::MAX_RECURSIVE_DEPTH;
 
 pub struct Camera {
     hsize: u32,
@@ -73,7 +74,7 @@ impl Camera {
         for y in 0..self.vsize {
             for x in 0..self.hsize {
                 let ray = ray_for_pixel(self, x, y);
-                let color = color_at(world, &ray);
+                let color = color_at(world, &ray, MAX_RECURSIVE_DEPTH);
                 image.write_pixel(x, y, &color);
             }
         }

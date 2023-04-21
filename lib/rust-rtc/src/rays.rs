@@ -26,6 +26,7 @@ impl Ray {
     }
 }
 
+// FIXME: should these be references?
 pub fn ray(origin: Point, direction: Vector) -> Ray {
     Ray::new(origin, direction)
 }
