@@ -75,24 +75,15 @@ pub fn pattern_at_shape(pattern: &Pattern, shape: &Shape, world_point: &Point) -
     pattern.pattern_at_shape(shape, world_point)
 }
 
-// Trait to allow Patterns or Colors to be used
-// as parameters to pattern factory functions
-pub trait IntoPattern {
-    // FIXME: this should probably not be "Into":
-    // https://rust-lang.github.io/api-guidelines/naming.html
-    // Consider ownership to choose into_, to_, or as_
-    fn into_pattern(&self) -> Pattern;
-}
-
-impl IntoPattern for Pattern {
-    fn into_pattern(&self) -> Pattern {
-        self.clone()
+impl From<&Color> for Pattern {
+    fn from(value: &Color) -> Self {
+        Pattern::solid_pattern(&value)
     }
 }
 
-impl IntoPattern for Color {
-    fn into_pattern(&self) -> Pattern {
-        Pattern::solid_pattern(self)
+impl From<&Pattern> for Pattern {
+    fn from(value: &Pattern) -> Pattern {
+        value.clone()
     }
 }
 
@@ -130,12 +121,6 @@ pub fn solid_pattern(color: &Color) -> Pattern {
     Pattern::solid_pattern(color)
 }
 
-impl From<Color> for Pattern {
-    fn from(value: Color) -> Self {
-        Pattern::solid_pattern(&value)
-    }
-}
-
 // ------[ StripePattern ]------
 #[derive(Debug, PartialEq, Clone)]
 pub struct StripePattern {
@@ -144,10 +129,11 @@ pub struct StripePattern {
 }
 
 impl StripePattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> StripePattern {
+    //pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> StripePattern {
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> StripePattern {
         StripePattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
         }
     }
 }
@@ -165,23 +151,20 @@ impl PatternTrait for StripePattern {
 }
 
 impl Pattern {
-    pub fn stripe_pattern<T, U>(a: &T, b: &U) -> Pattern
+    pub fn stripe_pattern<T, U>(a: T, b: U) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
-            pattern: PatternEnum::StripePattern(StripePattern::new(
-                &a.into_pattern(),
-                &b.into_pattern(),
-            )),
+            pattern: PatternEnum::StripePattern(StripePattern::new(&a.into(), &b.into())),
             ..Default::default()
         }
     }
 }
 
-pub fn stripe_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
-    Pattern::stripe_pattern(&a.into_pattern(), &b.into_pattern())
+pub fn stripe_pattern<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> Pattern {
+    Pattern::stripe_pattern(&a.into(), &b.into())
 }
 
 // ------[ GradientPattern ]------
@@ -192,10 +175,10 @@ pub struct GradientPattern {
 }
 
 impl GradientPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> GradientPattern {
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> GradientPattern {
         GradientPattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
         }
     }
 }
@@ -213,23 +196,20 @@ impl PatternTrait for GradientPattern {
 }
 
 impl Pattern {
-    pub fn gradient_pattern<T, U>(a: &T, b: &U) -> Pattern
+    pub fn gradient_pattern<T, U>(a: T, b: U) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
-            pattern: PatternEnum::GradientPattern(GradientPattern::new(
-                &a.into_pattern(),
-                &b.into_pattern(),
-            )),
+            pattern: PatternEnum::GradientPattern(GradientPattern::new(&a.into(), &b.into())),
             ..Default::default()
         }
     }
 }
 
-pub fn gradient_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
-    Pattern::gradient_pattern(&a.into_pattern(), &b.into_pattern())
+pub fn gradient_pattern<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> Pattern {
+    Pattern::gradient_pattern(&a.into(), &b.into())
 }
 
 // ------[ RingPattern ]------
@@ -240,10 +220,10 @@ pub struct RingPattern {
 }
 
 impl RingPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> RingPattern {
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> RingPattern {
         RingPattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
         }
     }
 }
@@ -263,10 +243,10 @@ impl PatternTrait for RingPattern {
 }
 
 impl Pattern {
-    pub fn ring_pattern<T, U>(a: &T, b: &U) -> Pattern
+    pub fn ring_pattern<T, U>(a: T, b: U) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
             pattern: PatternEnum::RingPattern(RingPattern::new(a, b)),
@@ -275,8 +255,8 @@ impl Pattern {
     }
 }
 
-pub fn ring_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
-    Pattern::ring_pattern(&a.into_pattern(), &b.into_pattern())
+pub fn ring_pattern<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> Pattern {
+    Pattern::ring_pattern(&a.into(), &b.into())
 }
 
 // ------[ CheckersPattern ]------
@@ -287,10 +267,10 @@ pub struct CheckersPattern {
 }
 
 impl CheckersPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> CheckersPattern {
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> CheckersPattern {
         CheckersPattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
         }
     }
 }
@@ -309,10 +289,10 @@ impl PatternTrait for CheckersPattern {
 }
 
 impl Pattern {
-    pub fn checkers_pattern<T, U>(a: &T, b: &U) -> Pattern
+    pub fn checkers_pattern<T, U>(a: T, b: U) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
             pattern: PatternEnum::CheckersPattern(CheckersPattern::new(a, b)),
@@ -321,8 +301,8 @@ impl Pattern {
     }
 }
 
-pub fn checkers_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
-    Pattern::checkers_pattern(&a.into_pattern(), &b.into_pattern())
+pub fn checkers_pattern<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> Pattern {
+    Pattern::checkers_pattern(&a.into(), &b.into())
 }
 
 // ------[ RadialGradientPattern ]------
@@ -334,14 +314,14 @@ pub struct RadialGradientPattern {
 }
 
 impl RadialGradientPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(
-        a: &T,
-        b: &U,
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(
+        a: T,
+        b: U,
         y_factor: f64,
     ) -> RadialGradientPattern {
         RadialGradientPattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
             y_factor,
         }
     }
@@ -365,10 +345,10 @@ impl PatternTrait for RadialGradientPattern {
 }
 
 impl Pattern {
-    pub fn radial_gradient_pattern<T, U>(a: &T, b: &U, y_factor: f64) -> Pattern
+    pub fn radial_gradient_pattern<T, U>(a: T, b: U, y_factor: f64) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
             pattern: PatternEnum::RadialGradientPattern(RadialGradientPattern::new(a, b, y_factor)),
@@ -381,12 +361,12 @@ impl Pattern {
 //   //
 //   radial_gradient_pattern(&WHITE, &BLACK, YFactor::default)
 //
-pub fn radial_gradient_pattern<T: IntoPattern, U: IntoPattern>(
-    a: &T,
-    b: &U,
+pub fn radial_gradient_pattern<T: Into<Pattern>, U: Into<Pattern>>(
+    a: T,
+    b: U,
     y_factor: f64,
 ) -> Pattern {
-    Pattern::radial_gradient_pattern(&a.into_pattern(), &b.into_pattern(), y_factor)
+    Pattern::radial_gradient_pattern(&a.into(), &b.into(), y_factor)
 }
 
 // ------[ BlendedPattern ]------
@@ -397,10 +377,11 @@ pub struct BlendedPattern {
 }
 
 impl BlendedPattern {
-    pub fn new<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> BlendedPattern {
+    //    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> StripePattern {
+    pub fn new<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> BlendedPattern {
         BlendedPattern {
-            a: Box::new(a.into_pattern()),
-            b: Box::new(b.into_pattern()),
+            a: Box::new(a.into()),
+            b: Box::new(b.into()),
         }
     }
 }
@@ -416,10 +397,10 @@ impl PatternTrait for BlendedPattern {
 }
 
 impl Pattern {
-    pub fn blended_pattern<T, U>(a: &T, b: &U) -> Pattern
+    pub fn blended_pattern<T, U>(a: T, b: U) -> Pattern
     where
-        T: IntoPattern,
-        U: IntoPattern,
+        T: Into<Pattern>,
+        U: Into<Pattern>,
     {
         Pattern {
             pattern: PatternEnum::BlendedPattern(BlendedPattern::new(a, b)),
@@ -428,8 +409,8 @@ impl Pattern {
     }
 }
 
-pub fn blended_pattern<T: IntoPattern, U: IntoPattern>(a: &T, b: &U) -> Pattern {
-    Pattern::blended_pattern(&a.into_pattern(), &b.into_pattern())
+pub fn blended_pattern<T: Into<Pattern>, U: Into<Pattern>>(a: T, b: U) -> Pattern {
+    Pattern::blended_pattern(&a.into(), &b.into())
 }
 
 // ------[ PerturbedPattern ]------
@@ -453,14 +434,14 @@ impl Default for PerturbedPattern {
 }
 
 impl PerturbedPattern {
-    pub fn new<T: IntoPattern>(
-        a: &T,
+    pub fn new<T: Into<Pattern>>(
+        a: T,
         scale: f64,
         num_octaves: u32,
         persistence: f64,
     ) -> PerturbedPattern {
         PerturbedPattern {
-            a: Box::new(a.into_pattern()),
+            a: Box::new(a.into()),
             scale,
             num_octaves,
             persistence,
@@ -502,9 +483,9 @@ impl PatternTrait for PerturbedPattern {
 }
 
 impl Pattern {
-    pub fn perturbed_pattern<T>(a: &T, scale: f64, num_octaves: u32, persistence: f64) -> Pattern
+    pub fn perturbed_pattern<T>(a: T, scale: f64, num_octaves: u32, persistence: f64) -> Pattern
     where
-        T: IntoPattern,
+        T: Into<Pattern>,
     {
         Pattern {
             pattern: PatternEnum::PerturbedPattern(PerturbedPattern::new(
@@ -518,13 +499,13 @@ impl Pattern {
     }
 }
 
-pub fn perturbed_pattern<T: IntoPattern>(
-    a: &T,
+pub fn perturbed_pattern<T: Into<Pattern>>(
+    a: T,
     scale: f64,
     num_octaves: u32,
     persistence: f64,
 ) -> Pattern {
-    Pattern::perturbed_pattern(&a.into_pattern(), scale, num_octaves, persistence)
+    Pattern::perturbed_pattern(&a.into(), scale, num_octaves, persistence)
 }
 
 #[cfg(test)]
