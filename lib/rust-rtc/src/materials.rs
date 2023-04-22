@@ -161,7 +161,16 @@ pub fn material(
     transparency: f64,
     refractive_index: f64,
 ) -> Material {
-    Material::new(color, ambient, diffuse, specular, shininess, reflective, transparency, refractive_index)
+    Material::new(
+        color,
+        ambient,
+        diffuse,
+        specular,
+        shininess,
+        reflective,
+        transparency,
+        refractive_index,
+    )
 }
 
 pub fn lighting(

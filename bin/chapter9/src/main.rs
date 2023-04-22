@@ -3,12 +3,12 @@ use rust_rtc::canvas::ppm_from_canvas;
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
+use rust_rtc::math::MAX_RECURSIVE_DEPTH;
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;
-use rust_rtc::math::MAX_RECURSIVE_DEPTH;
 
 fn main() {
     let mut w = world();

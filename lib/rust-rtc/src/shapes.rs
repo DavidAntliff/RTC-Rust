@@ -32,7 +32,6 @@ impl Shape {
         shape.material.transparency = 1.0;
         shape.material.refractive_index = RefractiveIndex::GLASS;
         shape
-
     }
     pub fn plane() -> Shape {
         Shape {
@@ -107,7 +106,9 @@ pub fn sphere(id: i32) -> Shape {
     Shape::sphere(id)
 }
 
-pub fn glass_sphere() -> Shape { Shape::glass_sphere() }
+pub fn glass_sphere() -> Shape {
+    Shape::glass_sphere()
+}
 
 pub fn plane() -> Shape {
     Shape::plane()

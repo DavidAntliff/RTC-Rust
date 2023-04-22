@@ -1,7 +1,9 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{hit, intersect, IntersectionComputation, Intersections, prepare_computations_for_refraction};
+use crate::intersections::{
+    hit, intersect, prepare_computations_for_refraction, IntersectionComputation, Intersections,
+};
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
@@ -197,13 +199,16 @@ pub fn refracted_color(world: &World, comps: &IntersectionComputation, depth: i3
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::intersections::{intersection, Intersection, intersections, prepare_computations, prepare_computations_for_refraction};
+    use crate::intersections::{
+        intersection, intersections, prepare_computations, prepare_computations_for_refraction,
+        Intersection,
+    };
+    use crate::patterns::test_pattern;
     use crate::rays::ray;
     use crate::shapes::plane;
     use crate::transformations::translation;
     use crate::tuples::vector;
     use approx::assert_relative_eq;
-    use crate::patterns::test_pattern;
 
     // Creating an empty world
     #[test]
@@ -443,7 +448,8 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(
             Intersection::new(4.0, Some(&shape)),
-            Intersection::new(6.0, Some(&shape)));
+            Intersection::new(6.0, Some(&shape))
+        );
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
         assert_eq!(c, color(0.0, 0.0, 0.0));
@@ -462,7 +468,8 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(
             Intersection::new(4.0, Some(&shape)),
-            Intersection::new(6.0, Some(&shape)));
+            Intersection::new(6.0, Some(&shape))
+        );
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 0);
         assert_eq!(c, color(0.0, 0.0, 0.0));
@@ -482,7 +489,8 @@ mod tests {
         let r = ray(point(0.0, 0.0, k), vector(0.0, 1.0, 0.0));
         let xs = intersections!(
             Intersection::new(-k, Some(&shape)),
-            Intersection::new(k, Some(&shape)));
+            Intersection::new(k, Some(&shape))
+        );
         // Since we're inside the sphere, need to look at the *second* intersection: xs[1]
         let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
@@ -501,7 +509,7 @@ mod tests {
         {
             let mut b = &mut w.objects[1];
             b.material.transparency = 1.0;
-            b.material.refractive_index =1.5;
+            b.material.refractive_index = 1.5;
         }
         let a = &w.objects[0];
         let b = &w.objects[1];
@@ -511,10 +519,11 @@ mod tests {
             Intersection::new(-0.9899, Some(&a)),
             Intersection::new(-0.4899, Some(&b)),
             Intersection::new(0.4899, Some(&b)),
-            Intersection::new(0.9899, Some(&a)));
+            Intersection::new(0.9899, Some(&a))
+        );
         let comps = prepare_computations_for_refraction(&xs[2], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
-        assert_relative_eq!(c, color(0.0, 0.99888, 0.04725), epsilon=1e-4);
+        assert_relative_eq!(c, color(0.0, 0.99888, 0.04725), epsilon = 1e-4);
     }
 
     // shade_hit() with a transparent material
@@ -543,6 +552,6 @@ mod tests {
         let xs = intersections!(Intersection::new(f64::sqrt(2.0), floor));
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let color_ = shade_hit(&w, &comps, 5);
-        assert_relative_eq!(color_, color(0.93642, 0.68642, 0.68642), epsilon=1e-4);
+        assert_relative_eq!(color_, color(0.93642, 0.68642, 0.68642), epsilon = 1e-4);
     }
 }

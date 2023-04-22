@@ -5,8 +5,8 @@ use crate::rays::Ray;
 use crate::shapes::{normal_at, Shape, ShapeTrait};
 use crate::tuples::{dot, reflect, Point, Vector};
 
-pub use std::vec as intersections;
 use crate::materials::RefractiveIndex;
+pub use std::vec as intersections;
 
 #[derive(Debug, PartialEq, Default, Copy, Clone)]
 pub struct Intersection<'a> {
@@ -56,8 +56,8 @@ pub struct IntersectionComputation<'a> {
     pub normalv: Vector,
     pub inside: bool,
     pub reflectv: Vector,
-    pub n1: f64,  // refractive index of material being exited
-    pub n2: f64,  // refractive index of material being entered
+    pub n1: f64, // refractive index of material being exited
+    pub n2: f64, // refractive index of material being entered
 }
 
 // Note to self: cannot implement Default for IntersectionComputation
@@ -121,7 +121,7 @@ pub fn prepare_computations_for_refraction<'a>(
             // in the containers list. If the list is empty, set it to 1.0 (vacuum).
             comps.n1 = match containers.last() {
                 Some(object) => object.material.refractive_index,
-                None => RefractiveIndex::VACUUM
+                None => RefractiveIndex::VACUUM,
             };
         }
 
@@ -136,8 +136,12 @@ pub fn prepare_computations_for_refraction<'a>(
             }
         }
         match index {
-            Some(n) => { containers.remove(n); },
-            None => { containers.push(object); },
+            Some(n) => {
+                containers.remove(n);
+            }
+            None => {
+                containers.push(object);
+            }
         }
 
         // If the intersection is the hit, set n2 to the refractive index of the last object
@@ -146,7 +150,7 @@ pub fn prepare_computations_for_refraction<'a>(
         if std::ptr::eq(i, intersection) {
             comps.n2 = match containers.last() {
                 Some(object) => object.material.refractive_index,
-                None => RefractiveIndex::VACUUM
+                None => RefractiveIndex::VACUUM,
             };
 
             break;
@@ -163,7 +167,7 @@ mod tests {
     use crate::shapes::{glass_sphere, plane, sphere};
     use crate::transformations::{scaling, translation};
     use crate::tuples::{point, vector};
-    use rstest::{rstest};
+    use rstest::rstest;
 
     // An intersection encapsulates t and object
     #[test]
@@ -302,7 +306,11 @@ mod tests {
     #[case(3, 2.5, 2.5)]
     #[case(4, 2.5, 1.5)]
     #[case(5, 1.5, 1.0)]
-    fn finding_n1_and_n2_at_various_intersections(#[case] index: usize, #[case] n1: f64, #[case] n2: f64) {
+    fn finding_n1_and_n2_at_various_intersections(
+        #[case] index: usize,
+        #[case] n1: f64,
+        #[case] n2: f64,
+    ) {
         let mut a = glass_sphere();
         a.set_transform(&scaling(2.0, 2.0, 2.0));
         a.material.refractive_index = 1.5;
@@ -319,7 +327,8 @@ mod tests {
             Intersection::new(3.25, Some(&c)),
             Intersection::new(4.75, Some(&b)),
             Intersection::new(5.25, Some(&c)),
-            Intersection::new(6.0, Some(&a)));
+            Intersection::new(6.0, Some(&a))
+        );
         let comps = prepare_computations_for_refraction(&xs[index], &r, &xs);
         assert_eq!(comps.n1, n1);
         assert_eq!(comps.n2, n2);

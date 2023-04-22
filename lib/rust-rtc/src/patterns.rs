@@ -95,11 +95,9 @@ impl From<&Pattern> for Pattern {
     }
 }
 
-
 // ------[ TestPattern ]------
 #[derive(Debug, PartialEq, Default, Copy, Clone)]
-pub struct TestPattern {
-}
+pub struct TestPattern {}
 
 impl TestPattern {
     pub fn new() -> TestPattern {
@@ -125,7 +123,6 @@ impl Pattern {
 pub fn test_pattern() -> Pattern {
     Pattern::test_pattern()
 }
-
 
 // ------[ SolidPattern ]------
 #[derive(Debug, PartialEq, Copy, Clone)]
