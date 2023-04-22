@@ -86,10 +86,11 @@ impl World {
     }
 
     fn color_at(&self, ray: &Ray, depth: i32) -> Color {
-        let mut xs = intersect_world(self, ray);
+        let xs = self.intersect(ray);
 
         // Sort & Find copied from intersections.hit(), due to borrowing issue
-        xs.sort_by(|a, b| a.t.total_cmp(&b.t));
+        // No need to sort as self.intersect() already does this.
+        //xs.sort_by(|a, b| a.t.total_cmp(&b.t));
         let hit = xs.iter().find(|&x| x.t > 0.0);
 
         if let Some(i) = hit {
@@ -98,14 +99,6 @@ impl World {
         } else {
             Color::new(0.0, 0.0, 0.0)
         }
-        // // FIXME: is there a way to avoid cloning xs?
-        // // FIXME: cloning xs doesn't work - reference in hit doesn't match to a reference in xs2
-        // if let Some(i) = hit(&mut xs) {
-        //     let comps = prepare_computations_for_refraction(i, ray, &xs);
-        //     self.shade_hit(&comps, depth)
-        // } else {
-        //     Color::new(0.0, 0.0, 0.0)
-        // }
     }
 
     fn reflected_color(&self, comps: &IntersectionComputation, depth: i32) -> Color {
