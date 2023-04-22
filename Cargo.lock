@@ -108,6 +108,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter11_refraction"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter4"
 version = "0.1.0"
 dependencies = [

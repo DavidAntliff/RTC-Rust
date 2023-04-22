@@ -8,6 +8,7 @@ use rust_rtc::transformations::{scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;
+use rust_rtc::math::MAX_RECURSIVE_DEPTH;
 
 fn main() {
     let mut w = world();
@@ -52,7 +53,7 @@ fn main() {
         &vector(0.0, 1.0, 0.0),
     ));
 
-    let canvas = render(&cam, &w);
+    let canvas = render(&cam, &w, MAX_RECURSIVE_DEPTH);
     let ppm = ppm_from_canvas(&canvas);
     print!("{}", ppm);
 }

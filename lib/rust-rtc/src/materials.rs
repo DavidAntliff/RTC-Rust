@@ -6,6 +6,17 @@ use crate::patterns::Pattern;
 use crate::shapes::Shape;
 use crate::tuples::{dot, normalize, reflect, Point, Vector};
 
+#[non_exhaustive]
+pub struct RefractiveIndex {}
+
+impl RefractiveIndex {
+    pub const VACUUM: f64 = 1.0;
+    pub const AIR: f64 = 1.000029;
+    pub const WATER: f64 = 1.333;
+    pub const GLASS: f64 = 1.52;
+    pub const DIAMOND: f64 = 2.417;
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Material {
     pub color: Color,
@@ -14,10 +25,13 @@ pub struct Material {
     pub specular: f64,
     pub shininess: f64,
     pub reflective: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
     pattern: Option<Box<Pattern>>,
 }
 
 impl Material {
+    // TODO: builder pattern?
     pub fn new(
         color: Color,
         ambient: f64,
@@ -25,6 +39,8 @@ impl Material {
         specular: f64,
         shininess: f64,
         reflective: f64,
+        transparency: f64,
+        refractive_index: f64,
     ) -> Self {
         Material {
             color,
@@ -33,6 +49,8 @@ impl Material {
             specular,
             shininess,
             reflective,
+            transparency,
+            refractive_index,
             pattern: Default::default(),
         }
     }
@@ -121,6 +139,8 @@ impl Default for Material {
             specular: 0.9,
             shininess: 200.0,
             reflective: 0.0,
+            transparency: 0.0,
+            refractive_index: RefractiveIndex::AIR,
             pattern: None,
         }
     }
@@ -130,6 +150,7 @@ pub fn default_material() -> Material {
     Material::default()
 }
 
+// TODO: builder pattern?
 pub fn material(
     color: Color,
     ambient: f64,
@@ -137,8 +158,10 @@ pub fn material(
     specular: f64,
     shininess: f64,
     reflective: f64,
+    transparency: f64,
+    refractive_index: f64,
 ) -> Material {
-    Material::new(color, ambient, diffuse, specular, shininess, reflective)
+    Material::new(color, ambient, diffuse, specular, shininess, reflective, transparency, refractive_index)
 }
 
 pub fn lighting(
@@ -356,5 +379,13 @@ mod tests {
     fn reflectivity_of_default_material() {
         let m = default_material();
         assert_eq!(m.reflective, 0.0);
+    }
+
+    // Transparency and Refractive Index for the default material
+    #[test]
+    fn transparency_and_refractive_index_for_default_material() {
+        let m = default_material();
+        assert_eq!(m.transparency, 0.0);
+        assert_eq!(m.refractive_index, RefractiveIndex::AIR);
     }
 }

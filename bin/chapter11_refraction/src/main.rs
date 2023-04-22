@@ -2,7 +2,7 @@ use rust_rtc::camera::{camera, render};
 use rust_rtc::canvas::ppm_from_canvas;
 use rust_rtc::colors::{color, GREEN, GREY25, GREY75, RED};
 use rust_rtc::lights::point_light;
-use rust_rtc::materials::default_material;
+use rust_rtc::materials::{default_material, RefractiveIndex};
 use rust_rtc::patterns::{blended_pattern, stripe_pattern};
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{rotation_y, scaling, translation, view_transform};
@@ -30,30 +30,40 @@ fn main() {
     floor.material.set_pattern(&floor_pattern);
     w.add_object(floor);
 
+    // Large partially-sunk clear glass sphere
     let mut sphere1 = sphere(1);
     sphere1.set_transform(&scaling(1.5, 1.5, 1.5).then(&translation(0.0, 0.5, 0.0)));
     sphere1.material.color = GREY25;
     sphere1.material.specular = 1.0;
     sphere1.material.shininess = 1000.0;
-    sphere1.material.reflective = 0.9;
+    sphere1.material.reflective = 0.7;
+    sphere1.material.transparency = 0.7;
+    sphere1.material.refractive_index = RefractiveIndex::GLASS;
     w.add_object(sphere1);
 
+    // Small floating red sphere
     let mut sphere2 = sphere(2);
     sphere2.set_transform(&scaling(0.4, 0.4, 0.4).then(&translation(-2.0, 1.7, -1.0)));
     sphere2.material.color = RED;
     sphere2.material.specular = 0.7;
     sphere2.material.shininess = 100.0;
     sphere2.material.reflective = 0.4;
+    sphere2.material.transparency = 0.8;
+    sphere2.material.refractive_index = RefractiveIndex::GLASS;
     w.add_object(sphere2);
 
+    // Small floating green sphere
     let mut sphere3 = sphere(3);
     sphere3.set_transform(&scaling(0.5, 0.5, 0.5).then(&translation(1.8, 1.8, -1.0)));
     sphere3.material.color = GREEN;
     sphere3.material.specular = 0.7;
     sphere3.material.shininess = 100.0;
     sphere3.material.reflective = 0.4;
+    sphere3.material.transparency = 0.8;
+    sphere3.material.refractive_index = RefractiveIndex::GLASS;
     w.add_object(sphere3);
 
+    // Tiny unreflective magenta sphere
     let mut sphere4 = sphere(4);
     sphere4.set_transform(&scaling(0.2, 0.2, 0.2).then(&translation(1.5, 0.2, -1.8)));
     sphere4.material.color = color(0.8, 0.0, 0.8);
@@ -62,15 +72,18 @@ fn main() {
     sphere4.material.reflective = 0.0;
     w.add_object(sphere4);
 
+    // Large blue sphere
     let mut sphere5 = sphere(5);
     sphere5.set_transform(&scaling(0.5, 0.5, 0.5).then(&translation(-1.0, 0.5, -3.5)));
     sphere5.material.color = color(0.1, 0.0, 1.0);
     sphere5.material.specular = 1.0;
     sphere5.material.shininess = 1000.0;
     sphere5.material.reflective = 0.8;
+    sphere5.material.transparency = 0.0;
+    sphere5.material.refractive_index = RefractiveIndex::GLASS;
     w.add_object(sphere5);
 
-    // yellow sphere behind the camera
+    // Huge yellow sphere behind the camera
     let mut sphere6 = sphere(6);
     sphere6.set_transform(&scaling(2.0, 2.0, 2.0).then(&translation(4.0, 2.0, -5.0)));
     sphere6.material.color = color(0.9, 0.7, 0.0);

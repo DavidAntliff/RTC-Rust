@@ -1,7 +1,7 @@
 // Chapter 9: Planes
 
 use crate::intersections::Intersections;
-use crate::materials::Material;
+use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
 use crate::planes::Plane;
 use crate::rays::Ray;
@@ -22,6 +22,17 @@ impl Shape {
             shape: ShapeEnum::Sphere(Sphere::new(id)),
             ..Default::default()
         }
+    }
+
+    pub fn glass_sphere() -> Shape {
+        let mut shape = Shape {
+            shape: ShapeEnum::Sphere(Sphere::new(0)),
+            ..Default::default()
+        };
+        shape.material.transparency = 1.0;
+        shape.material.refractive_index = RefractiveIndex::GLASS;
+        shape
+
     }
     pub fn plane() -> Shape {
         Shape {
@@ -95,6 +106,8 @@ pub fn normal_at(object: &Shape, world_point: &Point) -> Vector {
 pub fn sphere(id: i32) -> Shape {
     Shape::sphere(id)
 }
+
+pub fn glass_sphere() -> Shape { Shape::glass_sphere() }
 
 pub fn plane() -> Shape {
     Shape::plane()

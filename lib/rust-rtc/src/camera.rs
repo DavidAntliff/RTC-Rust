@@ -1,7 +1,6 @@
 // Chapter 7: Implementing a Camera
 
 use crate::canvas::{canvas, Canvas};
-use crate::math::MAX_RECURSIVE_DEPTH;
 use crate::matrices::{identity4, Matrix4};
 use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
@@ -69,12 +68,13 @@ impl Camera {
         ray(origin, direction)
     }
 
-    pub fn render(&self, world: &World) -> Canvas {
+    pub fn render(&self, world: &World, max_recursive_depth: i32) -> Canvas {
         let mut image = canvas(self.hsize, self.vsize);
+
         for y in 0..self.vsize {
             for x in 0..self.hsize {
                 let ray = ray_for_pixel(self, x, y);
-                let color = color_at(world, &ray, MAX_RECURSIVE_DEPTH);
+                let color = color_at(world, &ray, max_recursive_depth);
                 image.write_pixel(x, y, &color);
             }
         }
@@ -96,8 +96,8 @@ pub fn ray_for_pixel(camera: &Camera, px: u32, py: u32) -> Ray {
     camera.ray_for_pixel(px, py)
 }
 
-pub fn render(camera: &Camera, world: &World) -> Canvas {
-    camera.render(world)
+pub fn render(camera: &Camera, world: &World, max_recursive_depth: i32) -> Canvas {
+    camera.render(world, max_recursive_depth)
 }
 
 struct CalcPixelSizeResult {
@@ -201,7 +201,7 @@ mod tests {
         let to = point(0.0, 0.0, 0.0);
         let up = vector(0.0, 1.0, 0.0);
         c.set_transform(&view_transform(&from, &to, &up));
-        let image = render(&c, &w);
+        let image = render(&c, &w, 1);
         assert_relative_eq!(
             image.pixel_at(5, 5),
             &color(0.38066, 0.47583, 0.2855),

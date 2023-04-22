@@ -38,6 +38,7 @@ impl Pattern {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum PatternEnum {
+    TestPattern(TestPattern),
     SolidPattern(SolidPattern),
     StripePattern(StripePattern),
     GradientPattern(GradientPattern),
@@ -61,6 +62,7 @@ trait PatternTrait {
 impl PatternTrait for PatternEnum {
     fn pattern_at(&self, local_point: &Point) -> Color {
         match self {
+            PatternEnum::TestPattern(pattern) => pattern.pattern_at(local_point),
             PatternEnum::SolidPattern(pattern) => pattern.pattern_at(local_point),
             PatternEnum::StripePattern(pattern) => pattern.pattern_at(local_point),
             PatternEnum::GradientPattern(pattern) => pattern.pattern_at(local_point),
@@ -92,6 +94,38 @@ impl From<&Pattern> for Pattern {
         value.clone()
     }
 }
+
+
+// ------[ TestPattern ]------
+#[derive(Debug, PartialEq, Default, Copy, Clone)]
+pub struct TestPattern {
+}
+
+impl TestPattern {
+    pub fn new() -> TestPattern {
+        TestPattern {}
+    }
+}
+
+impl PatternTrait for TestPattern {
+    fn pattern_at(&self, local_point: &Point) -> Color {
+        Color::new(local_point.x(), local_point.y(), local_point.z())
+    }
+}
+
+impl Pattern {
+    pub fn test_pattern() -> Pattern {
+        Pattern {
+            pattern: PatternEnum::TestPattern(TestPattern::new()),
+            ..Default::default()
+        }
+    }
+}
+
+pub fn test_pattern() -> Pattern {
+    Pattern::test_pattern()
+}
+
 
 // ------[ SolidPattern ]------
 #[derive(Debug, PartialEq, Copy, Clone)]

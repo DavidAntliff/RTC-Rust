@@ -36,6 +36,7 @@ impl Plane {
     }
 }
 
+// TODO: rename this to avoid accidental use
 pub fn plane() -> Plane {
     Plane::new()
 }

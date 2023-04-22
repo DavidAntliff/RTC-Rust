@@ -56,6 +56,7 @@ impl Sphere {
     }
 }
 
+// TODO: rename this to avoid accidental use
 pub fn sphere(id: i32) -> Sphere {
     Sphere::new(id)
 }
