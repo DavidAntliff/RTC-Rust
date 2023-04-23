@@ -2,6 +2,17 @@
 
 ![workflow](https://github.com/DavidAntliff/RTC-Rust/actions/workflows/rust.yml/badge.svg)
 
+## TODO
+
+Apart from continuing through the book:
+
+ * Command line parameters for:
+  * Resolution (e.g. "SVGA", "1024x768") - DONE
+  * Rendering subrange within current resolution (e.g. "200+50,300+380", "200-250,300-380", "200-,300-", "-100,-100")
+  * Output to filename - DONE (PPM only)
+  * PNG rendering
+ * Scene description files or DSL?
+
 ## Conventions
 
 This codebase uses the Left Hand Coordinate system.

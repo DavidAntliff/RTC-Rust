@@ -10,8 +10,8 @@ use std::f64::consts::PI;
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct Resolution {
-    hsize: u32, // pixel width
-    vsize: u32, // pixel height
+    pub hsize: u32, // pixel width
+    pub vsize: u32, // pixel height
 }
 
 impl Resolution {
@@ -21,6 +21,15 @@ impl Resolution {
 
     pub fn num_pixels(&self) -> u64 {
         self.hsize as u64 * self.vsize as u64
+    }
+}
+
+impl Default for Resolution {
+    fn default() -> Self {
+        Resolution {
+            hsize: 100,
+            vsize: 50,
+        }
     }
 }
 
@@ -125,7 +134,7 @@ impl<'a> Camera<'a> {
 
 impl<'a> Default for Camera<'a> {
     fn default() -> Camera<'a> {
-        let default_resolution = Resolution::new(100, 50);
+        let default_resolution = Resolution::default();
         let default_field_of_view = PI / 3.0;
         let c = calc_pixel_size(
             default_resolution.hsize,

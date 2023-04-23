@@ -1,16 +1,19 @@
-use rust_rtc::camera::{Resolution};
-
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
-use rust_rtc::math::MAX_RECURSIVE_DEPTH;
+
 use rust_rtc::shapes::sphere;
 use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
+use rust_rtc::utils;
+use rust_rtc::utils::RenderOptions;
 use rust_rtc::world::world;
 use std::f64::consts::PI;
+use std::process::ExitCode;
 
-fn main() {
+fn main() -> ExitCode {
+    let cli = utils::parse_args();
+
     let mut w = world();
     let mut floor = sphere(1);
     floor.set_transform(&scaling(10.0, 0.01, 10.0));
@@ -65,22 +68,20 @@ fn main() {
 
     w.add_light(point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
 
-    //let resolution = Resolution::VGA;  // 640 x 480
-    //let resolution = Resolution::XGA;  // 1024 x 768
-    let resolution = Resolution::QHD; // 2560 x 1440
-                                      //let resolution = Resolution::UHD_4K;  // 3840 x 2160
+    let options = RenderOptions {
+        camera_transform: view_transform(
+            &point(0.0, 1.5, -5.0),
+            &point(0.0, 1.0, 0.0),
+            &vector(0.0, 1.0, 0.0),
+        ),
+        ..Default::default()
+    };
 
-    let camera_transform = view_transform(
-        &point(0.0, 1.5, -5.0),
-        &point(0.0, 1.0, 0.0),
-        &vector(0.0, 1.0, 0.0),
-    );
-
-    rust_rtc::utils::render_world(
-        &w,
-        resolution,
-        PI / 3.0,
-        camera_transform,
-        MAX_RECURSIVE_DEPTH,
-    );
+    ExitCode::from(match utils::render_world(&w, options, &cli) {
+        Ok(_) => 0,
+        Err(e) => {
+            eprintln!("Write {}: {}", cli.output, e);
+            1
+        }
+    })
 }

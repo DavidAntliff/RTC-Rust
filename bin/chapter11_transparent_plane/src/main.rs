@@ -5,20 +5,24 @@
 
 use rand::prelude::*;
 use rand_xoshiro::Xoshiro256StarStar;
-use rust_rtc::camera::{Resolution};
 
 use rust_rtc::colors::{color, colori, Color};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, RefractiveIndex};
-use rust_rtc::math::MAX_RECURSIVE_DEPTH;
+
 use rust_rtc::patterns::checkers_pattern;
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{rotation_x, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector, Point};
+use rust_rtc::utils;
+use rust_rtc::utils::RenderOptions;
 use rust_rtc::world::world;
 use std::f64::consts::PI;
+use std::process::ExitCode;
 
-fn main() {
+fn main() -> ExitCode {
+    let cli = utils::parse_args();
+
     let mut w = world();
 
     let mut wall = plane();
@@ -112,23 +116,21 @@ fn main() {
 
     w.add_light(point_light(point(5.0, 10.0, -8.0), color(0.9, 0.9, 0.9)));
 
-    //let resolution = Resolution::VGA;  // 640 x 480
-    //let resolution = Resolution::XGA;  // 1024 x 768
-    let resolution = Resolution::QHD; // 2560 x 1440
-                                      //let resolution = Resolution::UHD_4K;  // 3840 x 2160
+    let options = RenderOptions {
+        camera_transform: view_transform(
+            &point(4.0, 4.0, -8.0),
+            &point(0.0, 0.0, 0.0),
+            &vector(0.0, 1.0, 0.0),
+        )
+        .then(&translation(0.0, 0.0, 2.0)),
+        ..Default::default()
+    };
 
-    let camera_transform = view_transform(
-        &point(4.0, 4.0, -8.0),
-        &point(0.0, 0.0, 0.0),
-        &vector(0.0, 1.0, 0.0),
-    )
-    .then(&translation(0.0, 0.0, 2.0));
-
-    rust_rtc::utils::render_world(
-        &w,
-        resolution,
-        PI / 3.0,
-        camera_transform,
-        MAX_RECURSIVE_DEPTH,
-    );
+    ExitCode::from(match utils::render_world(&w, options, &cli) {
+        Ok(_) => 0,
+        Err(e) => {
+            eprintln!("Write {}: {}", cli.output, e);
+            1
+        }
+    })
 }
