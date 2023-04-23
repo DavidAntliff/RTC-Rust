@@ -27,6 +27,7 @@ pub struct Material {
     pub reflective: f64,
     pub transparency: f64,
     pub refractive_index: f64,
+    pub casts_shadow: bool,
     pattern: Option<Box<Pattern>>,
 }
 
@@ -51,7 +52,7 @@ impl Material {
             reflective,
             transparency,
             refractive_index,
-            pattern: Default::default(),
+            ..Default::default()
         }
     }
 
@@ -141,6 +142,7 @@ impl Default for Material {
             reflective: 0.0,
             transparency: 0.0,
             refractive_index: RefractiveIndex::AIR,
+            casts_shadow: true,
             pattern: None,
         }
     }

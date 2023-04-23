@@ -1,10 +1,7 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{
-    hit, intersect, prepare_computations_for_refraction, schlick, IntersectionComputation,
-    Intersections,
-};
+use crate::intersections::{intersect, prepare_computations_for_refraction, schlick, IntersectionComputation, Intersections, Intersection};
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
@@ -53,20 +50,31 @@ impl World {
 
     fn is_shadowed(&self, point: &Point) -> bool {
         if let Some(light) = &self.light {
+            // Cast a ray from this point to the light source
             let v = light.position - point;
             let distance = magnitude(&v);
             let direction = normalize(&v);
 
             let ray = ray(*point, direction);
-            let mut intersections = intersect_world(self, &ray);
+            let intersections = intersect_world(self, &ray);
 
-            if let Some(h) = hit(&mut intersections) {
+            // Filter out any objects that don't cast shadows
+            let xs: Vec<Intersection> = intersections
+                .into_iter()
+                .filter(|x|
+                    x.object.expect("should be object").material.casts_shadow)
+                .collect();
+
+            // No need to call hit() as already sorted
+            //if let Some(h) = hit(&mut xs) {
+            let hit = xs.iter().find(|&x| x.t > 0.0);
+            if let Some(h) = hit {
                 h.t < distance
             } else {
                 false
             }
         } else {
-            false // everything is in shadow
+            false // no light - everything is in shadow
         }
     }
 
@@ -352,6 +360,25 @@ mod tests {
         let comps = prepare_computations(&i, &r);
         let c = shade_hit(&w, &comps, 1);
         assert_eq!(c, color(0.1, 0.1, 0.1));
+    }
+
+    // shade_hit() is given an intersection in shadow, but material does not cast shadows
+    #[test]
+    fn shade_hit_given_intersection_in_shadow_but_material_does_not_cast_shadows() {
+        let mut w = world();
+        w.add_light(point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0)));
+        let mut s1 = sphere(1);
+        s1.material.casts_shadow = false;
+        w.add_object(s1);
+        let mut s2 = sphere(2);
+        s2.set_transform(&translation(0.0, 0.0, 10.0));
+        s2.material.casts_shadow = false;
+        w.add_object(s2.clone());
+        let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
+        let i = intersection(4.0, Some(&s2));
+        let comps = prepare_computations(&i, &r);
+        let c = shade_hit(&w, &comps, 1);
+        assert_eq!(c, color(1.9, 1.9, 1.9));
     }
 
     // Chapter 11: Reflections
