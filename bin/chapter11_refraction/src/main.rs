@@ -1,5 +1,4 @@
-use rust_rtc::camera::{camera, render};
-use rust_rtc::canvas::ppm_from_canvas;
+use rust_rtc::camera::{Resolution};
 use rust_rtc::colors::{color, GREEN, GREY25, GREY75, RED, WHITE};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, RefractiveIndex};
@@ -124,30 +123,25 @@ fn main() {
 
     w.add_light(point_light(point(5.0, 10.0, -8.0), color(0.9, 0.9, 0.9)));
 
-    //let mut cam = camera(100, 50, PI / 3.0);
-    //let mut cam = camera(1024, 768, PI / 3.0);
-    //let mut cam = camera(1600, 800, PI / 3.0);
-    let mut cam = camera(2048, 1536, PI / 3.0);
-    //let mut cam = camera(3840, 2160, PI / 3.0);
+    //let resolution = Resolution::VGA;  // 640 x 480
+    //let resolution = Resolution::XGA;  // 1024 x 768
+    let resolution = Resolution::QHD;  // 2560 x 1440
+    //let resolution = Resolution::UHD_4K;  // 3840 x 2160
 
     // From the front
-    cam.set_transform(
-        &view_transform(
+    let camera_transform = view_transform(
             &point(0.0, 2.5, -5.0),
             &point(0.0, 0.5, 5.0),
             &vector(0.0, 1.0, 0.0),
         )
-        .then(&translation(0.0, 0.0, -2.5)),
-    );
+        .then(&translation(0.0, 0.0, -2.5));
 
-    // From above
-    // cam.set_transform(&view_transform(
-    //     &point(0.0, 2.5, 0.0),
-    //     &point(0.0, 0.0, 0.5),
-    //     &vector(0.0, 0.0, 1.0),
-    // ).then(&translation(-1.0, -1.0, -8.0)));
+    // From above:
+    // let camera_transform = view_transform(
+    //         &point(0.0, 2.5, 0.0),
+    //         &point(0.0, 0.0, 0.5),
+    //         &vector(0.0, 0.0, 1.0),
+    //     ).then(&translation(-1.0, -1.0, -8.0));
 
-    let canvas = render(&cam, &w, MAX_RECURSIVE_DEPTH);
-    let ppm = ppm_from_canvas(&canvas);
-    print!("{}", ppm);
+    rust_rtc::utils::render_world(&w, resolution, PI / 3.0, camera_transform, MAX_RECURSIVE_DEPTH);
 }

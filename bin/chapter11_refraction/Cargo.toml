@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rust-rtc = { path = "../../lib/rust-rtc" }
+indicatif = "0.17.3"

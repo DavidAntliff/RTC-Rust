@@ -7,9 +7,35 @@ use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
 use std::f64::consts::PI;
 
-pub struct Camera {
-    hsize: u32,
-    vsize: u32,
+#[derive(Copy, Clone)]
+#[non_exhaustive]
+pub struct Resolution {
+    hsize: u32,  // pixel width
+    vsize: u32,  // pixel height
+}
+
+impl Resolution {
+    pub const fn new(hsize: u32, vsize: u32) -> Self {
+        Resolution { hsize, vsize }
+    }
+
+    pub fn num_pixels(&self) -> u64 {
+        self.hsize as u64 * self.vsize as u64
+    }
+}
+
+impl Resolution {
+    pub const VGA: Resolution = Resolution::new(640, 480);
+    pub const SVGA: Resolution = Resolution::new(800, 600);
+    pub const XGA: Resolution = Resolution::new(1024, 768);
+    pub const SXGA: Resolution = Resolution::new(1280, 1024);
+    pub const FHD: Resolution = Resolution::new(1920, 1080);
+    pub const QHD: Resolution = Resolution::new(2560, 1440);
+    pub const UHD_4K: Resolution = Resolution::new(3840, 2160);
+}
+
+pub struct Camera<'a> {
+    resolution: Resolution,
     #[allow(dead_code)]
     field_of_view: f64,
     transform: Matrix4,
@@ -18,21 +44,26 @@ pub struct Camera {
     half_width: f64,
     half_height: f64,
     pixel_size: f64,
+
+    progress_callback: Option<Box<dyn FnMut(u64) + 'a>>,
 }
 
-impl Camera {
-    pub fn new(hsize: u32, vsize: u32, field_of_view: f64) -> Camera {
-        let c = calc_pixel_size(hsize, vsize, field_of_view);
+impl<'a> Camera<'a> {
+    pub fn new(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+        let c = calc_pixel_size(resolution.hsize, resolution.vsize, field_of_view);
         Camera {
-            hsize,
-            vsize,
+            resolution,
             field_of_view,
-            transform: identity4(),
-            inverse_transform: identity4(),
             half_width: c.half_width,
             half_height: c.half_height,
             pixel_size: c.pixel_size,
+            ..Default::default()
         }
+    }
+
+    // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
+    pub fn set_progress_callback(&mut self, f: Box<dyn FnMut(u64) + 'a>) {
+        self.progress_callback = Some(f);
     }
 
     pub fn set_transform(&mut self, transform: &Matrix4) {
@@ -68,40 +99,59 @@ impl Camera {
         ray(origin, direction)
     }
 
-    pub fn render(&self, world: &World, max_recursive_depth: i32) -> Canvas {
-        let mut image = canvas(self.hsize, self.vsize);
+    pub fn render(&mut self, world: &World, max_recursive_depth: i32) -> Canvas {
+        let mut image = canvas(self.resolution.hsize,
+                               self.resolution.vsize);
 
         // {
         //     let ray = ray_for_pixel(self, self.hsize / 2, self.vsize / 2);
         //     let color = color_at(world, &ray, max_recursive_depth);
         // }
 
-        for y in 0..self.vsize {
-            for x in 0..self.hsize {
+        for y in 0..self.resolution.vsize {
+            for x in 0..self.resolution.hsize {
                 let ray = ray_for_pixel(self, x, y);
                 let color = color_at(world, &ray, max_recursive_depth);
                 image.write_pixel(x, y, &color);
             }
+
+            match &mut self.progress_callback {
+                Some(f) => (f)(self.resolution.hsize as u64),
+                None => (),
+            };
         }
         image
     }
 }
 
-impl Default for Camera {
-    fn default() -> Camera {
-        Camera::new(100, 50, PI / 3.0)
+impl<'a> Default for Camera<'a> {
+    fn default() -> Camera<'a> {
+        let default_resolution = Resolution::new(100, 50);
+        let default_field_of_view = PI / 3.0;
+        let c = calc_pixel_size(default_resolution.hsize, default_resolution.vsize, default_field_of_view);
+
+        Camera {
+            resolution: default_resolution,
+            field_of_view: default_field_of_view,
+            transform: identity4(),
+            inverse_transform: identity4(),
+            half_width: c.half_width,
+            half_height: c.half_height,
+            pixel_size: c.pixel_size,
+            progress_callback: None,
+        }
     }
 }
 
-pub fn camera(hsize: u32, vsize: u32, field_of_view: f64) -> Camera {
-    Camera::new(hsize, vsize, field_of_view)
+pub fn camera<'a>(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+    Camera::new(resolution, field_of_view)
 }
 
 pub fn ray_for_pixel(camera: &Camera, px: u32, py: u32) -> Ray {
     camera.ray_for_pixel(px, py)
 }
 
-pub fn render(camera: &Camera, world: &World, max_recursive_depth: i32) -> Canvas {
+pub fn render(camera: &mut Camera, world: &World, max_recursive_depth: i32) -> Canvas {
     camera.render(world, max_recursive_depth)
 }
 
@@ -143,9 +193,9 @@ mod tests {
         let hsize = 160;
         let vsize = 120;
         let field_of_view = PI / 2.0;
-        let c = camera(hsize, vsize, field_of_view);
-        assert_eq!(c.hsize, 160);
-        assert_eq!(c.vsize, 120);
+        let c = camera(Resolution::new(hsize, vsize), field_of_view);
+        assert_eq!(c.resolution.hsize, 160);
+        assert_eq!(c.resolution.vsize, 120);
         assert_relative_eq!(c.field_of_view, PI / 2.0);
         assert_eq!(c.transform, identity4());
     }
@@ -153,21 +203,21 @@ mod tests {
     // The pixel size for a horizontal canvas
     #[test]
     fn pixel_size_for_horizontal_canvas() {
-        let c = camera(200, 125, PI / 2.0);
+        let c = camera(Resolution::new(200, 125), PI / 2.0);
         assert_relative_eq!(c.pixel_size, 0.01);
     }
 
     // The pixel size for a vertical canvas
     #[test]
     fn pixel_size_for_vertical_canvas() {
-        let c = camera(125, 200, PI / 2.0);
+        let c = camera(Resolution::new(125, 200), PI / 2.0);
         assert_relative_eq!(c.pixel_size, 0.01);
     }
 
     // Constructing a ray through the center of the canvas
     #[test]
     fn constructing_ray_through_center_of_canvas() {
-        let c = camera(201, 101, PI / 2.0);
+        let c = camera(Resolution::new(201, 101), PI / 2.0);
         let r = ray_for_pixel(&c, 100, 50);
         assert_eq!(r.origin, point(0.0, 0.0, 0.0));
         assert_relative_eq!(r.direction, vector(0.0, 0.0, -1.0));
@@ -176,7 +226,7 @@ mod tests {
     // Constructing a ray through the corner of the canvas
     #[test]
     fn constructing_ray_through_corner_of_canvas() {
-        let c = camera(201, 101, PI / 2.0);
+        let c = camera(Resolution::new(201, 101), PI / 2.0);
         let r = ray_for_pixel(&c, 0, 0);
         assert_eq!(r.origin, point(0.0, 0.0, 0.0));
         assert_relative_eq!(
@@ -189,7 +239,7 @@ mod tests {
     // Constructing a ray when the camera is transformed
     #[test]
     fn constructing_ray_when_camera_is_transformed() {
-        let mut c = camera(201, 101, PI / 2.0);
+        let mut c = camera(Resolution::new(201, 101), PI / 2.0);
         c.set_transform(&(rotation_y(PI / 4.0) * translation(0.0, -2.0, 5.0)));
         let r = ray_for_pixel(&c, 100, 50);
         assert_eq!(r.origin, point(0.0, 2.0, -5.0));
@@ -201,7 +251,7 @@ mod tests {
     #[test]
     fn rendering_world_with_camera() {
         let w = default_world();
-        let mut c = camera(11, 11, PI / 2.0);
+        let mut c = camera(Resolution::new(11, 11), PI / 2.0);
         let from = point(0.0, 0.0, -5.0);
         let to = point(0.0, 0.0, 0.0);
         let up = vector(0.0, 1.0, 0.0);
