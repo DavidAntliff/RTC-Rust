@@ -90,7 +90,7 @@ fn main() {
     sphere1.material.diffuse = 0.0;
     sphere1.material.specular = 0.9;
     sphere1.material.shininess = 300.0;
-    sphere1.material.reflective = 0.0;
+    sphere1.material.reflective = 0.9;
     sphere1.material.transparency = 0.9;
     sphere1.material.refractive_index = 1.5;
     w.add_object(sphere1);
@@ -103,7 +103,7 @@ fn main() {
     sphere2.material.diffuse = 0.0;
     sphere2.material.specular = 0.9;
     sphere2.material.shininess = 300.0;
-    sphere2.material.reflective = 0.0;
+    sphere2.material.reflective = 0.9;
     sphere2.material.transparency = 0.9;
     sphere2.material.refractive_index = 1.0000034;
     w.add_object(sphere2);

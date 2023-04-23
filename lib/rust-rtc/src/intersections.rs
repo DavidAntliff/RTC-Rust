@@ -111,8 +111,10 @@ pub fn prepare_computations_for_refraction<'a>(
     intersections: &[Intersection],
 ) -> IntersectionComputation<'a> {
     let mut comps = prepare_computations(intersection, ray);
-    let mut containers: Vec<&Shape> = vec![];
 
+    // Determine n1 (refractive index of material being exited),
+    // and n2 (refractive index of material being entered):
+    let mut containers: Vec<&Shape> = vec![];
     for i in intersections {
         let object = &i.object.expect("object should exist");
 
@@ -160,8 +162,36 @@ pub fn prepare_computations_for_refraction<'a>(
     comps
 }
 
+// https://graphics.stanford.edu/courses/cs148-10-summer/docs/2006--degreve--reflection_refraction.pdf
+pub fn schlick(comps: &IntersectionComputation) -> f64 {
+    // Cosine of angle between eye and normal vector:
+    let mut cos = dot(&comps.eyev, &comps.normalv);
+
+    // Total internal reflection only possible if n1 > n2
+    if comps.n1 > comps.n2 {
+        let n = comps.n1 / comps.n2;
+        let sin2_t = n * n * (1.0 - cos * cos);
+        if sin2_t > 1.0 {
+            return 1.0;
+        }
+
+        // Compute cosine of theta_t:
+        let cos_t = f64::sqrt(1.0 - sin2_t);
+
+        // When n1 > n2, use cos(theta_t) as 'cos'
+        cos = cos_t;
+    }
+
+    let k = (comps.n1 - comps.n2) / (comps.n1 + comps.n2);
+    let r0 = k * k;
+
+    let w = 1.0 - cos;
+    r0 + (1.0 - r0) * w * w * w * w * w
+}
+
 #[cfg(test)]
 mod tests {
+    use approx::assert_relative_eq;
     use super::*;
     use crate::rays::ray;
     use crate::shapes::{glass_sphere, plane, sphere};
@@ -345,5 +375,45 @@ mod tests {
         let comps = prepare_computations_for_refraction(&i, &r, &xs);
         assert!(comps.under_point.z() > EPSILON / 2.0);
         assert!(comps.point.z() < comps.under_point.z());
+    }
+
+    // The Schlick approximation under total internal reflection
+    #[test]
+    fn schlick_approximation_under_total_internal_reflection() {
+        let shape = glass_sphere();
+        let k = f64::sqrt(2.0) / 2.0;
+        let r = ray(point(0.0, 0.0 , k), vector(0.0, 1.0, 0.0));
+        let xs = intersections!(
+            Intersection::new(-k, Some(&shape)),
+            Intersection::new(k, Some(&shape)));
+        let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
+        let reflectance = schlick(&comps);
+        assert_eq!(reflectance, 1.0);
+    }
+
+    // The Schlick approximation with a perpendicular viewing angle
+    #[test]
+    fn schlick_approximation_with_perpendicular_view_angle() {
+        let mut shape = glass_sphere();
+        shape.material.refractive_index = 1.5;  // tests assume glass_sphere() uses ri = 1.5
+        let r = ray(point(0.0, 0.0 , 0.0), vector(0.0, 1.0, 0.0));
+        let xs = intersections!(
+            Intersection::new(-1.0, Some(&shape)),
+            Intersection::new(1.0, Some(&shape)));
+        let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
+        let reflectance = schlick(&comps);
+        assert_relative_eq!(reflectance, 0.04, epsilon=1e-5);
+    }
+
+    // The Schlick approximation with a small angle and n2 > n1
+    #[test]
+    fn schlick_approximation_with_small_angle_n2_gt_n1() {
+        let mut shape = glass_sphere();
+        shape.material.refractive_index = 1.5;  // tests assume glass_sphere() uses ri = 1.5
+        let r = ray(point(0.0, 0.99, -2.0), vector(0.0, 0.0, 1.0));
+        let xs = intersections!(Intersection::new(1.8589, Some(&shape)));
+        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let reflectance = schlick(&comps);
+        assert_relative_eq!(reflectance, 0.48873, epsilon=1e-5);
     }
 }

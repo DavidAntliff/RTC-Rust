@@ -1,9 +1,7 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{
-    hit, intersect, prepare_computations_for_refraction, IntersectionComputation, Intersections,
-};
+use crate::intersections::{hit, intersect, prepare_computations_for_refraction, IntersectionComputation, Intersections, schlick};
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
@@ -82,7 +80,13 @@ impl World {
         );
         let reflected = self.reflected_color(comps, depth);
         let refracted = self.refracted_color(comps, depth);
-        surface + reflected + refracted
+
+        if comps.object.material.reflective > 0.0 && comps.object.material.transparency > 0.0 {
+            let reflectance = schlick(&comps);
+            surface + reflected * reflectance + refracted * (1.0 - reflectance)
+        } else {
+            surface + reflected + refracted
+        }
     }
 
     fn color_at(&self, ray: &Ray, depth: i32) -> Color {
@@ -126,7 +130,7 @@ impl World {
             // Find sin(theta_2)^2 via trig identity:
             let sin2_t = n_ratio * n_ratio * (1.0 - cos_i * cos_i);
 
-            // Total internal reflection?
+            // If sin2_t > 1.0, there is no transmission - Total Internal Reflection
             if sin2_t > 1.0 {
                 return color(0.0, 0.0, 0.0);
             }
@@ -546,5 +550,36 @@ mod tests {
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let color_ = shade_hit(&w, &comps, 5);
         assert_relative_eq!(color_, color(0.93642, 0.68642, 0.68642), epsilon = 1e-4);
+    }
+
+    // shade_hit() with a reflective, transparent material
+    #[test]
+    fn shade_hit_with_reflective_transparent_material() {
+        let mut w = default_world();
+        let k = f64::sqrt(2.0) / 2.0;
+        let r = ray(point(0.0, 0.0, -3.0), vector(0.0, -k, k));
+
+        let mut floor = plane();
+        floor.set_transform(&translation(0.0, -1.0, 0.0));
+        floor.material.reflective = 0.5;
+        floor.material.transparency = 0.5;
+        floor.material.refractive_index = 1.5;
+        w.add_object(floor);
+
+        let mut ball = sphere(1);
+        ball.material.color = color(1.0, 0.0, 0.0);
+        ball.material.ambient = 0.5;
+        ball.set_transform(&translation(0.0, -3.5, -0.5));
+        w.add_object(ball);
+
+        let floor = match &w.objects[..] {
+            [.., floor, _] => Some(floor),
+            _ => panic!("missing objects"),
+        };
+
+        let xs = intersections!(Intersection::new(f64::sqrt(2.0), floor));
+        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let color_ = shade_hit(&w, &comps, 5);
+        assert_relative_eq!(color_, color(0.93391, 0.69643, 0.69243), epsilon = 1e-5);
     }
 }

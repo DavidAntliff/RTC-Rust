@@ -71,6 +71,11 @@ impl Camera {
     pub fn render(&self, world: &World, max_recursive_depth: i32) -> Canvas {
         let mut image = canvas(self.hsize, self.vsize);
 
+        // {
+        //     let ray = ray_for_pixel(self, self.hsize / 2, self.vsize / 2);
+        //     let color = color_at(world, &ray, max_recursive_depth);
+        // }
+
         for y in 0..self.vsize {
             for x in 0..self.hsize {
                 let ray = ray_for_pixel(self, x, y);
