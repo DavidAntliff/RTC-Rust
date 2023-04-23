@@ -1,4 +1,4 @@
-use rust_rtc::camera::{Resolution};
+use rust_rtc::camera::Resolution;
 use rust_rtc::colors::{color, GREEN, GREY25, GREY75, RED, WHITE};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, RefractiveIndex};
@@ -125,16 +125,16 @@ fn main() {
 
     //let resolution = Resolution::VGA;  // 640 x 480
     //let resolution = Resolution::XGA;  // 1024 x 768
-    let resolution = Resolution::QHD;  // 2560 x 1440
-    //let resolution = Resolution::UHD_4K;  // 3840 x 2160
+    let resolution = Resolution::QHD; // 2560 x 1440
+                                      //let resolution = Resolution::UHD_4K;  // 3840 x 2160
 
     // From the front
     let camera_transform = view_transform(
-            &point(0.0, 2.5, -5.0),
-            &point(0.0, 0.5, 5.0),
-            &vector(0.0, 1.0, 0.0),
-        )
-        .then(&translation(0.0, 0.0, -2.5));
+        &point(0.0, 2.5, -5.0),
+        &point(0.0, 0.5, 5.0),
+        &vector(0.0, 1.0, 0.0),
+    )
+    .then(&translation(0.0, 0.0, -2.5));
 
     // From above:
     // let camera_transform = view_transform(
@@ -143,5 +143,11 @@ fn main() {
     //         &vector(0.0, 0.0, 1.0),
     //     ).then(&translation(-1.0, -1.0, -8.0));
 
-    rust_rtc::utils::render_world(&w, resolution, PI / 3.0, camera_transform, MAX_RECURSIVE_DEPTH);
+    rust_rtc::utils::render_world(
+        &w,
+        resolution,
+        PI / 3.0,
+        camera_transform,
+        MAX_RECURSIVE_DEPTH,
+    );
 }

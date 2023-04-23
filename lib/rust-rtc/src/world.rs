@@ -1,7 +1,10 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{intersect, prepare_computations_for_refraction, schlick, IntersectionComputation, Intersections, Intersection};
+use crate::intersections::{
+    intersect, prepare_computations_for_refraction, schlick, Intersection, IntersectionComputation,
+    Intersections,
+};
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
@@ -61,8 +64,7 @@ impl World {
             // Filter out any objects that don't cast shadows
             let xs: Vec<Intersection> = intersections
                 .into_iter()
-                .filter(|x|
-                    x.object.expect("should be object").material.casts_shadow)
+                .filter(|x| x.object.expect("should be object").material.casts_shadow)
                 .collect();
 
             // No need to call hit() as already sorted

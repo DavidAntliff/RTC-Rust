@@ -14,5 +14,5 @@ pub mod shapes;
 pub mod spheres;
 pub mod transformations;
 pub mod tuples;
-pub mod world;
 pub mod utils;
+pub mod world;

@@ -53,8 +53,8 @@
 //     transparency: 0.9
 //     refractive-index: 1.0000034
 
-use rust_rtc::camera::{camera, render, Resolution};
-use rust_rtc::canvas::ppm_from_canvas;
+use rust_rtc::camera::{Resolution};
+
 use rust_rtc::colors::{color, WHITE};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::default_material;
@@ -117,7 +117,7 @@ fn main() {
     let resolution = Resolution::new(600, 600);
 
     let camera_transform = view_transform(
-        &point(0.0,  0.0, -5.0),
+        &point(0.0, 0.0, -5.0),
         &point(0.0, 0.0, 0.0),
         &vector(0.0, 1.0, 0.0),
     );

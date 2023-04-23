@@ -3,20 +3,20 @@
 // Implement non-shadow-casting materials, so that a view from air into water
 // is possible, without the water surface casting a shadow over the objects below.
 
-use rust_rtc::camera::{camera, render, Resolution};
-use rust_rtc::canvas::ppm_from_canvas;
-use rust_rtc::colors::{color, Color, colori};
+use rand::prelude::*;
+use rand_xoshiro::Xoshiro256StarStar;
+use rust_rtc::camera::{Resolution};
+
+use rust_rtc::colors::{color, colori, Color};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, RefractiveIndex};
 use rust_rtc::math::MAX_RECURSIVE_DEPTH;
-use rust_rtc::patterns::{checkers_pattern};
+use rust_rtc::patterns::checkers_pattern;
 use rust_rtc::shapes::{plane, sphere};
 use rust_rtc::transformations::{rotation_x, scaling, translation, view_transform};
-use rust_rtc::tuples::{point, Point, vector};
+use rust_rtc::tuples::{point, vector, Point};
 use rust_rtc::world::world;
 use std::f64::consts::PI;
-use rand::prelude::*;
-use rand_xoshiro::Xoshiro256StarStar;
 
 fn main() {
     let mut w = world();
@@ -61,23 +61,34 @@ fn main() {
 
     // Pebbles
     for i in 0..num_pebbles {
-        let grey_level = { let v = rng.gen(); Color::new(v, v, v) };
+        let grey_level = {
+            let v = rng.gen();
+            Color::new(v, v, v)
+        };
         let size = 0.1 + rng.gen::<f64>() / 10.0;
         let pebble = Pebble {
-            position: point(spread * (rng.gen::<f64>() - 0.5),
-                            -size * rng.gen::<f64>(),
-                            spread * (rng.gen::<f64>() - 0.5)),
+            position: point(
+                spread * (rng.gen::<f64>() - 0.5),
+                -size * rng.gen::<f64>(),
+                spread * (rng.gen::<f64>() - 0.5),
+            ),
             size,
-            color: grey_level + Color::new(rng.gen::<f64>() / 10.0,
-                                           rng.gen::<f64>() / 10.0,
-                                           rng.gen::<f64>() / 10.0)
+            color: grey_level
+                + Color::new(
+                    rng.gen::<f64>() / 10.0,
+                    rng.gen::<f64>() / 10.0,
+                    rng.gen::<f64>() / 10.0,
+                ),
         };
 
         let mut object = sphere(i);
-        object.set_transform(&scaling(pebble.size, pebble.size, pebble.size)
-            .then(&translation(pebble.position.x(),
-                               -water_depth + pebble.position.y(),
-                               pebble.position.z())));
+        object.set_transform(
+            &scaling(pebble.size, pebble.size, pebble.size).then(&translation(
+                pebble.position.x(),
+                -water_depth + pebble.position.y(),
+                pebble.position.z(),
+            )),
+        );
         object.material.color = pebble.color;
         object.material.specular = 0.2;
         object.material.shininess = 10.0;
@@ -103,14 +114,21 @@ fn main() {
 
     //let resolution = Resolution::VGA;  // 640 x 480
     //let resolution = Resolution::XGA;  // 1024 x 768
-    let resolution = Resolution::QHD;  // 2560 x 1440
-    //let resolution = Resolution::UHD_4K;  // 3840 x 2160
+    let resolution = Resolution::QHD; // 2560 x 1440
+                                      //let resolution = Resolution::UHD_4K;  // 3840 x 2160
 
     let camera_transform = view_transform(
         &point(4.0, 4.0, -8.0),
         &point(0.0, 0.0, 0.0),
         &vector(0.0, 1.0, 0.0),
-    ).then(&translation(0.0, 0.0, 2.0));
+    )
+    .then(&translation(0.0, 0.0, 2.0));
 
-    rust_rtc::utils::render_world(&w, resolution, PI / 3.0, camera_transform, MAX_RECURSIVE_DEPTH);
+    rust_rtc::utils::render_world(
+        &w,
+        resolution,
+        PI / 3.0,
+        camera_transform,
+        MAX_RECURSIVE_DEPTH,
+    );
 }

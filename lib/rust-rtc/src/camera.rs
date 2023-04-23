@@ -10,8 +10,8 @@ use std::f64::consts::PI;
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct Resolution {
-    hsize: u32,  // pixel width
-    vsize: u32,  // pixel height
+    hsize: u32, // pixel width
+    vsize: u32, // pixel height
 }
 
 impl Resolution {
@@ -100,8 +100,7 @@ impl<'a> Camera<'a> {
     }
 
     pub fn render(&mut self, world: &World, max_recursive_depth: i32) -> Canvas {
-        let mut image = canvas(self.resolution.hsize,
-                               self.resolution.vsize);
+        let mut image = canvas(self.resolution.hsize, self.resolution.vsize);
 
         // {
         //     let ray = ray_for_pixel(self, self.hsize / 2, self.vsize / 2);
@@ -128,7 +127,11 @@ impl<'a> Default for Camera<'a> {
     fn default() -> Camera<'a> {
         let default_resolution = Resolution::new(100, 50);
         let default_field_of_view = PI / 3.0;
-        let c = calc_pixel_size(default_resolution.hsize, default_resolution.vsize, default_field_of_view);
+        let c = calc_pixel_size(
+            default_resolution.hsize,
+            default_resolution.vsize,
+            default_field_of_view,
+        );
 
         Camera {
             resolution: default_resolution,
@@ -256,7 +259,7 @@ mod tests {
         let to = point(0.0, 0.0, 0.0);
         let up = vector(0.0, 1.0, 0.0);
         c.set_transform(&view_transform(&from, &to, &up));
-        let image = render(&c, &w, 1);
+        let image = render(&mut c, &w, 1);
         assert_relative_eq!(
             image.pixel_at(5, 5),
             &color(0.38066, 0.47583, 0.2855),
