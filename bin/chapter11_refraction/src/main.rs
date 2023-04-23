@@ -6,7 +6,7 @@ use rust_rtc::materials::{default_material, RefractiveIndex};
 use rust_rtc::math::MAX_RECURSIVE_DEPTH;
 use rust_rtc::patterns::{blended_pattern, stripe_pattern};
 use rust_rtc::shapes::{plane, sphere};
-use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
+use rust_rtc::transformations::{rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::world::world;
 use std::f64::consts::PI;
@@ -39,8 +39,8 @@ fn main() {
     sphere1.material.diffuse = 0.1;
     sphere1.material.specular = 1.0;
     sphere1.material.shininess = 300.0;
-    sphere1.material.reflective = 1.0;//0.99;
-    sphere1.material.transparency = 1.0;//1;//0.99;
+    sphere1.material.reflective = 1.0; //0.99;
+    sphere1.material.transparency = 1.0; //1;//0.99;
     sphere1.material.refractive_index = RefractiveIndex::GLASS;
     w.add_object(sphere1);
 
@@ -131,11 +131,14 @@ fn main() {
     //let mut cam = camera(3840, 2160, PI / 3.0);
 
     // From the front
-    cam.set_transform(&view_transform(
-        &point(0.0, 2.5, -5.0),
-        &point(0.0, 0.5, 5.0),
-        &vector(0.0, 1.0, 0.0),
-    ).then(&translation(0.0, 0.0, -2.5)));
+    cam.set_transform(
+        &view_transform(
+            &point(0.0, 2.5, -5.0),
+            &point(0.0, 0.5, 5.0),
+            &vector(0.0, 1.0, 0.0),
+        )
+        .then(&translation(0.0, 0.0, -2.5)),
+    );
 
     // From above
     // cam.set_transform(&view_transform(

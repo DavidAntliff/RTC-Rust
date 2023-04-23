@@ -191,12 +191,12 @@ pub fn schlick(comps: &IntersectionComputation) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    use approx::assert_relative_eq;
     use super::*;
     use crate::rays::ray;
     use crate::shapes::{glass_sphere, plane, sphere};
     use crate::transformations::{scaling, translation};
     use crate::tuples::{point, vector};
+    use approx::assert_relative_eq;
     use rstest::rstest;
 
     // An intersection encapsulates t and object
@@ -382,10 +382,11 @@ mod tests {
     fn schlick_approximation_under_total_internal_reflection() {
         let shape = glass_sphere();
         let k = f64::sqrt(2.0) / 2.0;
-        let r = ray(point(0.0, 0.0 , k), vector(0.0, 1.0, 0.0));
+        let r = ray(point(0.0, 0.0, k), vector(0.0, 1.0, 0.0));
         let xs = intersections!(
             Intersection::new(-k, Some(&shape)),
-            Intersection::new(k, Some(&shape)));
+            Intersection::new(k, Some(&shape))
+        );
         let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
         let reflectance = schlick(&comps);
         assert_eq!(reflectance, 1.0);
@@ -395,25 +396,26 @@ mod tests {
     #[test]
     fn schlick_approximation_with_perpendicular_view_angle() {
         let mut shape = glass_sphere();
-        shape.material.refractive_index = 1.5;  // tests assume glass_sphere() uses ri = 1.5
-        let r = ray(point(0.0, 0.0 , 0.0), vector(0.0, 1.0, 0.0));
+        shape.material.refractive_index = 1.5; // tests assume glass_sphere() uses ri = 1.5
+        let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 1.0, 0.0));
         let xs = intersections!(
             Intersection::new(-1.0, Some(&shape)),
-            Intersection::new(1.0, Some(&shape)));
+            Intersection::new(1.0, Some(&shape))
+        );
         let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
         let reflectance = schlick(&comps);
-        assert_relative_eq!(reflectance, 0.04, epsilon=1e-5);
+        assert_relative_eq!(reflectance, 0.04, epsilon = 1e-5);
     }
 
     // The Schlick approximation with a small angle and n2 > n1
     #[test]
     fn schlick_approximation_with_small_angle_n2_gt_n1() {
         let mut shape = glass_sphere();
-        shape.material.refractive_index = 1.5;  // tests assume glass_sphere() uses ri = 1.5
+        shape.material.refractive_index = 1.5; // tests assume glass_sphere() uses ri = 1.5
         let r = ray(point(0.0, 0.99, -2.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(Intersection::new(1.8589, Some(&shape)));
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let reflectance = schlick(&comps);
-        assert_relative_eq!(reflectance, 0.48873, epsilon=1e-5);
+        assert_relative_eq!(reflectance, 0.48873, epsilon = 1e-5);
     }
 }

@@ -1,7 +1,10 @@
 // Chapter 7: Making a Scene
 
 use crate::colors::{color, Color};
-use crate::intersections::{hit, intersect, prepare_computations_for_refraction, IntersectionComputation, Intersections, schlick};
+use crate::intersections::{
+    hit, intersect, prepare_computations_for_refraction, schlick, IntersectionComputation,
+    Intersections,
+};
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
 use crate::rays::{ray, Ray};
@@ -82,7 +85,7 @@ impl World {
         let refracted = self.refracted_color(comps, depth);
 
         if comps.object.material.reflective > 0.0 && comps.object.material.transparency > 0.0 {
-            let reflectance = schlick(&comps);
+            let reflectance = schlick(comps);
             surface + reflected * reflectance + refracted * (1.0 - reflectance)
         } else {
             surface + reflected + refracted
@@ -444,8 +447,8 @@ mod tests {
         let shape = &w.objects[0];
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(
-            Intersection::new(4.0, Some(&shape)),
-            Intersection::new(6.0, Some(&shape))
+            Intersection::new(4.0, Some(shape)),
+            Intersection::new(6.0, Some(shape))
         );
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
@@ -464,8 +467,8 @@ mod tests {
         let shape = &w.objects[0];
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(
-            Intersection::new(4.0, Some(&shape)),
-            Intersection::new(6.0, Some(&shape))
+            Intersection::new(4.0, Some(shape)),
+            Intersection::new(6.0, Some(shape))
         );
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 0);
@@ -485,8 +488,8 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 0.0, k), vector(0.0, 1.0, 0.0));
         let xs = intersections!(
-            Intersection::new(-k, Some(&shape)),
-            Intersection::new(k, Some(&shape))
+            Intersection::new(-k, Some(shape)),
+            Intersection::new(k, Some(shape))
         );
         // Since we're inside the sphere, need to look at the *second* intersection: xs[1]
         let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
@@ -513,10 +516,10 @@ mod tests {
 
         let r = ray(point(0.0, 0.0, 0.1), vector(0.0, 1.0, 0.0));
         let xs = intersections!(
-            Intersection::new(-0.9899, Some(&a)),
-            Intersection::new(-0.4899, Some(&b)),
-            Intersection::new(0.4899, Some(&b)),
-            Intersection::new(0.9899, Some(&a))
+            Intersection::new(-0.9899, Some(a)),
+            Intersection::new(-0.4899, Some(b)),
+            Intersection::new(0.4899, Some(b)),
+            Intersection::new(0.9899, Some(a))
         );
         let comps = prepare_computations_for_refraction(&xs[2], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
