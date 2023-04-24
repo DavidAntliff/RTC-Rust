@@ -28,30 +28,19 @@ pub struct Material {
     pub transparency: f64,
     pub refractive_index: f64,
     pub casts_shadow: bool,
+    pub receives_shadow: bool,
     pattern: Option<Box<Pattern>>,
 }
 
 impl Material {
     // TODO: builder pattern?
-    pub fn new(
-        color: Color,
-        ambient: f64,
-        diffuse: f64,
-        specular: f64,
-        shininess: f64,
-        reflective: f64,
-        transparency: f64,
-        refractive_index: f64,
-    ) -> Self {
+    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64) -> Self {
         Material {
             color,
             ambient,
             diffuse,
             specular,
             shininess,
-            reflective,
-            transparency,
-            refractive_index,
             ..Default::default()
         }
     }
@@ -143,6 +132,7 @@ impl Default for Material {
             transparency: 0.0,
             refractive_index: RefractiveIndex::AIR,
             casts_shadow: true,
+            receives_shadow: true,
             pattern: None,
         }
     }
@@ -159,20 +149,8 @@ pub fn material(
     diffuse: f64,
     specular: f64,
     shininess: f64,
-    reflective: f64,
-    transparency: f64,
-    refractive_index: f64,
 ) -> Material {
-    Material::new(
-        color,
-        ambient,
-        diffuse,
-        specular,
-        shininess,
-        reflective,
-        transparency,
-        refractive_index,
-    )
+    Material::new(color, ambient, diffuse, specular, shininess)
 }
 
 pub fn lighting(

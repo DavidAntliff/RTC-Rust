@@ -1,5 +1,6 @@
 // Chapter 9: Planes
 
+use crate::cubes::Cube;
 use crate::intersections::Intersections;
 use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
@@ -33,9 +34,17 @@ impl Shape {
         shape.material.refractive_index = RefractiveIndex::GLASS;
         shape
     }
+
     pub fn plane() -> Shape {
         Shape {
             shape: ShapeEnum::Plane(Plane::new()),
+            ..Default::default()
+        }
+    }
+
+    pub fn cube() -> Shape {
+        Shape {
+            shape: ShapeEnum::Cube(Cube::new()),
             ..Default::default()
         }
     }
@@ -58,7 +67,7 @@ impl Shape {
         // https://stackoverflow.com/questions/13654401/why-transform-normals-with-the-transpose-of-the-inverse-of-the-modelview-matrix
         let inverse_transform = inverse(&self.transform);
         let local_point = inverse_transform * world_point;
-        let local_normal = self.shape.local_normal_at(&local_point);
+        let local_normal = self.local_normal_at(&local_point);
         let mut world_normal = transpose(&inverse_transform) * local_normal;
         world_normal.set_w(0.0);
         normalize(&world_normal)
@@ -69,6 +78,7 @@ impl Shape {
 pub enum ShapeEnum {
     Sphere(Sphere),
     Plane(Plane),
+    Cube(Cube),
 }
 
 impl Default for ShapeEnum {
@@ -82,11 +92,22 @@ pub trait ShapeTrait {
     fn local_normal_at(&self, local_point: &Point) -> Vector;
 }
 
+impl ShapeTrait for Shape {
+    fn local_intersect(&self, local_ray: &Ray) -> Intersections {
+        self.shape.local_intersect(local_ray)
+    }
+
+    fn local_normal_at(&self, local_point: &Point) -> Vector {
+        self.shape.local_normal_at(local_point)
+    }
+}
+
 impl ShapeTrait for ShapeEnum {
     fn local_intersect(&self, local_ray: &Ray) -> Intersections {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_intersect(local_ray),
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
+            ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
         }
     }
 
@@ -94,6 +115,7 @@ impl ShapeTrait for ShapeEnum {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_normal_at(local_point),
             ShapeEnum::Plane(ref plane) => plane.local_normal_at(local_point),
+            ShapeEnum::Cube(ref cube) => cube.local_normal_at(local_point),
         }
     }
 }
@@ -112,6 +134,10 @@ pub fn glass_sphere() -> Shape {
 
 pub fn plane() -> Shape {
     Shape::plane()
+}
+
+pub fn cube() -> Shape {
+    Shape::cube()
 }
 
 #[cfg(test)]
@@ -207,7 +233,6 @@ mod test {
         let m = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
         s.set_transform(&m);
         let k = f64::sqrt(2.0) / 2.0;
-        //let n = s.shape.local_normal_at(&point(0.0, k, -k));
         let n = s.normal_at(&point(0.0, k, -k));
         assert_relative_eq!(n, vector(0.0, 0.97014, -0.24245), epsilon = 1e-4);
     }

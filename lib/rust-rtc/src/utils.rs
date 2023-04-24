@@ -27,6 +27,10 @@ pub struct Cli {
     #[arg(short = 'r', long = "resolution", value_enum)]
     pub resolution: Option<Resolutions>,
 
+    /// Generate low-resolution draft in selected aspect ratio
+    #[arg(short = 'j', long = "draft")]
+    pub draft: bool,
+
     /// Custom horizontal size (width) in pixels
     #[arg(short = 'x', long = "hsize")]
     #[arg(value_parser = clap::value_parser!(u32).range(1..))]
@@ -90,9 +94,18 @@ pub fn get_resolution(cli: &Cli, default: Resolution) -> Resolution {
         _ => base,
     };
 
-    match cli.vsize {
+    let base = match cli.vsize {
         Some(v) => Resolution { vsize: v, ..base },
         _ => base,
+    };
+
+    if cli.draft {
+        Resolution {
+            hsize: base.hsize / 4,
+            vsize: base.vsize / 4,
+        }
+    } else {
+        base
     }
 }
 

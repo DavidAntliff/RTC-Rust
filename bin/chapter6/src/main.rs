@@ -74,7 +74,7 @@ fn main() {
             if let Some(h) = hit(&mut xs) {
                 if let Some(object) = h.object {
                     let point = r.position(h.t);
-                    let normal = object.shape.local_normal_at(&point);
+                    let normal = object.local_normal_at(&point);
                     let eye = -r.direction;
 
                     let color = lighting(

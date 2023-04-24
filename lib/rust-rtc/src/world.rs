@@ -82,7 +82,7 @@ impl World {
 
     // Returns the color at the intersection encapsulated by comps, in the given world.
     fn shade_hit(&self, comps: &IntersectionComputation, depth: i32) -> Color {
-        let shadowed = self.is_shadowed(&comps.over_point);
+        let shadowed = comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point);
         let surface = comps.object.material.lighting(
             comps.object,
             &self.light,
@@ -170,7 +170,7 @@ pub fn default_world() -> World {
 
     let mut objects = vec![];
 
-    let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0, 0.0, 0.0, 1.0);
+    let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0);
     let mut s1 = sphere(1);
     s1.material = m;
     objects.push(s1);
@@ -232,7 +232,7 @@ mod tests {
     #[test]
     fn creating_the_default_world() {
         let light = point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
-        let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0, 0.0, 0.0, 1.0);
+        let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0);
         let mut s1 = sphere(1);
         s1.material = m;
         let mut s2 = sphere(2);

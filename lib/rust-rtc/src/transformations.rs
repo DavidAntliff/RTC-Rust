@@ -13,6 +13,18 @@ pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     ])
 }
 
+pub fn translate_x(x: f64) -> Matrix4 {
+    translation(x, 0.0, 0.0)
+}
+
+pub fn translate_y(y: f64) -> Matrix4 {
+    translation(0.0, y, 0.0)
+}
+
+pub fn translate_z(z: f64) -> Matrix4 {
+    translation(0.0, 0.0, z)
+}
+
 #[rustfmt::skip]
 pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     matrix4(&[
@@ -21,6 +33,10 @@ pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
         [0.0, 0.0,   z, 0.0],
         [0.0, 0.0, 0.0, 1.0],
     ])
+}
+
+pub fn uniform_scaling(s: f64) -> Matrix4 {
+    scaling(s, s, s)
 }
 
 #[rustfmt::skip]
