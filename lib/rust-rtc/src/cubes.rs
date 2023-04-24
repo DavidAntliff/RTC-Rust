@@ -30,10 +30,21 @@ impl Cube {
     pub fn local_intersect(&self, local_ray: &Ray) -> Intersections {
         let (xtmin, xtmax) = check_axis(local_ray.origin.x(), local_ray.direction.x());
         let (ytmin, ytmax) = check_axis(local_ray.origin.y(), local_ray.direction.y());
+
+        // Optimisation: Early exit on miss.
+        // If the maximum min value is already greater than the minimum max value, then
+        // the contribution from the Z axis can only make this condition stronger.
+        let xymin = f64::max(xtmin, ytmin);
+        let xymax = f64::min(xtmax, ytmax);
+        if xymin > xymax {
+            return intersections![];
+        }
+
+        // However, the ray may still miss, so we must test Z as well:
         let (ztmin, ztmax) = check_axis(local_ray.origin.z(), local_ray.direction.z());
 
-        let tmin = f64::max(f64::max(xtmin, ytmin), ztmin);
-        let tmax = f64::min(f64::min(xtmax, ytmax), ztmax);
+        let tmin = f64::max(xymin, ztmin);
+        let tmax = f64::min(xymax, ztmax);
 
         if tmin > tmax {
             intersections![]
