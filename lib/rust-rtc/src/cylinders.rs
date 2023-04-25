@@ -2,12 +2,24 @@ use crate::intersections::{intersections, Intersection, Intersections};
 use crate::rays::Ray;
 use crate::tuples::{vector, Point, Vector};
 
-#[derive(Debug, PartialEq, Default, Copy, Clone)]
-pub struct Cylinder {}
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct Cylinder {
+    pub minimum_y: f64, // exclusive Y coordinates in object space
+    pub maximum_y: f64,
+}
+
+impl Default for Cylinder {
+    fn default() -> Self {
+        Cylinder {
+            minimum_y: -f64::INFINITY,
+            maximum_y: f64::INFINITY,
+        }
+    }
+}
 
 impl Cylinder {
     pub fn new() -> Self {
-        Cylinder {}
+        Cylinder::default()
     }
 
     pub fn local_normal_at(&self, local_point: &Point) -> Vector {
@@ -38,7 +50,28 @@ impl Cylinder {
         } else {
             let t0 = (-b - disc.sqrt()) / (2.0 * a);
             let t1 = (-b + disc.sqrt()) / (2.0 * a);
-            intersections!(Intersection::new(t0, None), Intersection::new(t1, None))
+
+            // Book (page 184) shows swap(t0, t1) but it breaks tests:
+            // let (t0, t1) = if t0 > 1.0 {
+            //     (t1, t0)
+            // } else {
+            //     (t0, t1)
+            // };
+
+            // Check for truncation:
+            let mut xs: Intersections = vec![];
+
+            let y0 = local_ray.origin.y() + t0 * local_ray.direction.y();
+            if self.minimum_y < y0 && y0 < self.maximum_y {
+                xs.push(Intersection::new(t0, None));
+            }
+
+            let y1 = local_ray.origin.y() + t1 * local_ray.direction.y();
+            if self.minimum_y < y1 && y1 < self.maximum_y {
+                xs.push(Intersection::new(t1, None));
+            }
+
+            xs
         }
     }
 }
@@ -120,5 +153,46 @@ mod tests {
         let cyl = cylinder();
         let n = local_normal_at(&cyl, &item.origin);
         assert_eq!(n, item.direction);
+    }
+
+    // The default minimum and maximum for a cylinder
+    #[test]
+    fn default_minimum_and_maximum() {
+        let cyl = cylinder();
+        assert_eq!(cyl.minimum_y, -f64::INFINITY);
+        assert_eq!(cyl.maximum_y, f64::INFINITY);
+    }
+
+    struct TestItem2 {
+        point: Point,
+        direction: Vector,
+        count: usize,
+    }
+
+    impl TestItem2 {
+        fn new(point: Point, direction: Vector, count: usize) -> Self {
+            TestItem2 {
+                point,
+                direction,
+                count,
+            }
+        }
+    }
+
+    #[rstest]
+    #[case(TestItem2::new(point(0.0, 1.5, 0.0), vector(0.1, 1.0, 0.0), 0))]
+    #[case(TestItem2::new(point(0.0, 3.0, -5.0), vector(0.0, 0.0, 1.0), 0))]
+    #[case(TestItem2::new(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0), 0))]
+    #[case(TestItem2::new(point(0.0, 2.0, -5.0), vector(0.0, 0.0, 1.0), 0))]
+    #[case(TestItem2::new(point(0.0, 1.0, -5.0), vector(0.0, 0.0, 1.0), 0))]
+    #[case(TestItem2::new(point(0.0, 1.5, -2.0), vector(0.0, 0.0, 1.0), 2))]
+    fn intersecting_constrained_cylinder(#[case] item: TestItem2) {
+        let mut cyl = cylinder();
+        cyl.minimum_y = 1.0;
+        cyl.maximum_y = 2.0;
+        let direction = item.direction.normalize();
+        let r = ray(item.point, direction);
+        let xs = local_intersect(&cyl, &r);
+        assert_eq!(xs.len(), item.count);
     }
 }

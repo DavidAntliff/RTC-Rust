@@ -1,7 +1,7 @@
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 
-use rust_rtc::shapes::{infinite_cylinder};
+use rust_rtc::shapes::cylinder;
 use rust_rtc::transformations::{
     rotation_x, rotation_z, translate_y, translate_z, translation, view_transform,
 };
@@ -17,7 +17,9 @@ fn main() -> ExitCode {
 
     let mut w = world();
 
-    let mut cyl1 = infinite_cylinder();
+    let cyl_len = 4.0;
+
+    let mut cyl1 = cylinder(-cyl_len * 1.5, false, cyl_len, false);
     cyl1.material.color = color(0.722, 0.451, 0.20);
     cyl1.material.specular = 1.0;
     cyl1.material.shininess = 10.0;
@@ -25,7 +27,7 @@ fn main() -> ExitCode {
     cyl1.material.reflective = 0.9;
     w.add_object(cyl1);
 
-    let mut cyl2 = infinite_cylinder();
+    let mut cyl2 = cylinder(-cyl_len * 2.0, false, cyl_len * 4.0, false);
     cyl2.set_transform(
         &rotation_z(PI / 4.0)
             .then(&rotation_x(PI / 2.0))
@@ -38,7 +40,7 @@ fn main() -> ExitCode {
     cyl2.material.reflective = 0.9;
     w.add_object(cyl2);
 
-    let mut cyl3 = infinite_cylinder();
+    let mut cyl3 = cylinder(-cyl_len * 2.0, false, cyl_len * 3.0, false);
     cyl3.set_transform(
         &rotation_z(-PI / 4.0)
             .then(&rotation_x(PI / 2.0))
@@ -52,8 +54,8 @@ fn main() -> ExitCode {
     cyl3.material.reflective = 0.9;
     w.add_object(cyl3);
 
-    let mut cyl4 = infinite_cylinder();
-    cyl4.set_transform(&translation(25.0, 0.0, 25.0));
+    let mut cyl4 = cylinder(-cyl_len * 3.0, false, -cyl_len * 1.5, false);
+    cyl4.set_transform(&translation(-10.5, 0.0, 10.0));
     cyl4.material.color = color(0.7922, 0.80, 0.8078);
     cyl4.material.diffuse = 0.3;
     cyl4.material.specular = 0.8;
@@ -61,6 +63,16 @@ fn main() -> ExitCode {
     cyl4.material.shininess = 10.0;
     cyl4.material.reflective = 0.5;
     w.add_object(cyl4);
+
+    let mut cyl5 = cylinder(-cyl_len * 1.0, false, cyl_len * 1.0, false);
+    cyl5.set_transform(&rotation_x(-PI / 2.0).then(&translation(3.0, 4.0, -4.0)));
+    cyl5.material.color = color(0.7922, 0.80, 0.8078);
+    cyl5.material.diffuse = 0.3;
+    cyl5.material.specular = 0.8;
+    cyl5.material.shininess = 100.0;
+    cyl5.material.shininess = 10.0;
+    cyl5.material.reflective = 0.5;
+    w.add_object(cyl5);
 
     w.add_light(point_light(point(-2.0, 5.0, -10.0), color(1.0, 1.0, 1.0)));
 

@@ -50,7 +50,17 @@ impl Shape {
         }
     }
 
-    pub fn cylinder() -> Shape {
+    pub fn cylinder(min_y: f64, min_cap: bool, max_y: f64, max_cap: bool) -> Shape {
+        let mut cyl = Cylinder::new();
+        cyl.minimum_y = min_y;
+        cyl.maximum_y = max_y;
+        Shape {
+            shape: ShapeEnum::Cylinder(cyl),
+            ..Default::default()
+        }
+    }
+
+    pub fn infinite_cylinder() -> Shape {
         Shape {
             shape: ShapeEnum::Cylinder(Cylinder::new()),
             ..Default::default()
@@ -151,8 +161,12 @@ pub fn cube() -> Shape {
     Shape::cube()
 }
 
-pub fn cylinder() -> Shape {
-    Shape::cylinder()
+pub fn infinite_cylinder() -> Shape {
+    Shape::infinite_cylinder()
+}
+
+pub fn cylinder(min_y: f64, min_cap: bool, max_y: f64, max_cap: bool) -> Shape {
+    Shape::cylinder(min_y, min_cap, max_y, max_cap)
 }
 
 #[cfg(test)]
