@@ -1,6 +1,7 @@
 // Chapter 9: Planes
 
 use crate::cubes::Cube;
+use crate::cylinders::Cylinder;
 use crate::intersections::Intersections;
 use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
@@ -49,6 +50,13 @@ impl Shape {
         }
     }
 
+    pub fn cylinder() -> Shape {
+        Shape {
+            shape: ShapeEnum::Cylinder(Cylinder::new()),
+            ..Default::default()
+        }
+    }
+
     pub fn set_transform(&mut self, m: &Matrix4) {
         self.transform = *m;
         self.inverse_transform = self.transform.inverse();
@@ -79,6 +87,7 @@ pub enum ShapeEnum {
     Sphere(Sphere),
     Plane(Plane),
     Cube(Cube),
+    Cylinder(Cylinder),
 }
 
 impl Default for ShapeEnum {
@@ -108,6 +117,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Sphere(ref sphere) => sphere.local_intersect(local_ray),
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
             ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
+            ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
         }
     }
 
@@ -116,6 +126,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Sphere(ref sphere) => sphere.local_normal_at(local_point),
             ShapeEnum::Plane(ref plane) => plane.local_normal_at(local_point),
             ShapeEnum::Cube(ref cube) => cube.local_normal_at(local_point),
+            ShapeEnum::Cylinder(ref cylinder) => cylinder.local_normal_at(local_point),
         }
     }
 }
@@ -138,6 +149,10 @@ pub fn plane() -> Shape {
 
 pub fn cube() -> Shape {
     Shape::cube()
+}
+
+pub fn cylinder() -> Shape {
+    Shape::cylinder()
 }
 
 #[cfg(test)]
