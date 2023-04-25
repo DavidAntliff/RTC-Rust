@@ -2,6 +2,16 @@
 
 ![workflow](https://github.com/DavidAntliff/RTC-Rust/actions/workflows/rust.yml/badge.svg)
 
+![chapter11_refraction_20230423_123159.png](images%2Fchapter11%2Fchapter11_refraction_20230423_123159.png)
+
+Based on the book ["The Ray Tracer Challenge"](http://raytracerchallenge.com/) by Jamis Buck, 1st Edition 2019.
+
+Written in Rust 2021, with some code ported from [RTC-CPP](https://github.com/DavidAntliff/RTC-CPP), a partial implementation in C++20.
+
+## Gallery
+
+[Here](images/gallery.md)
+
 ## TODO
 
 Apart from continuing through the book:
@@ -197,3 +207,4 @@ $ MAGICK_CONFIGURE_PATH=. convert -verbose image.ppm hires.png
 image.ppm PPM 20480x15360 20480x15360+0+0 8-bit sRGB 2.68126GiB 18.050u 0:18.058
 image.ppm=>hires.png PPM 20480x15360 20480x15360+0+0 8-bit sRGB 21.1562MiB 13.000u 0:10.258
 ```
+
