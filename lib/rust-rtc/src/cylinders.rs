@@ -32,9 +32,9 @@ impl Cylinder {
         // projected onto the XZ plane, provided the cylinder is not truncated at that point.
         let dist = local_point.x() * local_point.x() + local_point.z() * local_point.z();
 
-        if dist < 1.0 && local_point.y() >= self.maximum_y - EPSILON {
+        if self.closed_max && dist < 1.0 && local_point.y() >= self.maximum_y - EPSILON {
             vector(0.0, 1.0, 0.0)
-        } else if dist < 1.0 && local_point.y() <= self.minimum_y + EPSILON {
+        } else if self.closed_min && dist < 1.0 && local_point.y() <= self.minimum_y + EPSILON {
             vector(0.0, -1.0, 0.0)
         } else {
             vector(local_point.x(), 0.0, local_point.z())
@@ -90,18 +90,22 @@ impl Cylinder {
             return;
         }
 
-        // Check for an intersection with the lower end cap by intersecting with
-        // the plane at y = self.minimum_y
-        let t = (self.minimum_y - ray.origin.y()) / ray.direction.y();
-        if check_cap(ray, t) {
-            xs.push(Intersection::new(t, None));
+        if self.closed_min {
+            // Check for an intersection with the lower end cap by intersecting with
+            // the plane at y = self.minimum_y
+            let t = (self.minimum_y - ray.origin.y()) / ray.direction.y();
+            if check_cap(ray, t) {
+                xs.push(Intersection::new(t, None));
+            }
         }
 
-        // Check for an intersection with the upper end cap by intersecting with
-        // the plane at y = self.maximum_y
-        let t = (self.maximum_y - ray.origin.y()) / ray.direction.y();
-        if check_cap(ray, t) {
-            xs.push(Intersection::new(t, None));
+        if self.closed_max {
+            // Check for an intersection with the upper end cap by intersecting with
+            // the plane at y = self.maximum_y
+            let t = (self.maximum_y - ray.origin.y()) / ray.direction.y();
+            if check_cap(ray, t) {
+                xs.push(Intersection::new(t, None));
+            }
         }
     }
 }

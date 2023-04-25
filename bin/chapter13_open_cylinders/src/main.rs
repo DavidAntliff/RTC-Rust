@@ -23,7 +23,9 @@ fn main() -> ExitCode {
     let mut cyl1 = infinite_cylinder();
     let cyl_prim = cyl1.as_cylinder_primitive().expect("should be a cylinder");
     cyl_prim.minimum_y = -cyl_len * 1.5;
-    cyl_prim.maximum_y = cyl_len * 1.0;
+    cyl_prim.maximum_y = cyl_len * 0.5;
+    cyl_prim.closed_min = false;
+    cyl_prim.closed_max = false;
     cyl1.material.color = color(0.722, 0.451, 0.20);
     cyl1.material.specular = 1.0;
     cyl1.material.shininess = 10.0;

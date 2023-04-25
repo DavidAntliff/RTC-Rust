@@ -1,5 +1,5 @@
 [package]
-name = "chapter13_capped_cylinders"
+name = "chapter13_open_cylinders"
 version = "0.1.0"
 edition = "2021"
 

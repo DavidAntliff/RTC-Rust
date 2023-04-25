@@ -1,5 +1,5 @@
 [package]
-name = "chapter13_cylinders"
+name = "chapter13_half_open_cylinders"
 version = "0.1.0"
 edition = "2021"
 
