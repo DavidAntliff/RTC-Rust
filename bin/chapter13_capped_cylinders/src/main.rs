@@ -19,11 +19,13 @@ fn main() -> ExitCode {
 
     let cyl_len = 4.0;
 
-    //let mut cyl1 = cylinder(-cyl_len * 1.5, cyl_len, false, false);
+    //let mut cyl1 = cylinder(-cyl_len * 1.5, cyl_len, true, true);
     let mut cyl1 = infinite_cylinder();
     let cyl_prim = cyl1.as_cylinder_primitive().expect("should be a cylinder");
     cyl_prim.minimum_y = -cyl_len * 1.5;
-    cyl_prim.maximum_y = cyl_len * 1.0;
+    cyl_prim.maximum_y = cyl_len * 0.5;
+    cyl_prim.closed_min = true;
+    cyl_prim.closed_max = true;
     cyl1.material.color = color(0.722, 0.451, 0.20);
     cyl1.material.specular = 1.0;
     cyl1.material.shininess = 10.0;
@@ -31,7 +33,7 @@ fn main() -> ExitCode {
     cyl1.material.reflective = 0.9;
     w.add_object(cyl1);
 
-    let mut cyl2 = cylinder(-cyl_len * 2.0, cyl_len * 4.0, false, false);
+    let mut cyl2 = cylinder(-cyl_len * 2.0, cyl_len * 4.0, true, true);
     cyl2.set_transform(
         &rotation_z(PI / 4.0)
             .then(&rotation_x(PI / 2.0))
@@ -44,7 +46,7 @@ fn main() -> ExitCode {
     cyl2.material.reflective = 0.9;
     w.add_object(cyl2);
 
-    let mut cyl3 = cylinder(-cyl_len * 2.0, cyl_len * 3.0, false, false);
+    let mut cyl3 = cylinder(-cyl_len * 2.0, cyl_len * 3.0, true, true);
     cyl3.set_transform(
         &rotation_z(-PI / 4.0)
             .then(&rotation_x(PI / 2.0))
@@ -58,7 +60,7 @@ fn main() -> ExitCode {
     cyl3.material.reflective = 0.9;
     w.add_object(cyl3);
 
-    let mut cyl4 = cylinder(-cyl_len * 3.0, -cyl_len * 1.5, false, false);
+    let mut cyl4 = cylinder(-cyl_len * 3.0, -cyl_len * 1.5, true, true);
     cyl4.set_transform(&translation(-10.5, 0.0, 10.0));
     cyl4.material.color = color(0.7922, 0.80, 0.8078);
     cyl4.material.diffuse = 0.3;
@@ -68,7 +70,7 @@ fn main() -> ExitCode {
     cyl4.material.reflective = 0.5;
     w.add_object(cyl4);
 
-    let mut cyl5 = cylinder(-cyl_len * 1.0, cyl_len * 1.0, false, false);
+    let mut cyl5 = cylinder(-cyl_len * 1.0, cyl_len * 1.0, true, true);
     cyl5.set_transform(&rotation_x(-PI / 2.0).then(&translation(3.0, 4.0, -4.0)));
     cyl5.material.color = color(0.7922, 0.80, 0.8078);
     cyl5.material.diffuse = 0.3;

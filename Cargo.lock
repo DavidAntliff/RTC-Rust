@@ -200,6 +200,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter13_capped_cylinders"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter13_cylinders"
 version = "0.1.0"
 dependencies = [

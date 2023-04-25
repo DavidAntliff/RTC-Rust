@@ -7,6 +7,7 @@ use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
 use crate::planes::Plane;
 use crate::rays::Ray;
+use crate::shapes;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
 
@@ -50,12 +51,15 @@ impl Shape {
         }
     }
 
-    pub fn cylinder(min_y: f64, min_cap: bool, max_y: f64, max_cap: bool) -> Shape {
-        let mut cyl = Cylinder::new();
-        cyl.minimum_y = min_y;
-        cyl.maximum_y = max_y;
+    pub fn cylinder(minimum_y: f64, maximum_y: f64, closed_min: bool, closed_max: bool) -> Shape {
         Shape {
-            shape: ShapeEnum::Cylinder(cyl),
+            //shape: ShapeEnum::Cylinder(cyl),
+            shape: ShapeEnum::Cylinder(Cylinder {
+                minimum_y,
+                maximum_y,
+                closed_min,
+                closed_max,
+            }),
             ..Default::default()
         }
     }
@@ -64,6 +68,21 @@ impl Shape {
         Shape {
             shape: ShapeEnum::Cylinder(Cylinder::new()),
             ..Default::default()
+        }
+    }
+
+    // Functions to extract primitive type
+    pub fn as_sphere_primitive(&mut self) -> Option<&mut shapes::Sphere> {
+        match self.shape {
+            ShapeEnum::Sphere(ref mut x) => Some(x),
+            _ => None,
+        }
+    }
+
+    pub fn as_cylinder_primitive(&mut self) -> Option<&mut shapes::Cylinder> {
+        match self.shape {
+            ShapeEnum::Cylinder(ref mut x) => Some(x),
+            _ => None,
         }
     }
 
@@ -165,8 +184,8 @@ pub fn infinite_cylinder() -> Shape {
     Shape::infinite_cylinder()
 }
 
-pub fn cylinder(min_y: f64, min_cap: bool, max_y: f64, max_cap: bool) -> Shape {
-    Shape::cylinder(min_y, min_cap, max_y, max_cap)
+pub fn cylinder(min_y: f64, max_y: f64, closed_min: bool, closed_max: bool) -> Shape {
+    Shape::cylinder(min_y, max_y, closed_min, closed_max)
 }
 
 #[cfg(test)]
@@ -282,5 +301,19 @@ mod test {
         m.ambient = 1.0;
         s.material = m.clone();
         assert_eq!(s.material, m);
+    }
+
+    // Get access to internal primitive type
+    #[test]
+    fn get_primitive_shape() {
+        let mut s = sphere(42);
+        let primitive = match s.shape {
+            ShapeEnum::Sphere(x) => x,
+            _ => panic!("bad"),
+        };
+        assert_eq!(primitive.id, 42);
+
+        let primitive2 = s.as_sphere_primitive();
+        assert_eq!(primitive2.unwrap(), &primitive);
     }
 }

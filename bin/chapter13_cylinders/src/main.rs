@@ -1,7 +1,7 @@
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 
-use rust_rtc::shapes::{infinite_cylinder};
+use rust_rtc::shapes::infinite_cylinder;
 use rust_rtc::transformations::{
     rotation_x, rotation_z, translate_y, translate_z, translation, view_transform,
 };
