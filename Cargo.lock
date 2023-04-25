@@ -200,6 +200,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter13_cones"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter13_half_open_cylinders"
 version = "0.1.0"
 dependencies = [

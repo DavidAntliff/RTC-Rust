@@ -1,5 +1,6 @@
 // Chapter 9: Planes
 
+use crate::cones::Cone;
 use crate::cubes::Cube;
 use crate::cylinders::Cylinder;
 use crate::intersections::Intersections;
@@ -71,6 +72,18 @@ impl Shape {
         }
     }
 
+    pub fn cone() -> Shape {
+        Shape {
+            shape: ShapeEnum::Cone(Cone {
+                minimum_y: -1.0,
+                maximum_y: 0.0,
+                closed_min: true,
+                closed_max: true,
+            }),
+            ..Default::default()
+        }
+    }
+
     // Functions to extract primitive type
     pub fn as_sphere_primitive(&mut self) -> Option<&mut shapes::Sphere> {
         match self.shape {
@@ -82,6 +95,13 @@ impl Shape {
     pub fn as_cylinder_primitive(&mut self) -> Option<&mut shapes::Cylinder> {
         match self.shape {
             ShapeEnum::Cylinder(ref mut x) => Some(x),
+            _ => None,
+        }
+    }
+
+    pub fn as_cone_primitive(&mut self) -> Option<&mut shapes::Cone> {
+        match self.shape {
+            ShapeEnum::Cone(ref mut x) => Some(x),
             _ => None,
         }
     }
@@ -117,6 +137,7 @@ pub enum ShapeEnum {
     Plane(Plane),
     Cube(Cube),
     Cylinder(Cylinder),
+    Cone(Cone),
 }
 
 impl Default for ShapeEnum {
@@ -147,6 +168,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
             ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
+            ShapeEnum::Cone(ref cone) => cone.local_intersect(local_ray),
         }
     }
 
@@ -156,6 +178,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Plane(ref plane) => plane.local_normal_at(local_point),
             ShapeEnum::Cube(ref cube) => cube.local_normal_at(local_point),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_normal_at(local_point),
+            ShapeEnum::Cone(ref cone) => cone.local_normal_at(local_point),
         }
     }
 }
@@ -186,6 +209,10 @@ pub fn infinite_cylinder() -> Shape {
 
 pub fn cylinder(min_y: f64, max_y: f64, closed_min: bool, closed_max: bool) -> Shape {
     Shape::cylinder(min_y, max_y, closed_min, closed_max)
+}
+
+pub fn cone() -> Shape {
+    Shape::cone()
 }
 
 #[cfg(test)]

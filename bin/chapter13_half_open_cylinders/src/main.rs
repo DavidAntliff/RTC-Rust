@@ -1,11 +1,8 @@
 use rust_rtc::colors::color;
 use rust_rtc::lights::point_light;
 
-use rust_rtc::shapes::{cylinder};
-use rust_rtc::transformations::{
-    rotation_x, rotation_y, scaling, translation,
-    view_transform,
-};
+use rust_rtc::shapes::cylinder;
+use rust_rtc::transformations::{rotation_x, rotation_y, scaling, translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::utils;
 use rust_rtc::utils::RenderOptions;
