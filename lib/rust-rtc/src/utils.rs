@@ -139,14 +139,19 @@ pub fn render_world(world: &World, options: RenderOptions, cli: &Cli) -> Result<
 
     let mut cam = camera(resolution, options.field_of_view);
 
-    cam.set_progress_callback(Box::new(|x| {
-        pb.inc(x);
-    }));
+    // cam.set_progress_callback(Box::new(|x| {
+    //     pb.inc(x);
+    // }));
+    let pb_update = Box::new(|x| { pb.inc(x); });
 
     cam.set_transform(&options.camera_transform);
 
     pb.set_message("Rendering...");
-    let canvas = render(&mut cam, world, cli.max_recursive_depth);
+
+    //let canvas = cam.render_single_threaded(world, cli.max_recursive_depth, Some(pb_update));
+    //let canvas = cam.render(world, cli.max_recursive_depth, Some(pb_update));
+    let canvas = cam.render(world, cli.max_recursive_depth, pb_update);
+
     pb.finish_with_message("Writing...");
     //    let ppm = ppm_from_canvas(&canvas);
     //    print!("{}", ppm);

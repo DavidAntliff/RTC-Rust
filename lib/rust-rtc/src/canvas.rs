@@ -2,6 +2,7 @@
 
 use crate::colors::Color;
 
+#[derive(Debug)]
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
@@ -38,6 +39,14 @@ impl Canvas {
             ._index_of(x, y)
             .expect("Pixel coordinates out of range");
         self.pixels[index] = *color;
+    }
+
+    pub fn blit(&mut self, subimage: &Canvas, offset_x: u32, offset_y: u32) {
+        for y in 0 .. subimage.height {
+            for x in 0 .. subimage.width {
+                self.write_pixel(offset_x + x, offset_y + y, subimage.pixel_at(x, y));
+            }
+        }
     }
 
     fn _add_value(row: &mut String, value: f64) {

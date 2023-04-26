@@ -6,8 +6,10 @@ use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
 use std::f64::consts::PI;
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[non_exhaustive]
 pub struct Resolution {
     pub hsize: u32, // pixel width
@@ -43,7 +45,8 @@ impl Resolution {
     pub const UHD_4K: Resolution = Resolution::new(3840, 2160);
 }
 
-pub struct Camera<'a> {
+//pub struct Camera<'a> {
+pub struct Camera {
     resolution: Resolution,
     #[allow(dead_code)]
     field_of_view: f64,
@@ -54,11 +57,13 @@ pub struct Camera<'a> {
     half_height: f64,
     pixel_size: f64,
 
-    progress_callback: Option<Box<dyn FnMut(u64) + 'a>>,
+    //progress_callback: Option<Box<dyn FnMut(u64) + 'a>>,
 }
 
-impl<'a> Camera<'a> {
-    pub fn new(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+//impl<'a> Camera<'a> {
+impl Camera {
+    //pub fn new(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+    pub fn new(resolution: Resolution, field_of_view: f64) -> Camera {
         let c = calc_pixel_size(resolution.hsize, resolution.vsize, field_of_view);
         Camera {
             resolution,
@@ -71,9 +76,9 @@ impl<'a> Camera<'a> {
     }
 
     // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
-    pub fn set_progress_callback(&mut self, f: Box<dyn FnMut(u64) + 'a>) {
-        self.progress_callback = Some(f);
-    }
+    //pub fn set_progress_callback(&mut self, f: Box<dyn FnMut(u64) + 'a>) {
+    //    self.progress_callback = Some(f);
+    //}
 
     pub fn set_transform(&mut self, transform: &Matrix4) {
         self.transform = *transform;
@@ -108,13 +113,9 @@ impl<'a> Camera<'a> {
         ray(origin, direction)
     }
 
-    pub fn render(&mut self, world: &World, max_recursive_depth: i32) -> Canvas {
+    pub fn render_single_threaded(&self, world: &World, max_recursive_depth: i32,
+                                  mut progress_callback: Option<Box<dyn FnMut(u64) + '_>>) -> Canvas {
         let mut image = canvas(self.resolution.hsize, self.resolution.vsize);
-
-        // {
-        //     let ray = ray_for_pixel(self, self.hsize / 2, self.vsize / 2);
-        //     let color = color_at(world, &ray, max_recursive_depth);
-        // }
 
         for y in 0..self.resolution.vsize {
             for x in 0..self.resolution.hsize {
@@ -123,17 +124,127 @@ impl<'a> Camera<'a> {
                 image.write_pixel(x, y, &color);
             }
 
-            match &mut self.progress_callback {
+            match &mut progress_callback {
                 Some(f) => (f)(self.resolution.hsize as u64),
                 None => (),
             };
         }
         image
     }
+
+    pub fn render(&self, world: &World, max_recursive_depth: i32,
+                  //mut progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>) -> Canvas {
+                  mut progress_callback: Box<dyn FnMut(u64) + Send + '_>) -> Canvas {
+        let image = canvas(self.resolution.hsize, self.resolution.vsize);
+
+        let image_height = image.height;
+        let image_width = image.width;
+
+        let ydiv = 2;
+        let xdiv = 2;
+
+        let ystep = image_height / ydiv;
+        let xstep = image_width / xdiv;
+
+        let image_arc = Arc::new(Mutex::new(image));
+
+        // let pb = match progress_callback {
+        //     Some(b) => Some(Arc::new(Mutex::new(b))),
+        //     None => None,
+        // };
+        let pb_arc = Arc::new(Mutex::new(progress_callback));
+
+        std::thread::scope(|s| {
+            for y in 0..ydiv {
+                for x in 0..xdiv {
+                    let image = Arc::clone(&image_arc);
+                    let pb = Arc::clone(&pb_arc);
+
+                    // let pb = match &pb {
+                    //     Some(pb) => Some(Arc::clone(&pb)),
+                    //     None => None,
+                    // };
+
+                    s.spawn(move || {
+                        //eprintln!("thread {}, {} started", x, y);
+                        let now = Instant::now();
+
+                        // Account for rounding loss due to integer division:
+                        let xstart = x * xstep;
+                        let xend = if x == xdiv - 1 { image_width } else { (x + 1) * xstep };
+                        let ystart = y * ystep;
+                        let yend = if y == ydiv - 1 { image_height } else { (y + 1) * ystep };
+
+                        let subimage = self.render_subimage(world,
+                                                            xstart, xend,
+                                                            ystart, yend,
+                                                            max_recursive_depth);
+
+                        //eprintln!("thread {:2}, {:2} finished in {:6} ms", x, y, now.elapsed().as_millis());
+
+                        {
+                            let mut f = pb.lock().expect("should be lockable");
+                            (f)(((xend - xstart) * (yend - ystart)) as u64);
+                        }
+
+                        // match &pb {
+                        //     Some(arc) => {
+                        //         let mut f = arc.lock().expect("should be lockable");
+                        //         (f)(((xend - xstart) * (yend - ystart)) as u64);
+                        //     },
+                        //     None => (),
+                        // }
+                        // {
+                        //     let mut pb = pb_arc.lock().expect("should be lockable");
+                        //     match &mut pb {
+                        //         Some(f) => (f)(self.resolution.hsize as u64),
+                        //         None => (),
+                        //     };
+                        // }
+
+                        let mut image = image.lock().expect("should be lockable");
+                        image.blit(&subimage, x * xstep, y * ystep);
+                    });
+
+                    // let subimage = self.render_subimage(world,
+                    //                                     x * xstep, (x + 1) * xstep,
+                    //                                     y * ystep, (y + 1) * ystep,
+                    //                                     max_recursive_depth);
+                }
+            }
+        });
+
+        Arc::try_unwrap(image_arc).expect("should be sole owner").into_inner().expect("should be consumable")
+    }
+
+    pub fn render_subimage(&self, world: &World,
+                           start_x: u32, end_x: u32,
+                           start_y: u32, end_y: u32,
+                           max_recursive_depth: i32) -> Canvas {
+        let height = end_y - start_y;
+        let width = end_x - start_x;
+        let mut image = canvas(width, height);
+
+        for y in 0..height {
+            for x in 0..width {
+                let ray = ray_for_pixel(self, start_x + x, start_y + y);
+                let color = color_at(world, &ray, max_recursive_depth);
+                image.write_pixel(x, y, &color);
+            }
+
+            // match &mut self.progress_callback {
+            //     Some(f) => (f)(width as u64),
+            //     None => (),
+            // };
+        }
+        image
+    }
 }
 
-impl<'a> Default for Camera<'a> {
-    fn default() -> Camera<'a> {
+//impl<'a> Default for Camera<'a> {
+//    fn default() -> Camera<'a> {
+impl Default for Camera {
+    fn default() -> Camera {
         let default_resolution = Resolution::default();
         let default_field_of_view = PI / 3.0;
         let c = calc_pixel_size(
@@ -150,12 +261,13 @@ impl<'a> Default for Camera<'a> {
             half_width: c.half_width,
             half_height: c.half_height,
             pixel_size: c.pixel_size,
-            progress_callback: None,
+            //progress_callback: None,
         }
     }
 }
 
-pub fn camera<'a>(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+//pub fn camera<'a>(resolution: Resolution, field_of_view: f64) -> Camera<'a> {
+pub fn camera(resolution: Resolution, field_of_view: f64) -> Camera {
     Camera::new(resolution, field_of_view)
 }
 
@@ -164,7 +276,8 @@ pub fn ray_for_pixel(camera: &Camera, px: u32, py: u32) -> Ray {
 }
 
 pub fn render(camera: &mut Camera, world: &World, max_recursive_depth: i32) -> Canvas {
-    camera.render(world, max_recursive_depth)
+    let do_nothing = Box::new(|x| { });
+    camera.render(world, max_recursive_depth, do_nothing)
 }
 
 struct CalcPixelSizeResult {
