@@ -1,4 +1,4 @@
-use crate::camera::{camera, render, Resolution};
+use crate::camera::{camera, Resolution};
 use crate::canvas::{ppm_from_canvas, Canvas};
 use crate::math::MAX_RECURSIVE_DEPTH;
 use crate::matrices::{identity4, Matrix4};
@@ -45,6 +45,16 @@ pub struct Cli {
     #[arg(short = 'd', long = "recurse-depth")]
     #[arg(default_value_t = MAX_RECURSIVE_DEPTH)]
     pub max_recursive_depth: i32,
+
+    /// Number of vertical subimage divisions, for multi-threaded rendering
+    #[arg(short = 'm', long = "hdiv", default_value_t = 8)]
+    #[arg(value_parser = clap::value_parser!(u32).range(1..))]
+    pub hdiv: u32,
+
+    /// Number of horizontal subimage divisions, for multi-threaded rendering
+    #[arg(short = 'm', long = "vdiv", default_value_t = 8)]
+    #[arg(value_parser = clap::value_parser!(u32).range(1..))]
+    pub vdiv: u32,
 }
 
 fn parse_filename(name: &str) -> Result<String, String> {
@@ -139,22 +149,20 @@ pub fn render_world(world: &World, options: RenderOptions, cli: &Cli) -> Result<
 
     let mut cam = camera(resolution, options.field_of_view);
 
-    // cam.set_progress_callback(Box::new(|x| {
-    //     pb.inc(x);
-    // }));
     let pb_update = Box::new(|x| { pb.inc(x); });
 
     cam.set_transform(&options.camera_transform);
 
     pb.set_message("Rendering...");
 
-    //let canvas = cam.render_single_threaded(world, cli.max_recursive_depth, Some(pb_update));
-    //let canvas = cam.render(world, cli.max_recursive_depth, Some(pb_update));
-    let canvas = cam.render(world, cli.max_recursive_depth, pb_update);
+    let canvas = if cli.hdiv == 1 && cli.vdiv == 1 {
+        cam.render_single_threaded(world, cli.max_recursive_depth, Some(pb_update))
+    } else {
+        cam.render(world, cli.max_recursive_depth, cli.hdiv, cli.vdiv, Some(pb_update))
+    };
 
     pb.finish_with_message("Writing...");
-    //    let ppm = ppm_from_canvas(&canvas);
-    //    print!("{}", ppm);
+
     write_canvas(&canvas, &cli.output)?;
     pb.finish_with_message("Complete");
 
