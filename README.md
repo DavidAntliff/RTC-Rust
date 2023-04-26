@@ -26,7 +26,7 @@ Written in Rust 2021, with some code ported from [RTC-CPP](https://github.com/Da
    * Rotation (Euler),
    * Scaling (independent axes),
    * Skewing (6 DoF).
- * Single point-light source.
+ * Multiple point-light sources.
  * Procedural patterns:
    * Stripes (linear, ring),
    * Gradients (linear, radial),

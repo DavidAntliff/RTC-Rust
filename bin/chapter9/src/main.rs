@@ -58,6 +58,7 @@ fn main() -> ExitCode {
     w.add_object(left);
 
     w.add_light(point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
+    w.add_light(point_light(point(5.0, 15.0, -10.0), color(1.0, 1.0, 1.0)));
 
     let options = RenderOptions {
         camera_transform: view_transform(

@@ -15,6 +15,7 @@ use crate::tuples::{dot, magnitude, normalize, point, Point};
 #[derive(Default)]
 pub struct World {
     light: Option<PointLight>,
+    lights: Vec<PointLight>,
     objects: Vec<Shape>,
 }
 
@@ -22,6 +23,7 @@ impl World {
     fn new(light: PointLight, objects: Vec<Shape>) -> World {
         World {
             light: Some(light),
+            lights: vec![],
             objects,
         }
     }
@@ -29,6 +31,7 @@ impl World {
     // TODO: support multiple lights
     pub fn add_light(&mut self, light: PointLight) {
         self.light = Some(light);
+        self.lights.push(light);
     }
 
     pub fn add_object(&mut self, object: Shape) {
@@ -51,48 +54,55 @@ impl World {
         intersections
     }
 
-    fn is_shadowed(&self, point: &Point) -> bool {
-        if let Some(light) = &self.light {
-            // Cast a ray from this point to the light source
-            let v = light.position - point;
-            let distance = magnitude(&v);
-            let direction = normalize(&v);
+    fn is_shadowed(&self, point: &Point, light: &PointLight) -> bool {
+        // Cast a ray from this point to the light source
+        let v = light.position - point;
+        let distance = magnitude(&v);
+        let direction = normalize(&v);
 
-            let ray = ray(*point, direction);
-            let intersections = intersect_world(self, &ray);
+        let ray = ray(*point, direction);
+        let intersections = intersect_world(self, &ray);
 
-            // Filter out any objects that don't cast shadows
-            let xs: Vec<Intersection> = intersections
-                .into_iter()
-                .filter(|x| x.object.expect("should be object").material.casts_shadow)
-                .collect();
+        // Filter out any objects that don't cast shadows
+        let xs: Vec<Intersection> = intersections
+            .into_iter()
+            .filter(|x| x.object.expect("should be object").material.casts_shadow)
+            .collect();
 
-            // No need to call hit() as already sorted
-            //if let Some(h) = hit(&mut xs) {
-            let hit = xs.iter().find(|&x| x.t > 0.0);
-            if let Some(h) = hit {
-                h.t < distance
-            } else {
-                false
-            }
+        // No need to call hit() as already sorted
+        //if let Some(h) = hit(&mut xs) {
+        let hit = xs.iter().find(|&x| x.t > 0.0);
+        if let Some(h) = hit {
+            h.t < distance
         } else {
-            false // no light - everything is in shadow
+            false
         }
     }
 
     // Returns the color at the intersection encapsulated by comps, in the given world.
     fn shade_hit(&self, comps: &IntersectionComputation, depth: i32) -> Color {
-        let shadowed = comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point);
-        let surface = comps.object.material.lighting(
-            comps.object,
-            &self.light,
-            &comps.over_point, // avoid boundary issues
-            &comps.eyev,
-            &comps.normalv,
-            shadowed,
-        );
+
+        let mut total_surface = color(0.0, 0.0, 0.0);
+        for light in &self.lights {
+            let shadowed = comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point, light);
+            let surface = comps.object.material.lighting(
+                comps.object,
+                &Some(*light),
+                &comps.over_point, // avoid boundary issues
+                &comps.eyev,
+                &comps.normalv,
+                shadowed,
+            );
+            total_surface = total_surface + surface;
+        }
+
+        let surface = total_surface / self.lights.len() as f64;
         let reflected = self.reflected_color(comps, depth);
         let refracted = self.refracted_color(comps, depth);
+
+        // Experimental: reduce surface color for reflective materials
+        // (Makes reflective objects very dark)
+        //let surface = surface * (1.0 - comps.object.material.reflective);
 
         if comps.object.material.reflective > 0.0 && comps.object.material.transparency > 0.0 {
             let reflectance = schlick(comps);
@@ -179,15 +189,18 @@ pub fn default_world() -> World {
     s2.set_transform(&scaling(0.5, 0.5, 0.5));
     objects.push(s2);
 
-    World::new(light, objects)
+    // FIXME:
+    let mut w = World::new(light.clone(), objects);
+    w.lights.push(light);
+    w
 }
 
 pub fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a> {
     world.intersect(ray)
 }
 
-pub fn is_shadowed(world: &World, point: &Point) -> bool {
-    world.is_shadowed(point)
+pub fn is_shadowed(world: &World, point: &Point, light: &PointLight) -> bool {
+    world.is_shadowed(point, light)
 }
 
 pub fn shade_hit(world: &World, comps: &IntersectionComputation, depth: i32) -> Color {
@@ -273,7 +286,8 @@ mod tests {
     #[test]
     fn shading_an_intersection_from_inside() {
         let mut w = default_world();
-        w.light = Some(point_light(point(0.0, 0.25, 0.0), color(1.0, 1.0, 1.0)));
+        w.lights = vec![];
+        w.add_light(point_light(point(0.0, 0.25, 0.0), color(1.0, 1.0, 1.0)));
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[1];
         let i = intersection(0.5, Some(shape));
@@ -320,7 +334,7 @@ mod tests {
     fn no_shadow_when_nothing_between_point_and_light() {
         let w = default_world();
         let p = point(0.0, 10.0, 0.0);
-        assert!(!is_shadowed(&w, &p));
+        assert!(!is_shadowed(&w, &p, &w.lights[0]));
     }
 
     // The shadow when an object is between the point and the light
@@ -328,7 +342,7 @@ mod tests {
     fn shadow_when_object_between_point_and_light() {
         let w = default_world();
         let p = point(10.0, -10.0, 10.0);
-        assert!(is_shadowed(&w, &p));
+        assert!(is_shadowed(&w, &p, &w.lights[0]));
     }
 
     // There is no shadow when an object is behind the light
@@ -336,7 +350,7 @@ mod tests {
     fn no_shadow_when_object_is_behind_light() {
         let w = default_world();
         let p = point(-20.0, 20.0, -20.0);
-        assert!(!is_shadowed(&w, &p));
+        assert!(!is_shadowed(&w, &p, &w.lights[0]));
     }
 
     // There is no shadow when an object is behind the point
@@ -344,7 +358,7 @@ mod tests {
     fn no_shadow_when_object_is_behind_point() {
         let w = default_world();
         let p = point(-2.0, 2.0, -2.0);
-        assert!(!is_shadowed(&w, &p));
+        assert!(!is_shadowed(&w, &p, &w.lights[0]));
     }
 
     // shade_hit() is given an intersection in shadow
