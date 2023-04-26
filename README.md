@@ -12,6 +12,34 @@ Written in Rust 2021, with some code ported from [RTC-CPP](https://github.com/Da
 
 [Here](images/gallery.md)
 
+## Features
+
+ * Outputs PPM files.
+ * World scene with primitives:
+   * Spheres,
+   * Planes (infinite),
+   * Cubes,
+   * Cylinders,
+   * Cones.
+ * Transformations:
+   * Translation,
+   * Rotation (Euler),
+   * Scaling (independent axes),
+   * Skewing (6 DoF).
+ * Single point-light source.
+ * Procedural patterns:
+   * Stripes (linear, ring),
+   * Gradients (linear, radial),
+   * 3D checkerboard,
+   * Blended patterns,
+   * Nested patterns of arbitrary depth,
+   * Perlin-noise perturbed patterns.
+ * Phong shading.
+ * Reflection.
+ * Refraction.
+ * Single and multi-threaded rendering.
+ * Command-line interface.
+
 ## TODO
 
 Apart from continuing through the book:
