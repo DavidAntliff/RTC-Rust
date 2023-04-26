@@ -50,6 +50,10 @@ Apart from continuing through the book:
   * Output to filename - DONE (PPM only)
   * PNG rendering
  * Scene description files or DSL?
+ * Gamma Correction (https://bheisler.github.io/post/writing-raytracer-in-rust-part-3/)
+ * Beer's Law for transparency.
+ * Emmissive colours.
+ * HDR.
 
 ## Conventions
 
