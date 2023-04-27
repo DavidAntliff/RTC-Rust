@@ -97,6 +97,16 @@
 
 [Source](../bin/chapter13_cones/src/main.rs)
 
+## Multiple Lights
+
+### Multiple Point Lights
+
+![chapter9_muliple_lights_20230427_203319.png](multiple_lights%2Fchapter9%2Fchapter9_muliple_lights_20230427_203319.png)
+
+![chapter12_cubes_muliple_lights_20230427_211555.png](multiple_lights%2Fchapter12_cubes%2Fchapter12_cubes_muliple_lights_20230427_211555.png)
+
+![cones_muliple_lights_20230427_203206.png](multiple_lights%2Fcones%2Fcones_muliple_lights_20230427_203206.png)
+
 ## Beginnings
 
 Skewed sphere intersection:
