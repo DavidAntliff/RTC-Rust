@@ -3,16 +3,16 @@ use crate::canvas::{ppm_from_canvas, Canvas};
 use crate::math::MAX_RECURSIVE_DEPTH;
 use crate::matrices::{identity4, Matrix4};
 use crate::world::World;
-use clap::{Parser, ValueEnum};
+use clap::{Parser, Args, ValueEnum};
 use std::f64::consts::PI;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 use std::path::Path;
 
-#[derive(Parser)]
+#[derive(Args)]
 #[clap(author, version, about, long_about = None)]
-pub struct Cli {
+pub struct RenderArgs {
     /// Optional output filename (omit, or use - for stdout)
     #[arg(
         short = 'o',
@@ -82,12 +82,25 @@ pub enum Resolutions {
     _4K,
 }
 
+#[derive(Args)]
+pub struct CommonArgs {
+    #[clap(flatten)]
+    #[clap(next_help_heading = "Render Options")]
+    pub render: RenderArgs,
+}
+
+#[derive(Parser)]
+pub struct Cli {
+    #[clap(flatten)]
+    pub common: CommonArgs,
+}
+
 pub fn parse_args() -> Cli {
     Cli::parse()
 }
 
-pub fn get_resolution(cli: &Cli, default: Resolution) -> Resolution {
-    let base = match &cli.resolution {
+pub fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resolution {
+    let base = match &common_args.render.resolution {
         Some(Resolutions::VGA) => Resolution::VGA,
         Some(Resolutions::SVGA) => Resolution::SVGA,
         Some(Resolutions::XGA) => Resolution::XGA,
@@ -99,17 +112,17 @@ pub fn get_resolution(cli: &Cli, default: Resolution) -> Resolution {
         _ => default,
     };
 
-    let base = match cli.hsize {
+    let base = match common_args.render.hsize {
         Some(h) => Resolution { hsize: h, ..base },
         _ => base,
     };
 
-    let base = match cli.vsize {
+    let base = match common_args.render.vsize {
         Some(v) => Resolution { vsize: v, ..base },
         _ => base,
     };
 
-    if cli.draft {
+    if common_args.render.draft {
         Resolution {
             hsize: base.hsize / 4,
             vsize: base.vsize / 4,
@@ -136,8 +149,8 @@ impl Default for RenderOptions {
     }
 }
 
-pub fn render_world(world: &World, options: RenderOptions, cli: &Cli) -> Result<Canvas, io::Error> {
-    let resolution = get_resolution(cli, options.default_resolution);
+pub fn render_world(world: &World, options: RenderOptions, common_args: &CommonArgs) -> Result<Canvas, io::Error> {
+    let resolution = get_resolution(common_args, options.default_resolution);
 
     let pb = indicatif::ProgressBar::new(resolution.num_pixels());
     pb.set_style(
@@ -155,15 +168,15 @@ pub fn render_world(world: &World, options: RenderOptions, cli: &Cli) -> Result<
 
     pb.set_message("Rendering...");
 
-    let canvas = if cli.hdiv == 1 && cli.vdiv == 1 {
-        cam.render_single_threaded(world, cli.max_recursive_depth, Some(pb_update))
+    let canvas = if common_args.render.hdiv == 1 && common_args.render.vdiv == 1 {
+        cam.render_single_threaded(world, common_args.render.max_recursive_depth, Some(pb_update))
     } else {
-        cam.render(world, cli.max_recursive_depth, cli.hdiv, cli.vdiv, Some(pb_update))
+        cam.render(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
     };
 
     pb.finish_with_message("Writing...");
 
-    write_canvas(&canvas, &cli.output)?;
+    write_canvas(&canvas, &common_args.render.output)?;
     pb.finish_with_message("Complete");
 
     Ok(canvas)

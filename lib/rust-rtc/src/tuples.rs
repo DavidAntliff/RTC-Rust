@@ -158,6 +158,21 @@ tuple_add!(Tuple, &Tuple);
 tuple_add!(&Tuple, Tuple);
 tuple_add!(&Tuple, &Tuple);
 
+macro_rules! tuple_add_assign {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::AddAssign<$rhs> for $lhs {
+            fn add_assign(&mut self, rhs: $rhs) {
+                self.0 += rhs.0;
+            }
+        }
+    };
+}
+
+tuple_add_assign!(Tuple, Tuple);
+tuple_add_assign!(Tuple, &Tuple);
+tuple_add_assign!(&mut Tuple, Tuple);
+tuple_add_assign!(&mut Tuple, &Tuple);
+
 macro_rules! tuple_sub {
     ( $lhs:ty , $rhs:ty ) => {
         impl std::ops::Sub<$rhs> for $lhs {

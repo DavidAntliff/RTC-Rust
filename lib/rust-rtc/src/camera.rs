@@ -143,7 +143,7 @@ impl Camera {
             for y in 0..ydiv {
                 for x in 0..xdiv {
                     let image = Arc::clone(&image_arc);
-                    let pb_opt = pb_arc.as_ref().map(|x| Arc::clone(&x));
+                    let pb_opt = pb_arc.as_ref().map(Arc::clone);
 
                     s.spawn(move || {
                         //eprintln!("thread {}, {} started", x, y);

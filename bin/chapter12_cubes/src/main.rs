@@ -12,6 +12,7 @@ use rust_rtc::utils::RenderOptions;
 use rust_rtc::world::world;
 use std::f64::consts::PI;
 use std::process::ExitCode;
+use clap::{Parser};
 
 fn cube_grid(
     origin: Point,
@@ -40,8 +41,20 @@ fn cube_grid(
     objects
 }
 
+#[derive(Parser)]
+pub struct Cli {
+    /// Max number of lights in scene
+    #[arg(short = 'l', long = "max-lights")]
+    #[arg(value_parser = clap::value_parser!(u32).range(1..))]
+    #[arg(default_value_t = 3)]
+    pub max_lights: u32,
+
+    #[clap(flatten)]
+    pub common: utils::CommonArgs,
+}
+
 fn main() -> ExitCode {
-    let cli = utils::parse_args();
+    let cli = Cli::parse();
 
     let mut w = world();
 
@@ -118,10 +131,14 @@ fn main() -> ExitCode {
     blue_cube.material.reflective = 0.7;
     w.add_object(blue_cube);
 
-    w.add_light(point_light(point(-2.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
-    w.add_light(point_light(point(10.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
-    w.add_light(point_light(point(5.0, 10.0, -10.0), color(1.0, 1.0, 1.0)));
-    w.add_light(point_light(point(-2.0, 12.0, -10.0), color(1.0, 1.0, 1.0)));
+    let dimming = cli.max_lights as f64;
+    w.add_light(point_light(point(-2.0, 10.0, -10.0), color(1.0, 1.0, 1.0) / dimming));
+    if cli.max_lights > 1 {
+        w.add_light(point_light(point(12.0, 10.0, -10.0), color(1.0, 1.0, 1.0) / dimming));
+    }
+    if cli.max_lights > 2 {
+        w.add_light(point_light(point(12.0, 20.0, -20.0), color(1.0, 1.0, 1.0) / dimming));
+    }
 
     let options = RenderOptions {
         camera_transform: view_transform(
@@ -133,10 +150,10 @@ fn main() -> ExitCode {
         ..Default::default()
     };
 
-    ExitCode::from(match utils::render_world(&w, options, &cli) {
+    ExitCode::from(match utils::render_world(&w, options, &cli.common) {
         Ok(_) => 0,
         Err(e) => {
-            eprintln!("Write {}: {}", cli.output, e);
+            eprintln!("Write {}: {}", cli.common.render.output, e);
             1
         }
     })

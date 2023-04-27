@@ -103,10 +103,10 @@ fn main() -> ExitCode {
         ..Default::default()
     };
 
-    ExitCode::from(match utils::render_world(&w, options, &cli) {
+    ExitCode::from(match utils::render_world(&w, options, &cli.common) {
         Ok(_) => 0,
         Err(e) => {
-            eprintln!("Write {}: {}", cli.output, e);
+            eprintln!("Write {}: {}", cli.common.render.output, e);
             1
         }
     })

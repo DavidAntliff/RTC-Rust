@@ -14,23 +14,19 @@ use crate::tuples::{dot, magnitude, normalize, point, Point};
 
 #[derive(Default)]
 pub struct World {
-    light: Option<PointLight>,
     lights: Vec<PointLight>,
     objects: Vec<Shape>,
 }
 
 impl World {
-    fn new(light: PointLight, objects: Vec<Shape>) -> World {
+    fn new(lights: Vec<PointLight>, objects: Vec<Shape>) -> World {
         World {
-            light: Some(light),
-            lights: vec![],
+            lights,
             objects,
         }
     }
 
-    // TODO: support multiple lights
     pub fn add_light(&mut self, light: PointLight) {
-        self.light = Some(light);
         self.lights.push(light);
     }
 
@@ -82,10 +78,11 @@ impl World {
     // Returns the color at the intersection encapsulated by comps, in the given world.
     fn shade_hit(&self, comps: &IntersectionComputation, depth: i32) -> Color {
 
-        let mut total_surface = color(0.0, 0.0, 0.0);
+        let mut surface = color(0.0, 0.0, 0.0);
+
         for light in &self.lights {
             let shadowed = comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point, light);
-            let surface = comps.object.material.lighting(
+            let surface_from_light = comps.object.material.lighting(
                 comps.object,
                 &Some(*light),
                 &comps.over_point, // avoid boundary issues
@@ -93,10 +90,9 @@ impl World {
                 &comps.normalv,
                 shadowed,
             );
-            total_surface = total_surface + surface;
+            surface += surface_from_light;
         }
 
-        let surface = total_surface / self.lights.len() as f64;
         let reflected = self.reflected_color(comps, depth);
         let refracted = self.refracted_color(comps, depth);
 
@@ -176,7 +172,9 @@ pub fn world() -> World {
 }
 
 pub fn default_world() -> World {
+    let mut lights = vec![];
     let light = point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
+    lights.push(light);
 
     let mut objects = vec![];
 
@@ -189,10 +187,7 @@ pub fn default_world() -> World {
     s2.set_transform(&scaling(0.5, 0.5, 0.5));
     objects.push(s2);
 
-    // FIXME:
-    let mut w = World::new(light.clone(), objects);
-    w.lights.push(light);
-    w
+    World::new(lights, objects)
 }
 
 pub fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a> {
@@ -237,7 +232,7 @@ mod tests {
     #[test]
     fn creating_an_empty_world() {
         let w = world();
-        assert!(w.light.is_none());
+        assert!(w.lights.is_empty());
         assert!(w.objects.is_empty());
     }
 
@@ -252,7 +247,7 @@ mod tests {
         s2.set_transform(&scaling(0.5, 0.5, 0.5));
 
         let w = default_world();
-        assert_eq!(w.light, Some(light));
+        assert_eq!(w.lights[0], light);
         assert_eq!(w.objects[0], s1);
         assert_eq!(w.objects[1], s2);
     }

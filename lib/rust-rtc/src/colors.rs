@@ -78,6 +78,21 @@ color_add!(Color, &Color);
 color_add!(&Color, Color);
 color_add!(&Color, &Color);
 
+macro_rules! color_add_assign {
+    ( $lhs:ty , $rhs:ty ) => {
+        impl std::ops::AddAssign<$rhs> for $lhs {
+            fn add_assign(&mut self, rhs: $rhs) {
+                self.0 += rhs.0;
+            }
+        }
+    };
+}
+
+color_add_assign!(Color, Color);
+color_add_assign!(Color, &Color);
+color_add_assign!(&mut Color, Color);
+color_add_assign!(&mut Color, &Color);
+
 macro_rules! color_sub {
     ( $lhs:ty , $rhs:ty ) => {
         impl std::ops::Sub<$rhs> for $lhs {
