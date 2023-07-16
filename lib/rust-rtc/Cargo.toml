@@ -10,6 +10,8 @@ glam = { version = "0.23" }
 derive_more = "0.99.17"
 indicatif = "0.17.3"
 clap.workspace = true
+#rayon = { version = "1.7", optional = true }
+rayon = "1.7"
 
 [dev-dependencies]
 approx = "0.5.1"

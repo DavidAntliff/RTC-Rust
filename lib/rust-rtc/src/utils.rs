@@ -52,7 +52,7 @@ pub struct RenderArgs {
     pub hdiv: u32,
 
     /// Number of horizontal subimage divisions, for multi-threaded rendering
-    #[arg(short = 'm', long = "vdiv", default_value_t = 8)]
+    #[arg(short = 'n', long = "vdiv", default_value_t = 8)]
     #[arg(value_parser = clap::value_parser!(u32).range(1..))]
     pub vdiv: u32,
 }
@@ -171,7 +171,8 @@ pub fn render_world(world: &World, options: RenderOptions, common_args: &CommonA
     let canvas = if common_args.render.hdiv == 1 && common_args.render.vdiv == 1 {
         cam.render_single_threaded(world, common_args.render.max_recursive_depth, Some(pb_update))
     } else {
-        cam.render(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
+        //cam.render(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
+        cam.render_with_rayon(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
     };
 
     pb.finish_with_message("Writing...");

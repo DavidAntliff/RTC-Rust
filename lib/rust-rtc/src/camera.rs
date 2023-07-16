@@ -7,6 +7,7 @@ use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
 use std::f64::consts::PI;
 use std::sync::{Arc, Mutex};
+use rayon::prelude::*;
 //use std::time::Instant;
 
 #[derive(Debug, Copy, Clone)]
@@ -49,7 +50,7 @@ pub struct Camera {
     resolution: Resolution,
 
     #[allow(dead_code)]
-    field_of_view: f64,  // stored, but not used
+    field_of_view: f64, // stored, but not used
 
     transform: Matrix4,
     inverse_transform: Matrix4,
@@ -105,8 +106,12 @@ impl Camera {
         ray(origin, direction)
     }
 
-    pub fn render_single_threaded(&self, world: &World, max_recursive_depth: i32,
-                                  mut progress_callback: Option<Box<dyn FnMut(u64) + '_>>) -> Canvas {
+    pub fn render_single_threaded(
+        &self,
+        world: &World,
+        max_recursive_depth: i32,
+        mut progress_callback: Option<Box<dyn FnMut(u64) + '_>>,
+    ) -> Canvas {
         let mut image = canvas(self.resolution.hsize, self.resolution.vsize);
 
         for y in 0..self.resolution.vsize {
@@ -125,9 +130,14 @@ impl Camera {
     }
 
     // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
-    pub fn render(&self, world: &World, max_recursive_depth: i32,
-                  xdiv: u32, ydiv: u32,
-                  progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>) -> Canvas {
+    pub fn render(
+        &self,
+        world: &World,
+        max_recursive_depth: i32,
+        xdiv: u32,
+        ydiv: u32,
+        progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
+    ) -> Canvas {
         let image = canvas(self.resolution.hsize, self.resolution.vsize);
 
         let image_height = image.height;
@@ -151,15 +161,27 @@ impl Camera {
 
                         // Account for rounding loss due to integer division in the bottom/right subimages:
                         let xstart = x * xstep;
-                        let xend = if x == xdiv - 1 { image_width } else { (x + 1) * xstep };
+                        let xend = if x == xdiv - 1 {
+                            image_width
+                        } else {
+                            (x + 1) * xstep
+                        };
                         let ystart = y * ystep;
-                        let yend = if y == ydiv - 1 { image_height } else { (y + 1) * ystep };
+                        let yend = if y == ydiv - 1 {
+                            image_height
+                        } else {
+                            (y + 1) * ystep
+                        };
 
-                        let subimage = self.render_subimage(world,
-                                                            xstart, xend,
-                                                            ystart, yend,
-                                                            max_recursive_depth,
-                                                            pb_opt);
+                        let subimage = self.render_subimage(
+                            world,
+                            xstart,
+                            xend,
+                            ystart,
+                            yend,
+                            max_recursive_depth,
+                            pb_opt,
+                        );
 
                         //eprintln!("thread {:2}, {:2} finished in {:6} ms", x, y, now.elapsed().as_millis());
 
@@ -170,14 +192,98 @@ impl Camera {
             }
         });
 
-        Arc::try_unwrap(image_arc).expect("should be sole owner").into_inner().expect("should be consumable")
+        Arc::try_unwrap(image_arc)
+            .expect("should be sole owner")
+            .into_inner()
+            .expect("should be consumable")
     }
 
-    pub fn render_subimage(&self, world: &World,
-                           start_x: u32, end_x: u32,
-                           start_y: u32, end_y: u32,
-                           max_recursive_depth: i32,
-                           progress_callback: Option<Arc<Mutex<Box<dyn FnMut(u64) + Send + '_>>>>) -> Canvas {
+    // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
+    pub fn render_with_rayon(
+        &self,
+        world: &World,
+        max_recursive_depth: i32,
+        xdiv: u32,
+        ydiv: u32,
+        progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
+    ) -> Canvas {
+        let image = canvas(self.resolution.hsize, self.resolution.vsize);
+
+        let image_height = image.height;
+        let image_width = image.width;
+
+        let ystep = image_height / ydiv;
+        let xstep = image_width / xdiv;
+
+        let image_arc = Arc::new(Mutex::new(image));
+        let pb_arc = progress_callback.map(|x| Arc::new(Mutex::new(x)));
+
+        // Rayon needs a collection of work items
+        struct WorkItem {
+            xstart: u32,
+            xend: u32,
+            ystart: u32,
+            yend: u32,
+        }
+
+        let mut work_items = vec![];
+        for y in 0..ydiv {
+            for x in 0..xdiv {
+                // Account for rounding loss due to integer division in the bottom/right subimages:
+                let xstart = x * xstep;
+                let xend = if x == xdiv - 1 {
+                    image_width
+                } else {
+                    (x + 1) * xstep
+                };
+                let ystart = y * ystep;
+                let yend = if y == ydiv - 1 {
+                    image_height
+                } else {
+                    (y + 1) * ystep
+                };
+
+                work_items.push(WorkItem {
+                    xstart,
+                    xend,
+                    ystart,
+                    yend,
+                });
+            }
+        }
+
+        work_items.par_iter().for_each(|work_item| {
+            let pb_opt = pb_arc.as_ref().map(Arc::clone);
+
+            let subimage = self.render_subimage(world,
+                                               work_item.xstart,
+                                               work_item.xend,
+                                               work_item.ystart,
+                                               work_item.yend,
+                                               max_recursive_depth,
+                                               pb_opt);
+            image_arc
+                .lock()
+                .expect("should be lockable")
+                .blit(&subimage, work_item.xstart, work_item.ystart);
+        });
+
+        Arc::try_unwrap(image_arc)
+            .expect("should be sole owner")
+            .into_inner()
+            .expect("should be consumable")
+    }
+
+    pub fn render_subimage(
+        &self,
+        world: &World,
+        start_x: u32,
+        end_x: u32,
+        start_y: u32,
+        end_y: u32,
+        max_recursive_depth: i32,
+        progress_callback: Option<Arc<Mutex<Box<dyn FnMut(u64) + Send + '_>>>>,
+    ) -> Canvas {
         let height = end_y - start_y;
         let width = end_x - start_x;
         let mut image = canvas(width, height);
@@ -195,7 +301,7 @@ impl Camera {
                     Some(ref arc) => {
                         let mut f = arc.lock().expect("should be lockable");
                         (f)(width as u64);
-                    },
+                    }
                     None => (),
                 }
             }
