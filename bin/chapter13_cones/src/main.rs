@@ -45,7 +45,7 @@ fn main() -> ExitCode {
     w.add_object(c);
 
     let mut c = cone();
-    let mut p = c.as_cone_primitive().expect("should be a cone");
+    let p = c.as_cone_primitive().expect("should be a cone");
     p.maximum_y = 1.0;
     c.set_transform(&translation(-5.0, 0.0, -2.0));
     c.material.color = color(0.2, 0.0, 0.9);
@@ -55,7 +55,7 @@ fn main() -> ExitCode {
     w.add_object(c);
 
     let mut c = cone();
-    let mut p = c.as_cone_primitive().expect("should be a cone");
+    let p = c.as_cone_primitive().expect("should be a cone");
     p.maximum_y = 2.3;
     c.set_transform(&translation(0.0, 0.0, 0.0));
     c.material.color = RED;
@@ -63,7 +63,7 @@ fn main() -> ExitCode {
     w.add_object(c);
 
     let mut c = cone();
-    let mut p = c.as_cone_primitive().expect("should be a cone");
+    let p = c.as_cone_primitive().expect("should be a cone");
     p.minimum_y = -2.0;
     c.set_transform(&rotation_x(-PI / 4.0).then(&translation(6.0, 1.9, 1.0)));
     c.material.color = color(0.0, 0.9, 0.1);
@@ -73,7 +73,7 @@ fn main() -> ExitCode {
     w.add_object(c);
 
     let mut c = cone();
-    let mut p = c.as_cone_primitive().expect("should be a cone");
+    let p = c.as_cone_primitive().expect("should be a cone");
     p.minimum_y = -2.0;
     c.set_transform(
         &rotation_z(-PI / 4.0)

@@ -30,7 +30,7 @@ pub fn intersect<'a>(object: &'a Shape, ray: &Ray) -> Intersections<'a> {
     // Apply the inverse of the shape's transformation
     let local_ray = ray.transform(object.inverse_transform());
     let mut intersections = object.local_intersect(&local_ray);
-    for mut intersection in &mut intersections {
+    for intersection in &mut intersections {
         intersection.object = Some(object);
     }
     intersections

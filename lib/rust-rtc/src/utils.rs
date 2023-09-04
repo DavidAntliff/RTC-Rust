@@ -172,7 +172,8 @@ pub fn render_world(world: &World, options: RenderOptions, common_args: &CommonA
         cam.render_single_threaded(world, common_args.render.max_recursive_depth, Some(pb_update))
     } else {
         //cam.render(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
-        cam.render_with_rayon(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
+        //cam.render_with_rayon(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
+        cam.render_with_rayon_by_lines(world, common_args.render.max_recursive_depth, Some(pb_update))
     };
 
     pb.finish_with_message("Writing...");

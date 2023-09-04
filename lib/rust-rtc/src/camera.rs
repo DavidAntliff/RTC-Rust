@@ -1,19 +1,21 @@
 // Chapter 7: Implementing a Camera
 
 use crate::canvas::{canvas, Canvas};
+use crate::colors::Color;
 use crate::matrices::{identity4, Matrix4};
 use crate::rays::{ray, Ray};
 use crate::tuples::{normalize, point};
 use crate::world::{color_at, World};
+use rayon::prelude::*;
 use std::f64::consts::PI;
 use std::sync::{Arc, Mutex};
-use rayon::prelude::*;
 //use std::time::Instant;
 
 #[derive(Debug, Copy, Clone)]
 #[non_exhaustive]
 pub struct Resolution {
-    pub hsize: u32, // pixel width
+    pub hsize: u32,
+    // pixel width
     pub vsize: u32, // pixel height
 }
 
@@ -130,182 +132,224 @@ impl Camera {
     }
 
     // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
-    pub fn render(
-        &self,
-        world: &World,
-        max_recursive_depth: i32,
-        xdiv: u32,
-        ydiv: u32,
-        progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
-    ) -> Canvas {
-        let image = canvas(self.resolution.hsize, self.resolution.vsize);
-
-        let image_height = image.height;
-        let image_width = image.width;
-
-        let ystep = image_height / ydiv;
-        let xstep = image_width / xdiv;
-
-        let image_arc = Arc::new(Mutex::new(image));
-        let pb_arc = progress_callback.map(|x| Arc::new(Mutex::new(x)));
-
-        std::thread::scope(|s| {
-            for y in 0..ydiv {
-                for x in 0..xdiv {
-                    let image = Arc::clone(&image_arc);
-                    let pb_opt = pb_arc.as_ref().map(Arc::clone);
-
-                    s.spawn(move || {
-                        //eprintln!("thread {}, {} started", x, y);
-                        //let now = Instant::now();
-
-                        // Account for rounding loss due to integer division in the bottom/right subimages:
-                        let xstart = x * xstep;
-                        let xend = if x == xdiv - 1 {
-                            image_width
-                        } else {
-                            (x + 1) * xstep
-                        };
-                        let ystart = y * ystep;
-                        let yend = if y == ydiv - 1 {
-                            image_height
-                        } else {
-                            (y + 1) * ystep
-                        };
-
-                        let subimage = self.render_subimage(
-                            world,
-                            xstart,
-                            xend,
-                            ystart,
-                            yend,
-                            max_recursive_depth,
-                            pb_opt,
-                        );
-
-                        //eprintln!("thread {:2}, {:2} finished in {:6} ms", x, y, now.elapsed().as_millis());
-
-                        let mut image = image.lock().expect("should be lockable");
-                        image.blit(&subimage, x * xstep, y * ystep);
-                    });
-                }
-            }
-        });
-
-        Arc::try_unwrap(image_arc)
-            .expect("should be sole owner")
-            .into_inner()
-            .expect("should be consumable")
-    }
+    // pub fn render(
+    //     &self,
+    //     world: &World,
+    //     max_recursive_depth: i32,
+    //     xdiv: u32,
+    //     ydiv: u32,
+    //     progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
+    // ) -> Canvas {
+    //     let image = canvas(self.resolution.hsize, self.resolution.vsize);
+    //
+    //     let image_height = image.height;
+    //     let image_width = image.width;
+    //
+    //     let ystep = image_height / ydiv;
+    //     let xstep = image_width / xdiv;
+    //
+    //     let image_arc = Arc::new(Mutex::new(image));
+    //     let pb_arc = progress_callback.map(|x| Arc::new(Mutex::new(x)));
+    //
+    //     std::thread::scope(|s| {
+    //         for y in 0..ydiv {
+    //             for x in 0..xdiv {
+    //                 let image = Arc::clone(&image_arc);
+    //                 let pb_opt = pb_arc.as_ref().map(Arc::clone);
+    //
+    //                 s.spawn(move || {
+    //                     //eprintln!("thread {}, {} started", x, y);
+    //                     //let now = Instant::now();
+    //
+    //                     // Account for rounding loss due to integer division in the bottom/right subimages:
+    //                     let xstart = x * xstep;
+    //                     let xend = if x == xdiv - 1 {
+    //                         image_width
+    //                     } else {
+    //                         (x + 1) * xstep
+    //                     };
+    //                     let ystart = y * ystep;
+    //                     let yend = if y == ydiv - 1 {
+    //                         image_height
+    //                     } else {
+    //                         (y + 1) * ystep
+    //                     };
+    //
+    //                     let subimage = self.render_subimage(
+    //                         world,
+    //                         xstart,
+    //                         xend,
+    //                         ystart,
+    //                         yend,
+    //                         max_recursive_depth,
+    //                         pb_opt,
+    //                     );
+    //
+    //                     //eprintln!("thread {:2}, {:2} finished in {:6} ms", x, y, now.elapsed().as_millis());
+    //
+    //                     let mut image = image.lock().expect("should be lockable");
+    //                     image.blit(&subimage, x * xstep, y * ystep);
+    //                 });
+    //             }
+    //         }
+    //     });
+    //
+    //     Arc::try_unwrap(image_arc)
+    //         .expect("should be sole owner")
+    //         .into_inner()
+    //         .expect("should be consumable")
+    // }
 
     // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
-    pub fn render_with_rayon(
+    // pub fn render_with_rayon(
+    //     &self,
+    //     world: &World,
+    //     max_recursive_depth: i32,
+    //     xdiv: u32,
+    //     ydiv: u32,
+    //     progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
+    // ) -> Canvas {
+    //     let image = canvas(self.resolution.hsize, self.resolution.vsize);
+    //
+    //     let image_height = image.height;
+    //     let image_width = image.width;
+    //
+    //     let ystep = image_height / ydiv;
+    //     let xstep = image_width / xdiv;
+    //
+    //     let image_arc = Arc::new(Mutex::new(image));
+    //     let pb_arc = progress_callback.map(|x| Arc::new(Mutex::new(x)));
+    //
+    //     // Rayon needs a collection of work items
+    //     struct WorkItem {
+    //         xstart: u32,
+    //         xend: u32,
+    //         ystart: u32,
+    //         yend: u32,
+    //     }
+    //
+    //     let mut work_items = vec![];
+    //     for y in 0..ydiv {
+    //         for x in 0..xdiv {
+    //             // Account for rounding loss due to integer division in the bottom/right subimages:
+    //             let xstart = x * xstep;
+    //             let xend = if x == xdiv - 1 {
+    //                 image_width
+    //             } else {
+    //                 (x + 1) * xstep
+    //             };
+    //             let ystart = y * ystep;
+    //             let yend = if y == ydiv - 1 {
+    //                 image_height
+    //             } else {
+    //                 (y + 1) * ystep
+    //             };
+    //
+    //             work_items.push(WorkItem {
+    //                 xstart,
+    //                 xend,
+    //                 ystart,
+    //                 yend,
+    //             });
+    //         }
+    //     }
+    //
+    //     work_items.par_iter().for_each(|work_item| {
+    //         let pb_opt = pb_arc.as_ref().map(Arc::clone);
+    //
+    //         let subimage = self.render_subimage(
+    //             world,
+    //             work_item.xstart,
+    //             work_item.xend,
+    //             work_item.ystart,
+    //             work_item.yend,
+    //             max_recursive_depth,
+    //             pb_opt,
+    //         );
+    //         image_arc.lock().expect("should be lockable").blit(
+    //             &subimage,
+    //             work_item.xstart,
+    //             work_item.ystart,
+    //         );
+    //     });
+    //
+    //     Arc::try_unwrap(image_arc)
+    //         .expect("should be sole owner")
+    //         .into_inner()
+    //         .expect("should be consumable")
+    // }
+
+    // pub fn render_subimage(
+    //     &self,
+    //     world: &World,
+    //     start_x: u32,
+    //     end_x: u32,
+    //     start_y: u32,
+    //     end_y: u32,
+    //     max_recursive_depth: i32,
+    //     progress_callback: Option<Arc<Mutex<Box<dyn FnMut(u64) + Send + '_>>>>,
+    // ) -> Canvas {
+    //     let height = end_y - start_y;
+    //     let width = end_x - start_x;
+    //     let mut image = canvas(width, height);
+    //
+    //     for y in 0..height {
+    //         for x in 0..width {
+    //             let ray = ray_for_pixel(self, start_x + x, start_y + y);
+    //             let color = color_at(world, &ray, max_recursive_depth);
+    //             image.write_pixel(x, y, &color);
+    //         }
+    //
+    //         {
+    //             // unstable: if pb_opt.is_some_and(|x| ...)
+    //             match &progress_callback {
+    //                 Some(ref arc) => {
+    //                     let mut f = arc.lock().expect("should be lockable");
+    //                     (f)(width as u64);
+    //                 }
+    //                 None => (),
+    //             }
+    //         }
+    //     }
+    //     image
+    // }
+
+    // Try rendering directly to array (e.g. Programming Rust: Revisiting the Mandelbrot Set)
+    // https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
+    pub fn render_with_rayon_by_lines(
         &self,
         world: &World,
         max_recursive_depth: i32,
-        xdiv: u32,
-        ydiv: u32,
         progress_callback: Option<Box<dyn FnMut(u64) + Send + '_>>,
     ) -> Canvas {
-        let image = canvas(self.resolution.hsize, self.resolution.vsize);
+        let mut image = canvas(self.resolution.hsize, self.resolution.vsize);
 
-        let image_height = image.height;
-        let image_width = image.width;
-
-        let ystep = image_height / ydiv;
-        let xstep = image_width / xdiv;
-
-        let image_arc = Arc::new(Mutex::new(image));
         let pb_arc = progress_callback.map(|x| Arc::new(Mutex::new(x)));
+        let pb_opt = pb_arc.as_ref().map(Arc::clone);
 
-        // Rayon needs a collection of work items
-        struct WorkItem {
-            xstart: u32,
-            xend: u32,
-            ystart: u32,
-            yend: u32,
-        }
+        let bands: Vec<(usize, &mut [Color])> = image
+            .pixels
+            .chunks_mut(self.resolution.hsize as usize)
+            .enumerate()
+            .collect();
 
-        let mut work_items = vec![];
-        for y in 0..ydiv {
-            for x in 0..xdiv {
-                // Account for rounding loss due to integer division in the bottom/right subimages:
-                let xstart = x * xstep;
-                let xend = if x == xdiv - 1 {
-                    image_width
-                } else {
-                    (x + 1) * xstep
-                };
-                let ystart = y * ystep;
-                let yend = if y == ydiv - 1 {
-                    image_height
-                } else {
-                    (y + 1) * ystep
-                };
-
-                work_items.push(WorkItem {
-                    xstart,
-                    xend,
-                    ystart,
-                    yend,
-                });
+        bands.into_par_iter().for_each(|(i, band)| {
+            let y = i;
+            for x in 0..self.resolution.hsize {
+                let ray = ray_for_pixel(self, x, y as u32);
+                let color = color_at(world, &ray, max_recursive_depth);
+                band[x as usize] = color;
             }
-        }
 
-        work_items.par_iter().for_each(|work_item| {
-            let pb_opt = pb_arc.as_ref().map(Arc::clone);
-
-            let subimage = self.render_subimage(world,
-                                               work_item.xstart,
-                                               work_item.xend,
-                                               work_item.ystart,
-                                               work_item.yend,
-                                               max_recursive_depth,
-                                               pb_opt);
-            image_arc
-                .lock()
-                .expect("should be lockable")
-                .blit(&subimage, work_item.xstart, work_item.ystart);
+            match &pb_opt {
+                Some(ref arc) => {
+                    let mut f = arc.lock().expect("should be lockable");
+                    (f)(self.resolution.hsize as u64);
+                }
+                None => (),
+            }
         });
 
-        Arc::try_unwrap(image_arc)
-            .expect("should be sole owner")
-            .into_inner()
-            .expect("should be consumable")
-    }
-
-    pub fn render_subimage(
-        &self,
-        world: &World,
-        start_x: u32,
-        end_x: u32,
-        start_y: u32,
-        end_y: u32,
-        max_recursive_depth: i32,
-        progress_callback: Option<Arc<Mutex<Box<dyn FnMut(u64) + Send + '_>>>>,
-    ) -> Canvas {
-        let height = end_y - start_y;
-        let width = end_x - start_x;
-        let mut image = canvas(width, height);
-
-        for y in 0..height {
-            for x in 0..width {
-                let ray = ray_for_pixel(self, start_x + x, start_y + y);
-                let color = color_at(world, &ray, max_recursive_depth);
-                image.write_pixel(x, y, &color);
-            }
-
-            {
-                // unstable: if pb_opt.is_some_and(|x| ...)
-                match &progress_callback {
-                    Some(ref arc) => {
-                        let mut f = arc.lock().expect("should be lockable");
-                        (f)(width as u64);
-                    }
-                    None => (),
-                }
-            }
-        }
         image
     }
 }

@@ -6,7 +6,7 @@ use crate::colors::Color;
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
-    pixels: Vec<Color>,
+    pub pixels: Vec<Color>,
 }
 
 impl Canvas {
