@@ -3,7 +3,7 @@ use crate::canvas::{ppm_from_canvas, Canvas};
 use crate::math::MAX_RECURSIVE_DEPTH;
 use crate::matrices::{identity4, Matrix4};
 use crate::world::World;
-use clap::{Parser, Args, ValueEnum};
+use clap::{Args, Parser, ValueEnum};
 use std::f64::consts::PI;
 use std::fs::File;
 use std::io;
@@ -149,7 +149,11 @@ impl Default for RenderOptions {
     }
 }
 
-pub fn render_world(world: &World, options: RenderOptions, common_args: &CommonArgs) -> Result<Canvas, io::Error> {
+pub fn render_world(
+    world: &World,
+    options: RenderOptions,
+    common_args: &CommonArgs,
+) -> Result<Canvas, io::Error> {
     let resolution = get_resolution(common_args, options.default_resolution);
 
     let pb = indicatif::ProgressBar::new(resolution.num_pixels());
@@ -162,18 +166,28 @@ pub fn render_world(world: &World, options: RenderOptions, common_args: &CommonA
 
     let mut cam = camera(resolution, options.field_of_view);
 
-    let pb_update = Box::new(|x| { pb.inc(x); });
+    let pb_update = Box::new(|x| {
+        pb.inc(x);
+    });
 
     cam.set_transform(&options.camera_transform);
 
     pb.set_message("Rendering...");
 
     let canvas = if common_args.render.hdiv == 1 && common_args.render.vdiv == 1 {
-        cam.render_single_threaded(world, common_args.render.max_recursive_depth, Some(pb_update))
+        cam.render_single_threaded(
+            world,
+            common_args.render.max_recursive_depth,
+            Some(pb_update),
+        )
     } else {
         //cam.render(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
         //cam.render_with_rayon(world, common_args.render.max_recursive_depth, common_args.render.hdiv, common_args.render.vdiv, Some(pb_update))
-        cam.render_with_rayon_by_lines(world, common_args.render.max_recursive_depth, Some(pb_update))
+        cam.render_with_rayon_by_lines(
+            world,
+            common_args.render.max_recursive_depth,
+            Some(pb_update),
+        )
     };
 
     pb.finish_with_message("Writing...");

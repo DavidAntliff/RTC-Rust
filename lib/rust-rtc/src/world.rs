@@ -20,10 +20,7 @@ pub struct World {
 
 impl World {
     fn new(lights: Vec<PointLight>, objects: Vec<Shape>) -> World {
-        World {
-            lights,
-            objects,
-        }
+        World { lights, objects }
     }
 
     pub fn add_light(&mut self, light: PointLight) {
@@ -77,11 +74,11 @@ impl World {
 
     // Returns the color at the intersection encapsulated by comps, in the given world.
     fn shade_hit(&self, comps: &IntersectionComputation, depth: i32) -> Color {
-
         let mut surface = color(0.0, 0.0, 0.0);
 
         for light in &self.lights {
-            let shadowed = comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point, light);
+            let shadowed =
+                comps.object.material.receives_shadow && self.is_shadowed(&comps.over_point, light);
             let surface_from_light = comps.object.material.lighting(
                 comps.object,
                 &Some(*light),

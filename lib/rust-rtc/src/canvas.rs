@@ -42,8 +42,8 @@ impl Canvas {
     }
 
     pub fn blit(&mut self, subimage: &Canvas, offset_x: u32, offset_y: u32) {
-        for y in 0 .. subimage.height {
-            for x in 0 .. subimage.width {
+        for y in 0..subimage.height {
+            for x in 0..subimage.width {
                 self.write_pixel(offset_x + x, offset_y + y, subimage.pixel_at(x, y));
             }
         }

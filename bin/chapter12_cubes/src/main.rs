@@ -2,6 +2,7 @@ use rust_rtc::colors::{color, WHITE};
 use rust_rtc::lights::point_light;
 use rust_rtc::materials::{default_material, Material};
 
+use clap::Parser;
 use rust_rtc::shapes::{cube, sphere, Shape};
 use rust_rtc::transformations::{
     rotation_x, rotation_y, translate_x, translate_z, translation, uniform_scaling, view_transform,
@@ -12,7 +13,6 @@ use rust_rtc::utils::RenderOptions;
 use rust_rtc::world::world;
 use std::f64::consts::PI;
 use std::process::ExitCode;
-use clap::{Parser};
 
 fn cube_grid(
     origin: Point,
@@ -132,12 +132,21 @@ fn main() -> ExitCode {
     w.add_object(blue_cube);
 
     let dimming = cli.max_lights as f64;
-    w.add_light(point_light(point(-2.0, 10.0, -10.0), color(1.0, 1.0, 1.0) / dimming));
+    w.add_light(point_light(
+        point(-2.0, 10.0, -10.0),
+        color(1.0, 1.0, 1.0) / dimming,
+    ));
     if cli.max_lights > 1 {
-        w.add_light(point_light(point(12.0, 10.0, -10.0), color(1.0, 1.0, 1.0) / dimming));
+        w.add_light(point_light(
+            point(12.0, 10.0, -10.0),
+            color(1.0, 1.0, 1.0) / dimming,
+        ));
     }
     if cli.max_lights > 2 {
-        w.add_light(point_light(point(12.0, 20.0, -20.0), color(1.0, 1.0, 1.0) / dimming));
+        w.add_light(point_light(
+            point(12.0, 20.0, -20.0),
+            color(1.0, 1.0, 1.0) / dimming,
+        ));
     }
 
     let options = RenderOptions {
