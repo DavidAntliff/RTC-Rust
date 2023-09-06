@@ -132,7 +132,7 @@ pub fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resoluti
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct RenderOptions {
     pub default_resolution: Resolution,
     pub field_of_view: f64,

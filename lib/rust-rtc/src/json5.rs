@@ -9,6 +9,7 @@ use std::path::Path;
 pub struct Scene {
     pub(crate) lights: Option<Vec<Light>>,
     pub(crate) bodies: Option<Vec<Body>>,
+    pub(crate) cameras: Option<Vec<Camera>>,
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -99,6 +100,58 @@ pub(crate) enum Pattern {
         b: Box<Pattern>,
         transforms: Option<Vec<Transform>>,
     },
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
+pub(crate) struct Camera {
+    pub(crate) name: String,
+    pub(crate) resolution: Resolution,
+    pub(crate) field_of_view: f64,
+    pub(crate) from: [f64; 3],
+    pub(crate) to: [f64; 3],
+    pub(crate) up: [f64; 3],
+}
+
+impl Default for Camera {
+    fn default() -> Self {
+        Self {
+            name: "".to_string(),
+            resolution: Resolution::default(),
+            field_of_view: 0.0,
+            from: [0.0, 0.0, -10.0],
+            to: [0.0, 1.0, 0.0],
+            up: [0.0, 1.0, 0.0],
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub(crate) enum Resolution {
+    VGA,
+    SVGA,
+    XGA,
+    XSGA,
+    FHD,
+    QHD,
+    #[serde(rename = "UHD")]
+    UHD,
+    #[serde(untagged)]
+    Custom {
+        width: u32,
+        height: u32,
+    },
+}
+
+impl Default for Resolution {
+    fn default() -> Self {
+        Self::Custom {
+            width: 100,
+            height: 50,
+        }
+    }
 }
 
 fn load_json5<T>(filename: &Path) -> Result<T>

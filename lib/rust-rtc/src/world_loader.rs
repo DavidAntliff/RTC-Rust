@@ -7,8 +7,11 @@ use crate::materials::{default_material, Material};
 use crate::matrices::identity4;
 use crate::matrices::Matrix4;
 use crate::shapes::{plane, sphere};
-use crate::transformations::{rotation_x, rotation_y, rotation_z, scaling, translation};
-use crate::tuples::{point, Tuple};
+use crate::transformations::{
+    rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
+};
+use crate::tuples::{point, vector, Point, Tuple};
+use crate::utils::RenderOptions;
 use crate::world::{world, World};
 use anyhow::{anyhow, Result};
 use std::path::Path;
@@ -51,7 +54,7 @@ fn build_material(material: &JsonMaterial) -> Material {
     m
 }
 
-pub fn load_world(filename: &Path) -> Result<World> {
+pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
     let mut world = world();
     let scene = load_scene(filename)?;
 
@@ -90,5 +93,20 @@ pub fn load_world(filename: &Path) -> Result<World> {
         }
     }
 
-    Ok(world)
+    let mut render_options: Vec<RenderOptions> = vec![];
+    if let Some(cameras) = scene.cameras {
+        for camera in cameras {
+            render_options.push(RenderOptions {
+                default_resolution: Default::default(),
+                field_of_view: camera.field_of_view,
+                camera_transform: view_transform(
+                    &camera.from.into(),
+                    &camera.to.into(),
+                    &camera.up.into(),
+                ),
+            })
+        }
+    }
+
+    Ok((world, render_options))
 }

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use rust_rtc::camera::render;
 use rust_rtc::transformations::{translation, view_transform};
 use rust_rtc::tuples::{point, vector};
 use rust_rtc::utils;
@@ -21,20 +22,36 @@ pub struct Cli {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    let mut w = load_world(Path::new(&cli.input))?;
+    let (mut world, render_options) = load_world(Path::new(&cli.input))?;
 
-    let options = RenderOptions {
-        camera_transform: view_transform(
-            &point(0.0, 1.5, -5.0),
-            //&point(0.0, 0.5, 0.0),
-            &point(0.0, 1.0, 0.0),
-            &vector(0.0, 1.0, 0.0),
-        ),
-        //.then(&translation(0.0, 0.0, -20.0)),
-        ..Default::default()
-    };
+    println!("{:#?}", world);
+    println!("{:#?}", render_options);
 
-    utils::render_world(&w, options, &cli.common)?;
+    let options = render_options[0];
+
+    // let options = RenderOptions {
+    //     camera_transform: view_transform(
+    //         &point(0.0, 1.5, -5.0),
+    //         //&point(0.0, 0.5, 0.0),
+    //         &point(0.0, 1.0, 0.0),
+    //         &vector(0.0, 1.0, 0.0),
+    //     ),
+    //     //.then(&translation(0.0, 0.0, -20.0)),
+    //     ..Default::default()
+    // };
+
+    // TODO:
+    //  .
+    //  - Handle cmd-line/json defaults properly.
+    //    Cmd-line should override json.
+    //  .
+    //  - Handle multiple cameras.
+    //    Each has a name, select first by default,
+    //    but allow others to be used by name or index.
+    //  .
+    //  - Port other scenes to JSON5.
+
+    utils::render_world(&world, options, &cli.common)?;
 
     Ok(())
 }

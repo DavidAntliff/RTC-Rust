@@ -92,4 +92,15 @@
       },
     },
   ],
+
+  cameras: [
+    {
+      name: "main",
+      resolution: { width: 3840, height: 2160 },
+      field_of_view: 1.047,  // pi/3
+      from: [0, 1.5, -5],
+      to: [0, 1.0, 0.0],
+      up: [0, 1, 0],
+    },
+  ]
 }

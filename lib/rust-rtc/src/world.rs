@@ -12,7 +12,7 @@ use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{dot, magnitude, normalize, point, Point};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct World {
     lights: Vec<PointLight>,
     objects: Vec<Shape>,
