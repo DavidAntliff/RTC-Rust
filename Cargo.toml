@@ -6,3 +6,4 @@ members = [
 
 [workspace.dependencies]
 clap = { version = "4.2.4", features = ["derive"]}
+anyhow = { version = "1.0.72" }

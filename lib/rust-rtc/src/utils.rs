@@ -57,7 +57,7 @@ pub struct RenderArgs {
     pub vdiv: u32,
 }
 
-fn parse_filename(name: &str) -> Result<String, String> {
+pub fn parse_filename(name: &str) -> Result<String, String> {
     if name.is_empty() {
         Err(String::from("filename cannot be an empty string"))
     } else if name.trim().len() != name.len() {
