@@ -107,22 +107,24 @@ pub(crate) enum Pattern {
 #[serde(default)]
 pub(crate) struct Camera {
     pub(crate) name: String,
-    pub(crate) resolution: Resolution,
-    pub(crate) field_of_view: f64,
+    pub(crate) resolution: Option<Resolution>,
+    pub(crate) field_of_view: Option<f64>,
     pub(crate) from: [f64; 3],
     pub(crate) to: [f64; 3],
     pub(crate) up: [f64; 3],
+    pub(crate) transforms: Option<Vec<Transform>>,
 }
 
 impl Default for Camera {
     fn default() -> Self {
         Self {
-            name: "".to_string(),
-            resolution: Resolution::default(),
-            field_of_view: 0.0,
+            name: "main".to_string(),
+            resolution: None,
+            field_of_view: None,
             from: [0.0, 0.0, -10.0],
             to: [0.0, 1.0, 0.0],
             up: [0.0, 1.0, 0.0],
+            transforms: None,
         }
     }
 }
@@ -133,7 +135,7 @@ pub(crate) enum Resolution {
     VGA,
     SVGA,
     XGA,
-    XSGA,
+    SXGA,
     FHD,
     QHD,
     #[serde(rename = "UHD")]

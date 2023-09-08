@@ -23,9 +23,22 @@ pub struct RenderArgs {
     #[arg(value_parser = parse_filename)]
     pub output: String,
 
+    /// Camera selection
+    #[arg(
+        short = 'c',
+        long = "camera",
+        value_name = "NAME",
+        default_value = "main"
+    )]
+    pub camera: String,
+
     /// Pre-defined resolutions
     #[arg(short = 'r', long = "resolution", value_enum)]
     pub resolution: Option<Resolutions>,
+
+    /// Field of view
+    #[arg(short = 'f', long = "fov")]
+    pub field_of_view: Option<f64>,
 
     /// Generate low-resolution draft in selected aspect ratio
     #[arg(short = 'j', long = "draft")]
@@ -99,7 +112,9 @@ pub fn parse_args() -> Cli {
     Cli::parse()
 }
 
-pub fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resolution {
+fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resolution {
+    // Command-line takes precedence over scene config
+
     let base = match &common_args.render.resolution {
         Some(Resolutions::VGA) => Resolution::VGA,
         Some(Resolutions::SVGA) => Resolution::SVGA,
@@ -132,6 +147,11 @@ pub fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resoluti
     }
 }
 
+fn get_field_of_view(common_args: &CommonArgs, default: f64) -> f64 {
+    // Command-line takes precedence over scene config
+    common_args.render.field_of_view.unwrap_or(default)
+}
+
 #[derive(Debug, Copy, Clone)]
 pub struct RenderOptions {
     pub default_resolution: Resolution,
@@ -156,6 +176,8 @@ pub fn render_world(
 ) -> Result<Canvas, io::Error> {
     let resolution = get_resolution(common_args, options.default_resolution);
 
+    let field_of_view = get_field_of_view(common_args, options.field_of_view);
+
     let pb = indicatif::ProgressBar::new(resolution.num_pixels());
     pb.set_style(
         indicatif::ProgressStyle::with_template(
@@ -164,7 +186,7 @@ pub fn render_world(
         .expect("style should be valid"),
     );
 
-    let mut cam = camera(resolution, options.field_of_view);
+    let mut cam = camera(resolution, field_of_view);
 
     let pb_update = Box::new(|x| {
         pb.inc(x);

@@ -1,6 +1,8 @@
+use crate::camera::Resolution;
 use crate::colors::Color;
 use crate::json5::{
-    load_scene, BodyType, Light, LightType, Material as JsonMaterial, Scene, Transform,
+    load_scene, BodyType, LightType, Material as JsonMaterial, Resolution as JsonResolution,
+    Transform,
 };
 use crate::lights::point_light;
 use crate::materials::{default_material, Material};
@@ -10,10 +12,10 @@ use crate::shapes::{plane, sphere};
 use crate::transformations::{
     rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
 };
-use crate::tuples::{point, vector, Point, Tuple};
+use crate::tuples::{point, Point, Tuple};
 use crate::utils::RenderOptions;
 use crate::world::{world, World};
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use std::path::Path;
 
 impl From<[f64; 3]> for Color {
@@ -28,8 +30,23 @@ impl From<[f64; 3]> for Tuple {
     }
 }
 
-fn build_transform(transforms: &Option<Vec<Transform>>) -> Matrix4 {
-    let mut combined_transform = identity4();
+impl From<JsonResolution> for Resolution {
+    fn from(value: JsonResolution) -> Self {
+        match value {
+            JsonResolution::VGA => Resolution::VGA,
+            JsonResolution::SVGA => Resolution::SVGA,
+            JsonResolution::XGA => Resolution::XGA,
+            JsonResolution::SXGA => Resolution::SXGA,
+            JsonResolution::FHD => Resolution::FHD,
+            JsonResolution::QHD => Resolution::QHD,
+            JsonResolution::UHD => Resolution::UHD_4K,
+            JsonResolution::Custom { width, height } => Resolution::new(width, height),
+        }
+    }
+}
+
+fn build_transform(initial: &Matrix4, transforms: &Option<Vec<Transform>>) -> Matrix4 {
+    let mut combined_transform = initial.clone();
     if let Some(transforms) = transforms {
         for transform in transforms {
             let t = match transform {
@@ -77,13 +94,13 @@ pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
             let shape = match body.body_type {
                 BodyType::Plane => {
                     let mut shape = plane();
-                    shape.set_transform(&build_transform(&body.transforms));
+                    shape.set_transform(&build_transform(&identity4(), &body.transforms));
                     shape.material = build_material(&body.material);
                     shape
                 }
                 BodyType::Sphere => {
                     let mut shape = sphere(1);
-                    shape.set_transform(&build_transform(&body.transforms));
+                    shape.set_transform(&build_transform(&identity4(), &body.transforms));
                     shape.material = build_material(&body.material);
                     shape
                 }
@@ -93,20 +110,27 @@ pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
         }
     }
 
-    let mut render_options: Vec<RenderOptions> = vec![];
+    let mut coll: Vec<RenderOptions> = vec![];
     if let Some(cameras) = scene.cameras {
         for camera in cameras {
-            render_options.push(RenderOptions {
-                default_resolution: Default::default(),
-                field_of_view: camera.field_of_view,
-                camera_transform: view_transform(
-                    &camera.from.into(),
-                    &camera.to.into(),
-                    &camera.up.into(),
-                ),
-            })
+            let camera_transform =
+                view_transform(&camera.from.into(), &camera.to.into(), &camera.up.into());
+            let camera_transform = build_transform(&camera_transform, &camera.transforms);
+
+            let mut render_options = RenderOptions {
+                camera_transform,
+                ..Default::default()
+            };
+            if let Some(resolution) = camera.resolution {
+                render_options.default_resolution = resolution.into();
+            }
+            if let Some(fov) = camera.field_of_view {
+                render_options.field_of_view = fov;
+            }
+
+            coll.push(render_options)
         }
     }
 
-    Ok((world, render_options))
+    Ok((world, coll))
 }
