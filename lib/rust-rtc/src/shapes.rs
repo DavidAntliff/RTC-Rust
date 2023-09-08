@@ -8,7 +8,6 @@ use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
 use crate::planes::Plane;
 use crate::rays::Ray;
-use crate::shapes;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
 
@@ -85,21 +84,21 @@ impl Shape {
     }
 
     // Functions to extract primitive type
-    pub fn as_sphere_primitive(&mut self) -> Option<&mut shapes::Sphere> {
+    pub fn as_sphere_primitive(&mut self) -> Option<&mut Sphere> {
         match self.shape {
             ShapeEnum::Sphere(ref mut x) => Some(x),
             _ => None,
         }
     }
 
-    pub fn as_cylinder_primitive(&mut self) -> Option<&mut shapes::Cylinder> {
+    pub fn as_cylinder_primitive(&mut self) -> Option<&mut Cylinder> {
         match self.shape {
             ShapeEnum::Cylinder(ref mut x) => Some(x),
             _ => None,
         }
     }
 
-    pub fn as_cone_primitive(&mut self) -> Option<&mut shapes::Cone> {
+    pub fn as_cone_primitive(&mut self) -> Option<&mut Cone> {
         match self.shape {
             ShapeEnum::Cone(ref mut x) => Some(x),
             _ => None,

@@ -311,9 +311,9 @@ mod tests {
     fn color_with_intersection_behind_ray() {
         let mut w = default_world();
         {
-            let mut outer = &mut w.objects[0];
+            let outer = &mut w.objects[0];
             outer.material.ambient = 1.0;
-            let mut inner = &mut w.objects[1];
+            let inner = &mut w.objects[1];
             inner.material.ambient = 1.0;
         }
         let r = ray(point(0.0, 0.0, 0.75), vector(0.0, 0.0, -1.0));
@@ -397,7 +397,7 @@ mod tests {
         let mut w = default_world();
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         {
-            let mut shape = &mut w.objects[1];
+            let shape = &mut w.objects[1];
             shape.material.ambient = 1.0;
         }
         let shape = &w.objects[1];
@@ -495,7 +495,7 @@ mod tests {
     fn refracted_color_at_max_recursive_depth() {
         let mut w = default_world();
         {
-            let mut shape = &mut w.objects[0];
+            let shape = &mut w.objects[0];
             shape.material.transparency = 1.0;
             shape.material.refractive_index = 1.5;
         }
@@ -515,7 +515,7 @@ mod tests {
     fn refracted_color_under_total_internal_reflection() {
         let mut w = default_world();
         {
-            let mut shape = &mut w.objects[0];
+            let shape = &mut w.objects[0];
             shape.material.transparency = 1.0;
             shape.material.refractive_index = 1.5;
         }
@@ -537,12 +537,12 @@ mod tests {
     fn refracted_color_with_refracted_ray() {
         let mut w = default_world();
         {
-            let mut a = &mut w.objects[0];
+            let a = &mut w.objects[0];
             a.material.ambient = 1.0;
             a.material.set_pattern(&test_pattern());
         }
         {
-            let mut b = &mut w.objects[1];
+            let b = &mut w.objects[1];
             b.material.transparency = 1.0;
             b.material.refractive_index = 1.5;
         }

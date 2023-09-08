@@ -1,5 +1,4 @@
 use anyhow::Result;
-use json5;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use std::path::Path;
@@ -130,6 +129,7 @@ impl Default for Camera {
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 #[serde(deny_unknown_fields)]
 pub(crate) enum Resolution {
     VGA,

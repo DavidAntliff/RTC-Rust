@@ -30,7 +30,7 @@ pub struct RenderArgs {
         value_name = "NAME",
         default_value = "main"
     )]
-    pub camera: String,
+    pub camera_name: String,
 
     /// Pre-defined resolutions
     #[arg(short = 'r', long = "resolution", value_enum)]

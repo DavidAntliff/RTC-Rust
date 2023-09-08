@@ -12,10 +12,11 @@ use crate::shapes::{plane, sphere};
 use crate::transformations::{
     rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
 };
-use crate::tuples::{point, Point, Tuple};
+use crate::tuples::{point, Tuple};
 use crate::utils::RenderOptions;
 use crate::world::{world, World};
 use anyhow::Result;
+use std::collections::HashMap;
 use std::path::Path;
 
 impl From<[f64; 3]> for Color {
@@ -46,7 +47,7 @@ impl From<JsonResolution> for Resolution {
 }
 
 fn build_transform(initial: &Matrix4, transforms: &Option<Vec<Transform>>) -> Matrix4 {
-    let mut combined_transform = initial.clone();
+    let mut combined_transform = *initial;
     if let Some(transforms) = transforms {
         for transform in transforms {
             let t = match transform {
@@ -71,7 +72,7 @@ fn build_material(material: &JsonMaterial) -> Material {
     m
 }
 
-pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
+pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptions>)> {
     let mut world = world();
     let scene = load_scene(filename)?;
 
@@ -110,7 +111,7 @@ pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
         }
     }
 
-    let mut coll: Vec<RenderOptions> = vec![];
+    let mut coll = HashMap::<String, RenderOptions>::new();
     if let Some(cameras) = scene.cameras {
         for camera in cameras {
             let camera_transform =
@@ -128,7 +129,7 @@ pub fn load_world(filename: &Path) -> Result<(World, Vec<RenderOptions>)> {
                 render_options.field_of_view = fov;
             }
 
-            coll.push(render_options)
+            coll.insert(camera.name, render_options);
         }
     }
 
