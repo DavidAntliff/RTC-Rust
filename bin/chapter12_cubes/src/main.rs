@@ -159,6 +159,8 @@ fn main() -> ExitCode {
         ..Default::default()
     };
 
+    dbg!(&options);
+
     ExitCode::from(match utils::render_world(&w, options, &cli.common) {
         Ok(_) => 0,
         Err(e) => {

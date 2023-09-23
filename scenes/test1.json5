@@ -2,87 +2,107 @@
 {
   lights: [
     {
-      type: "point_light",
-      position: [-10.0, 10.0, -10.0],
-      intensity: [0.5, 0.5, 0.5],
+      point_light: {
+        position: [-10.0, 10.0, -10.0],
+        intensity: [0.5, 0.5, 0.5],
+      }
     },
     {
-      type: "point_light",
-      position: [5.0, 15.0, -10.0],
-      intensity: [0.5, 0.5, 0.5]
-    },
+      point_light: {
+        position: [5.0, 15.0, -10.0],
+        intensity: [0.5, 0.5, 0.5]
+      }
+    }
   ],
 
   bodies: [
     // floor
     {
-      type: "plane",
-      material: {
-        color: [1.0, 0.9, 0.9],
-        specular: 0.0,
+      plane: {
+        material: {
+          color: [1.0, 0.9, 0.9],
+          specular: 0.0,
+        }
       }
     },
 
     // wall
     {
-      type: "plane",
-      transforms: [
-        { rotate_x: 1.5707963267948966 },
-        { rotate_y: 0.3 },
-        { translate: [0.0, 0.0, 7.0] },
-      ],
-      material: {
-        color: [1.0, 0.8, 0.8],
-        specular: 0.0,
-      },
+      plane: {
+        transforms: [
+          { rotate_x: 1.5707963267948966 },
+          { rotate_y: 0.3 },
+          { translate: [0.0, 0.0, 7.0] },
+        ],
+        material: {
+          color: [1.0, 0.8, 0.8],
+          specular: 0.0,
+        }
+      }
     },
 
     // sphere
     {
-      type: "sphere",
-      transforms: [
-        { translate: [-0.5, 1.0, 0.5] },
-      ],
-      material: {
-        color: [0.1, 1.0, 0.5],
-        diffuse: 0.7,
-        specular: 0.3,
-      },
+      sphere: {
+        transforms: [
+          { translate: [-0.5, 1.0, 0.5] },
+        ],
+        material: {
+          color: [0.1, 1.0, 0.5],
+          diffuse: 0.7,
+          specular: 0.3,
+        }
+      }
     },
 
     // blended pattern
     {
-      type: "plane",
-      transforms: [
-        { rotate_x: 1.5707963267948966 },
-        { translate:  [0.0, 0.0, 7.0] },
-      ],
-      material: {
-        color: [1.0, 0.8, 0.8],
-        diffuse: 0.3,
-        specular: 0.0,
-        pattern: {
-          rings: {
-            a: {
-              radial_gradient: {
-                a: { color: [1.0, 1.0, 0.0] },
-                b: { color: [0.0, 0.0, 0.0] },
-                y_factor: 0.0,
-              }
-            },
-            b: {
-              radial_gradient: {
-                a: { color: [0.0, 0.0, 0.0] },
-                b: { color: [1.0, 1.0, 0.0] },
-                y_factor: 0.0,
-              }
-            },
-            transforms: [
-              { scale: [0.5, 0.5, 0.5] },
-            ]
-          },
-        },
-      },
-    },
+      plane: {
+        transforms: [
+          { rotate_x: 1.5707963267948966 },
+          { translate:  [0.0, 0.0, 7.0] },
+        ],
+        material: {
+          color: [1.0, 0.8, 0.8],
+          diffuse: 0.3,
+          specular: 0.0,
+          pattern: {
+            rings: {
+              a: {
+                radial_gradient: {
+                  a: { color: [1.0, 1.0, 0.0] },
+                  b: { color: [0.0, 0.0, 0.0] },
+                  y_factor: 0.0,
+                }
+              },
+              b: {
+                radial_gradient: {
+                  a: { color: [0.0, 0.0, 0.0] },
+                  b: { color: [1.0, 1.0, 0.0] },
+                  y_factor: 0.0,
+                }
+              },
+              transforms: [
+                { scale: [0.5, 0.5, 0.5] },
+              ]
+            }
+          }
+        }
+      }
+    }
   ],
+
+  cameras: [
+    {
+      name: "main",
+      resolution: "QHD",
+      field_of_view: 1.047,  // pi/3
+      from: [0, 1.5, -5],
+      to: [0, 1.0, 0.0],
+      up: [0, 1, 0],
+      transforms: [
+        { translate:  [0.0, 0.0, -0.0] },
+      ]
+    },
+  ]
 }

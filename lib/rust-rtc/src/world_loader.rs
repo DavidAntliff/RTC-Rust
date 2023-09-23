@@ -1,16 +1,19 @@
 use crate::camera::Resolution;
-use crate::colors::Color;
+use crate::colors::{color, colori, Color};
 use crate::json5::{
-    load_scene, BodyType, LightType, Material as JsonMaterial, Resolution as JsonResolution,
-    Transform,
+    load_scene, Body, Color as JsonColor, Light, Material as JsonMaterial, Pattern as JsonPattern,
+    Resolution as JsonResolution, Transform,
 };
 use crate::lights::point_light;
 use crate::materials::{default_material, Material};
 use crate::matrices::identity4;
 use crate::matrices::Matrix4;
-use crate::shapes::{plane, sphere};
+use crate::patterns::{
+    checkers_pattern, radial_gradient_pattern, ring_pattern, solid_pattern, stripe_pattern, Pattern,
+};
 use crate::transformations::{
-    rotation_x, rotation_y, rotation_z, scaling, translation, view_transform,
+    rotation_x, rotation_y, rotation_z, scaling, translate_x, translate_y, translate_z,
+    translation, view_transform,
 };
 use crate::tuples::{point, Tuple};
 use crate::utils::RenderOptions;
@@ -25,9 +28,24 @@ impl From<[f64; 3]> for Color {
     }
 }
 
+impl From<[i32; 3]> for Color {
+    fn from(value: [i32; 3]) -> Self {
+        colori(value[0], value[1], value[2])
+    }
+}
+
 impl From<[f64; 3]> for Tuple {
     fn from(value: [f64; 3]) -> Self {
         point(value[0], value[1], value[2])
+    }
+}
+
+impl From<JsonColor> for Color {
+    fn from(value: crate::json5::Color) -> Self {
+        match value {
+            JsonColor::Color(ar) => ar.into(),
+            JsonColor::Colori(ar) => ar.into(),
+        }
     }
 }
 
@@ -55,6 +73,9 @@ fn build_transform(initial: &Matrix4, transforms: &Option<Vec<Transform>>) -> Ma
                 Transform::RotateY(theta) => rotation_y(*theta),
                 Transform::RotateZ(theta) => rotation_z(*theta),
                 Transform::Translate(x, y, z) => translation(*x, *y, *z),
+                Transform::TranslateX(x) => translate_x(*x),
+                Transform::TranslateY(y) => translate_y(*y),
+                Transform::TranslateZ(z) => translate_z(*z),
                 Transform::Scale(x, y, z) => scaling(*x, *y, *z),
             };
             combined_transform.then(&t);
@@ -69,7 +90,50 @@ fn build_material(material: &JsonMaterial) -> Material {
     m.ambient = material.ambient;
     m.diffuse = material.diffuse;
     m.specular = material.specular;
+    m.shininess = material.shininess;
+    m.reflective = material.reflective;
+    m.transparency = material.transparency;
+    m.refractive_index = material.refractive_index;
+    m.casts_shadow = material.casts_shadow;
+    m.receives_shadow = material.receives_shadow;
+
+    if let Some(base_pattern) = &material.pattern {
+        m.set_pattern(&build_pattern(&base_pattern));
+    }
+
     m
+}
+
+fn build_pattern(pattern: &JsonPattern) -> Pattern {
+    match pattern {
+        JsonPattern::Color(r, g, b) => solid_pattern(&color(*r, *g, *b)),
+        JsonPattern::Colori(r, g, b) => solid_pattern(&colori(*r, *g, *b)),
+        JsonPattern::RadialGradient {
+            a,
+            b,
+            transforms,
+            y_factor,
+        } => {
+            let mut p = radial_gradient_pattern(build_pattern(a), build_pattern(b), *y_factor);
+            p.set_transform(&build_transform(&identity4(), transforms));
+            p
+        }
+        JsonPattern::Rings { a, b, transforms } => {
+            let mut p = ring_pattern(build_pattern(a), build_pattern(b));
+            p.set_transform(&build_transform(&identity4(), transforms));
+            p
+        }
+        JsonPattern::Checkers { a, b, transforms } => {
+            let mut p = checkers_pattern(build_pattern(a), build_pattern(b));
+            p.set_transform(&build_transform(&identity4(), transforms));
+            p
+        }
+        JsonPattern::Stripes { a, b, transforms } => {
+            let mut p = stripe_pattern(build_pattern(a), build_pattern(b));
+            p.set_transform(&build_transform(&identity4(), transforms));
+            p
+        }
+    }
 }
 
 pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptions>)> {
@@ -78,13 +142,13 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
 
     if let Some(lights) = scene.lights {
         for light in lights {
-            match light.light_type {
-                LightType::PointLight => {
-                    let l = point_light(light.position.into(), light.intensity.into());
+            match light {
+                Light::PointLight {
+                    position,
+                    intensity,
+                } => {
+                    let l = point_light(position.into(), intensity.into());
                     world.add_light(l);
-                }
-                LightType::SpotLight => {
-                    todo!()
                 }
             }
         }
@@ -92,21 +156,61 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
 
     if let Some(bodies) = scene.bodies {
         for body in bodies {
-            let shape = match body.body_type {
-                BodyType::Plane => {
-                    let mut shape = plane();
-                    shape.set_transform(&build_transform(&identity4(), &body.transforms));
-                    shape.material = build_material(&body.material);
+            let shape = match body {
+                Body::Plane(plane) => {
+                    let mut shape = crate::shapes::plane();
+                    shape.set_transform(&build_transform(&identity4(), &plane.common.transforms));
+                    if let Some(m) = plane.common.material {
+                        shape.material = build_material(&m);
+                    };
                     shape
                 }
-                BodyType::Sphere => {
-                    let mut shape = sphere(1);
-                    shape.set_transform(&build_transform(&identity4(), &body.transforms));
-                    shape.material = build_material(&body.material);
+                Body::Sphere(sphere) => {
+                    let mut shape = crate::shapes::sphere(1);
+                    shape.set_transform(&build_transform(&identity4(), &sphere.common.transforms));
+                    if let Some(m) = sphere.common.material {
+                        shape.material = build_material(&m);
+                    };
+                    shape
+                }
+                Body::Cone(cone) => {
+                    let mut shape = crate::shapes::cone();
+                    let p = shape.as_cone_primitive().expect("should be a cone");
+                    if let Some(minimum_y) = cone.minimum_y {
+                        p.minimum_y = minimum_y;
+                    }
+                    if let Some(maximum_y) = cone.maximum_y {
+                        p.maximum_y = maximum_y;
+                    }
+                    shape.set_transform(&build_transform(&identity4(), &cone.common.transforms));
+                    if let Some(m) = cone.common.material {
+                        shape.material = build_material(&m);
+                    };
+                    shape
+                }
+                Body::Cylinder(cylinder) => {
+                    let min_y = cylinder.minimum_y.unwrap_or(-1.0);
+                    let max_y = cylinder.maximum_y.unwrap_or(1.0);
+                    let closed_min = cylinder.closed_min.unwrap_or(true);
+                    let closed_max = cylinder.closed_max.unwrap_or(true);
+
+                    let mut shape = crate::shapes::cylinder(min_y, max_y, closed_min, closed_max);
+                    shape
+                        .set_transform(&build_transform(&identity4(), &cylinder.common.transforms));
+                    if let Some(m) = cylinder.common.material {
+                        shape.material = build_material(&m);
+                    };
+                    shape
+                }
+                Body::Cube(cube) => {
+                    let mut shape = crate::shapes::cube();
+                    shape.set_transform(&build_transform(&identity4(), &cube.common.transforms));
+                    if let Some(m) = cube.common.material {
+                        shape.material = build_material(&m);
+                    };
                     shape
                 }
             };
-
             world.add_object(shape);
         }
     }
@@ -114,8 +218,11 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
     let mut coll = HashMap::<String, RenderOptions>::new();
     if let Some(cameras) = scene.cameras {
         for camera in cameras {
-            let camera_transform =
-                view_transform(&camera.from.into(), &camera.to.into(), &camera.up.into());
+            // 'up' must be a vector, so zero the w element:
+            let mut up = Tuple::from(camera.up);
+            up.set_w(0.0);
+
+            let camera_transform = view_transform(&camera.from.into(), &camera.to.into(), &up);
             let camera_transform = build_transform(&camera_transform, &camera.transforms);
 
             let mut render_options = RenderOptions {

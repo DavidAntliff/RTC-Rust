@@ -1,0 +1,163 @@
+// JSON5
+{
+  lights: [
+    {
+      point_light: {
+        position: [-2.0, 5.0, -10.0],
+        intensity: [0.5, 0.5, 0.5]
+      }
+    },
+    {
+      point_light: {
+        position: [5.0, 5.0, -10.0],
+        intensity: [0.5, 0.5, 0.5],
+      }
+    },
+    {
+      point_light: {
+        position: [0.0, 25.0, 100.0],
+        intensity: [0.7, 0.0, 0.0],
+      }
+    },
+  ],
+
+  bodies: [
+    // floor
+    {
+      plane: {
+        material: {
+          color: [1.0, 0.9, 0.9],
+          specular: 0.0,
+          reflective: 0.2,
+          pattern: {
+            checkers: {
+              a: {
+                stripes: {
+                  a: { colori: [167, 83, 104] },
+                  b: { colori: [124, 41, 62] },
+                  transforms: [
+                    { scale: [0.3, 0.3, 0.3] },
+                    { rotate_y: 0.7853981633974483 },
+                  ]
+                }
+              },
+              b: {
+                stripes: {
+                  a: { colori: [63, 63, 63] },
+                  b: { colori: [104, 104, 104] },
+                  transforms: [
+                    { scale: [0.3, 0.3, 0.3] },
+                    { rotate_y: -0.7853981633974483 },
+                  ]
+                }
+              },
+              transforms: [
+                { scale:  [1.0, 1.0, 1.0] },
+              ]
+            }
+          }
+        },
+        transforms: [
+          { translate: [0.0, -1.0, 0.0] },
+        ]
+      }
+    },
+
+    // cone 1
+    {
+      cone: {
+        transforms: [
+          { translate: [-10.0, 0.0, 0.0] },
+        ],
+        material: {
+          color: [1.0, 0.843, 0.0],
+          ambient: 0.2,
+          specular: 1.0,
+          shininess: 1000.0,
+          reflective: 1.0,
+        }
+      }
+    },
+
+    // cone 2
+    {
+      cone: {
+        maximum_y: 1.0,
+        transforms: [
+          { translate: [-5.0, 0.0, -2.0] },
+        ],
+        material: {
+          color: [0.2, 0.0, 0.9],
+          specular: 1.0,
+          shininess: 1000.0,
+          reflective: 1.0,
+        }
+      }
+    },
+
+    // cone 3
+    {
+      cone: {
+        maximum_y: 2.3,
+        transforms: [
+          { translate: [0.0, 0.0, 0.0] },
+        ],
+        material: {
+          color: [1.0, 0.0, 0.0],
+          reflective: 1.0,
+        }
+      }
+    },
+
+    // cone 4
+    {
+      cone: {
+        minimum_y: -2.0,
+        transforms: [
+          { rotate_x: -0.7853981633974483 },  // -pi / 4
+          { translate: [6.0, 1.9, 1.0] },
+        ],
+        material: {
+          color: [0.0, 0.9, 0.1],
+          specular: 1.0,
+          shininess: 300.0,
+          reflective: 1.0,
+        }
+      }
+    },
+
+    // cone 5
+    {
+      cone: {
+        minimum_y: -2.0,
+        transforms: [
+          { rotate_z: -0.7853981633974483 },  // -pi / 4
+          { rotate_y: -0.3 },
+          { translate: [12.0, 1.9, 0.0] },
+        ],
+        material: {
+          color: [1.0, 1.0, 1.0],
+          ambient: 0.2,
+          diffuse: 1.0,
+          specular: 1.0,
+          shininess: 300.0,
+          reflective: 0.9,
+        }
+      }
+    }
+  ],
+
+  cameras: [
+    {
+      name: "main",
+      resolution: "QHD",
+      field_of_view: 1.047,  // pi/3
+      from: [0, 1.5, -5.0],
+      to: [0.0, 0.5, 0.0],
+      up: [0.0, 1.0, 0.0],
+      transforms: [
+        { translate:  [0.0, 0.0, -20.0] },
+      ]
+    }
+  ]
+}

@@ -21,8 +21,8 @@ fn main() -> Result<()> {
 
     let (world, render_options) = load_world(Path::new(&cli.input))?;
 
-    println!("{:#?}", world);
-    println!("{:#?}", render_options);
+    dbg!("{world:#?}", &world);
+    dbg!("{render_options:#?}", &render_options);
 
     let options = render_options
         .get(&cli.common.render.camera_name)

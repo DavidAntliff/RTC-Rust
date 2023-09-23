@@ -8,3 +8,8 @@ resolver = "2"
 [workspace.dependencies]
 clap = { version = "4.2.4", features = ["derive"]}
 anyhow = { version = "1.0.72" }
+
+[profile.release]
+#lto = "fat"
+#codegen-units = 1
+#opt-level = 2

@@ -1,3 +1,4 @@
+use crate::materials::RefractiveIndex;
 use anyhow::Result;
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
@@ -13,56 +14,110 @@ pub struct Scene {
 
 #[derive(Deserialize, Debug, PartialEq)]
 #[serde(deny_unknown_fields)]
-pub(crate) struct Light {
-    #[serde(rename = "type")]
-    pub(crate) light_type: LightType,
-    pub(crate) position: [f64; 3],
-    pub(crate) intensity: [f64; 3],
-}
-
-#[derive(Deserialize, Debug, PartialEq)]
-pub(crate) enum LightType {
+pub(crate) enum Light {
     #[serde(rename = "point_light")]
-    PointLight,
-    #[serde(rename = "spot_light")]
-    SpotLight,
+    PointLight {
+        position: [f64; 3],
+        intensity: [f64; 3],
+    },
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub(crate) struct Body {
-    #[serde(rename = "type")]
-    pub(crate) body_type: BodyType,
-    pub(crate) material: Material,
+pub(crate) struct BodyCommon {
+    pub(crate) material: Option<Material>,
     pub(crate) transforms: Option<Vec<Transform>>,
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
-pub(crate) enum BodyType {
+pub(crate) struct Plane {
+    #[serde(flatten)]
+    pub(crate) common: BodyCommon,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub(crate) struct Sphere {
+    #[serde(flatten)]
+    pub(crate) common: BodyCommon,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub(crate) struct Cone {
+    #[serde(flatten)]
+    pub(crate) common: BodyCommon,
+    pub(crate) minimum_y: Option<f64>,
+    pub(crate) maximum_y: Option<f64>,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub(crate) struct Cylinder {
+    #[serde(flatten)]
+    pub(crate) common: BodyCommon,
+    pub(crate) minimum_y: Option<f64>,
+    pub(crate) maximum_y: Option<f64>,
+    pub(crate) closed_min: Option<bool>,
+    pub(crate) closed_max: Option<bool>,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub(crate) struct Cube {
+    #[serde(flatten)]
+    pub(crate) common: BodyCommon,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+pub(crate) enum Body {
     #[serde(rename = "plane")]
-    Plane,
+    Plane(Plane),
     #[serde(rename = "sphere")]
-    Sphere,
+    Sphere(Sphere),
+    #[serde(rename = "cone")]
+    Cone(Cone),
+    #[serde(rename = "cylinder")]
+    Cylinder(Cylinder),
+    #[serde(rename = "cube")]
+    Cube(Cube),
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
 #[serde(deny_unknown_fields)]
 #[serde(default)]
 pub(crate) struct Material {
-    pub(crate) color: [f64; 3],
+    pub(crate) color: Color,
     pub(crate) ambient: f64,
     pub(crate) diffuse: f64,
     pub(crate) specular: f64,
+    pub(crate) shininess: f64,
+    pub(crate) reflective: f64,
+    pub(crate) transparency: f64,
+    pub(crate) refractive_index: f64,
+    pub(crate) casts_shadow: bool,
+    pub(crate) receives_shadow: bool,
     pub(crate) pattern: Option<Pattern>,
 }
 
+#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
+#[serde(untagged)]
+pub(crate) enum Color {
+    #[serde(rename = "color")]
+    Color([f64; 3]),
+    #[serde(rename = "colori")]
+    Colori([i32; 3]),
+}
+
+// TODO: take these defaults from materials.rs
 impl Default for Material {
     fn default() -> Self {
         Self {
-            color: [1.0, 1.0, 1.0],
-            specular: 0.9,
+            color: Color::Color([1.0, 1.0, 1.0]),
             ambient: 0.1,
             diffuse: 0.9,
+            specular: 0.9,
+            shininess: 200.0,
+            reflective: 0.0,
+            transparency: 0.0,
+            refractive_index: RefractiveIndex::AIR,
+            casts_shadow: true,
+            receives_shadow: true,
             pattern: None,
         }
     }
@@ -78,6 +133,12 @@ pub(crate) enum Transform {
     RotateZ(f64),
     #[serde(rename = "translate")]
     Translate(f64, f64, f64),
+    #[serde(rename = "translate_x")]
+    TranslateX(f64),
+    #[serde(rename = "translate_y")]
+    TranslateY(f64),
+    #[serde(rename = "translate_z")]
+    TranslateZ(f64),
     #[serde(rename = "scale")]
     Scale(f64, f64, f64),
 }
@@ -86,6 +147,8 @@ pub(crate) enum Transform {
 pub(crate) enum Pattern {
     #[serde(rename = "color")]
     Color(f64, f64, f64),
+    #[serde(rename = "colori")]
+    Colori(i32, i32, i32),
     #[serde(rename = "radial_gradient")]
     RadialGradient {
         a: Box<Pattern>,
@@ -95,6 +158,18 @@ pub(crate) enum Pattern {
     },
     #[serde(rename = "rings")]
     Rings {
+        a: Box<Pattern>,
+        b: Box<Pattern>,
+        transforms: Option<Vec<Transform>>,
+    },
+    #[serde(rename = "checkers")]
+    Checkers {
+        a: Box<Pattern>,
+        b: Box<Pattern>,
+        transforms: Option<Vec<Transform>>,
+    },
+    #[serde(rename = "stripes")]
+    Stripes {
         a: Box<Pattern>,
         b: Box<Pattern>,
         transforms: Option<Vec<Transform>>,
@@ -162,7 +237,19 @@ where
 {
     let data = std::fs::read_to_string(filename)?;
     let t: T = json5::from_str(&data)?;
+
+    //let deserializer = &mut json5::from_str(&data);
+    //let deserializer = json5::Deserializer::from_str(&data);
+
+    //let result: Result<T, _> = serde_path_to_error::deserialize(deserializer);
+
     Ok(t)
+    //result
+
+    //let jd = &mut json5::Deserializer::from_str(&data);
+    //let result: Result<T, _> = serde_path_to_error::deserialize(jd);
+
+    //Ok(())
 }
 
 pub fn load_scene(filename: &Path) -> Result<Scene> {

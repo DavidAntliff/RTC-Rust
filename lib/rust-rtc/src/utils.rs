@@ -122,8 +122,7 @@ fn get_resolution(common_args: &CommonArgs, default: Resolution) -> Resolution {
         Some(Resolutions::SXGA) => Resolution::SXGA,
         Some(Resolutions::FHD) => Resolution::FHD,
         Some(Resolutions::QHD) => Resolution::QHD,
-        Some(Resolutions::UHD) => Resolution::UHD_4K,
-        Some(Resolutions::_4K) => Resolution::UHD_4K,
+        Some(Resolutions::UHD | Resolutions::_4K) => Resolution::UHD_4K,
         _ => default,
     };
 

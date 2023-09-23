@@ -35,6 +35,7 @@ fn main() -> ExitCode {
     floor.material.set_pattern(&floor_pattern);
     w.add_object(floor);
 
+    // cone 1
     let mut c = cone();
     c.set_transform(&translation(-10.0, 0.0, 0.0));
     c.material.color = color(1.0, 0.843, 0.0);
@@ -44,6 +45,7 @@ fn main() -> ExitCode {
     c.material.reflective = 1.0;
     w.add_object(c);
 
+    // cone 2
     let mut c = cone();
     let p = c.as_cone_primitive().expect("should be a cone");
     p.maximum_y = 1.0;
@@ -54,6 +56,7 @@ fn main() -> ExitCode {
     c.material.reflective = 1.0;
     w.add_object(c);
 
+    // cone 3
     let mut c = cone();
     let p = c.as_cone_primitive().expect("should be a cone");
     p.maximum_y = 2.3;
@@ -62,6 +65,7 @@ fn main() -> ExitCode {
     c.material.reflective = 1.0;
     w.add_object(c);
 
+    // cone 4
     let mut c = cone();
     let p = c.as_cone_primitive().expect("should be a cone");
     p.minimum_y = -2.0;
@@ -72,6 +76,7 @@ fn main() -> ExitCode {
     c.material.reflective = 1.0;
     w.add_object(c);
 
+    // cone 5
     let mut c = cone();
     let p = c.as_cone_primitive().expect("should be a cone");
     p.minimum_y = -2.0;
@@ -107,6 +112,8 @@ fn main() -> ExitCode {
         .then(&translation(0.0, 0.0, -20.0)),
         ..Default::default()
     };
+
+    dbg!("{w}", &w);
 
     ExitCode::from(match utils::render_world(&w, options, &cli.common) {
         Ok(_) => 0,

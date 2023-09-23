@@ -28,12 +28,12 @@ fn main() {
     let mut p = point(0.0, 120.0, 0.0);
 
     for _i in 0..12 {
-        eprintln!("{:?}", p);
+        eprintln!("{p:?}");
         let p2 = hour * p;
         set_pixel(&mut c, p2.x(), p2.y());
         p = p2;
     }
 
     let ppm = ppm_from_canvas(&c);
-    print!("{}", ppm);
+    print!("{ppm}");
 }

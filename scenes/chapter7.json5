@@ -2,95 +2,102 @@
 {
   lights: [
     {
-      type: "point_light",
-      position: [-10.0, 10.0, -10.0],
-      intensity: [1.0, 1.0, 1.0],
+      point_light: {
+        position: [-10.0, 10.0, -10.0],
+        intensity: [1.0, 1.0, 1.0],
+      }
     },
   ],
 
   bodies: [
     // floor
     {
-      type: "sphere",
-      material: {
-        color: [1.0, 0.9, 0.9],
-        specular: 0.0,
-      },
-      transforms: [
-        { scale: [10.0, 0.01, 10.0] },
-      ],
+      sphere: {
+        material: {
+          color: [1.0, 0.9, 0.9],
+          specular: 0.0,
+        },
+        transforms: [
+          { scale: [10.0, 0.01, 10.0] },
+        ]
+      }
     },
 
     // left wall
     {
-      type: "sphere",
-      transforms: [
-        { scale:  [10.0, 0.01, 10.0] },
-        { rotate_x: 1.5707963267948966 },
-        { rotate_y: -0.7853981633974483 },
-        { translate: [0.0, 0.0, 5.0] },
-      ],
-      material: {
-        color: [1.0, 0.9, 0.9],
-        specular: 0.0,
-      },
+      sphere: {
+        transforms: [
+          { scale:  [10.0, 0.01, 10.0] },
+          { rotate_x: 1.5707963267948966 },
+          { rotate_y: -0.7853981633974483 },
+          { translate: [0.0, 0.0, 5.0] },
+        ],
+        material: {
+          color: [1.0, 0.9, 0.9],
+          specular: 0.0,
+        }
+      }
     },
 
     // right wall
     {
-      type: "sphere",
-      transforms: [
-        { scale:  [10.0, 0.01, 10.0] },
-        { rotate_x: 1.5707963267948966 },
-        { rotate_y: 0.7853981633974483 },
-        { translate: [0.0, 0.0, 5.0] },
-      ],
-      material: {
-        color: [1.0, 0.9, 0.9],
-        specular: 0.0,
-      },
+      sphere: {
+        transforms: [
+          { scale:  [10.0, 0.01, 10.0] },
+          { rotate_x: 1.5707963267948966 },
+          { rotate_y: 0.7853981633974483 },
+          { translate: [0.0, 0.0, 5.0] },
+        ],
+        material: {
+          color: [1.0, 0.9, 0.9],
+          specular: 0.0,
+        }
+      }
     },
 
     // middle
     {
-      type: "sphere",
-      transforms: [
-        { translate: [-0.5, 1.0, 0.5] },
-      ],
-      material: {
-        color: [0.1, 1.0, 0.5],
-        diffuse: 0.7,
-        specular: 0.3,
-      },
+      sphere: {
+        transforms: [
+          { translate: [-0.5, 1.0, 0.5] },
+        ],
+        material: {
+          color: [0.1, 1.0, 0.5],
+          diffuse: 0.7,
+          specular: 0.3,
+        }
+      }
     },
 
     // right
     {
-      type: "sphere",
-      transforms: [
-        { scale:  [0.5, 0.5, 0.5] },
-        { translate: [1.5, 0.5, -0.5] },
-      ],
-      material: {
-        color: [0.5, 1.0, 0.1],
-        diffuse: 0.7,
-        specular: 0.3,
-      },
+      sphere: {
+        transforms: [
+          { scale:  [0.5, 0.5, 0.5] },
+          { translate: [1.5, 0.5, -0.5] },
+        ],
+        material: {
+          color: [0.5, 1.0, 0.1],
+          diffuse: 0.7,
+          specular: 0.3,
+        }
+      }
     },
 
     // left
     {
-      type: "sphere",
-      transforms: [
-        { scale:  [0.33, 0.33, 0.33] },
-        { translate: [-1.5, 0.33, -0.75] },
-      ],
-      material: {
-        color: [1.0, 0.8, 0.1],
-        diffuse: 0.7,
-        specular: 0.3,
-      },
-    },
+      sphere: {
+        transforms: [
+          { scale:  [0.33, 0.33, 0.33] },
+          { translate: [-1.5, 0.33, -0.75] },
+        ],
+        material: {
+          color: [1.0, 0.8, 0.1],
+          diffuse: 0.7,
+          specular: 0.3,
+        }
+      }
+    }
   ],
 
   cameras: [

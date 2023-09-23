@@ -56,7 +56,7 @@ fn main() {
     // for each row of pixels in the canvas
     for y in 0..canvas_pixels {
         if y % 50 == 0 {
-            eprintln!("row {}", y);
+            eprintln!("row {y}");
         }
 
         // compute the world y coordinate (top = +half, bottom = -half)
@@ -94,5 +94,5 @@ fn main() {
     }
 
     let ppm = ppm_from_canvas(&c);
-    print!("{}", ppm);
+    print!("{ppm}");
 }
