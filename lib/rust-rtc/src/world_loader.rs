@@ -1,9 +1,6 @@
 use crate::camera::Resolution;
 use crate::colors::{color, colori, Color};
-use crate::json5::{
-    load_scene, Body, Color as JsonColor, Light, Material as JsonMaterial, Pattern as JsonPattern,
-    Resolution as JsonResolution, Transform,
-};
+use crate::json;
 use crate::lights::point_light;
 use crate::materials::{default_material, Material};
 use crate::matrices::identity4;
@@ -18,7 +15,7 @@ use crate::transformations::{
 use crate::tuples::{point, Tuple};
 use crate::utils::RenderOptions;
 use crate::world::{world, World};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -40,43 +37,43 @@ impl From<[f64; 3]> for Tuple {
     }
 }
 
-impl From<JsonColor> for Color {
-    fn from(value: crate::json5::Color) -> Self {
+impl From<json::Color> for Color {
+    fn from(value: json::Color) -> Self {
         match value {
-            JsonColor::Color(ar) => ar.into(),
-            JsonColor::Colori(ar) => ar.into(),
+            json::Color::Color(ar) => ar.into(),
+            json::Color::Colori(ar) => ar.into(),
         }
     }
 }
 
-impl From<JsonResolution> for Resolution {
-    fn from(value: JsonResolution) -> Self {
+impl From<json::Resolution> for Resolution {
+    fn from(value: json::Resolution) -> Self {
         match value {
-            JsonResolution::VGA => Resolution::VGA,
-            JsonResolution::SVGA => Resolution::SVGA,
-            JsonResolution::XGA => Resolution::XGA,
-            JsonResolution::SXGA => Resolution::SXGA,
-            JsonResolution::FHD => Resolution::FHD,
-            JsonResolution::QHD => Resolution::QHD,
-            JsonResolution::UHD => Resolution::UHD_4K,
-            JsonResolution::Custom { width, height } => Resolution::new(width, height),
+            json::Resolution::VGA => Resolution::VGA,
+            json::Resolution::SVGA => Resolution::SVGA,
+            json::Resolution::XGA => Resolution::XGA,
+            json::Resolution::SXGA => Resolution::SXGA,
+            json::Resolution::FHD => Resolution::FHD,
+            json::Resolution::QHD => Resolution::QHD,
+            json::Resolution::UHD => Resolution::UHD_4K,
+            json::Resolution::Custom { width, height } => Resolution::new(width, height),
         }
     }
 }
 
-fn build_transform(initial: &Matrix4, transforms: &Option<Vec<Transform>>) -> Matrix4 {
+fn build_transform(initial: &Matrix4, transforms: &Option<Vec<json::Transform>>) -> Matrix4 {
     let mut combined_transform = *initial;
     if let Some(transforms) = transforms {
         for transform in transforms {
             let t = match transform {
-                Transform::RotateX(theta) => rotation_x(*theta),
-                Transform::RotateY(theta) => rotation_y(*theta),
-                Transform::RotateZ(theta) => rotation_z(*theta),
-                Transform::Translate(x, y, z) => translation(*x, *y, *z),
-                Transform::TranslateX(x) => translate_x(*x),
-                Transform::TranslateY(y) => translate_y(*y),
-                Transform::TranslateZ(z) => translate_z(*z),
-                Transform::Scale(x, y, z) => scaling(*x, *y, *z),
+                json::Transform::RotateX(theta) => rotation_x(*theta),
+                json::Transform::RotateY(theta) => rotation_y(*theta),
+                json::Transform::RotateZ(theta) => rotation_z(*theta),
+                json::Transform::Translate(x, y, z) => translation(*x, *y, *z),
+                json::Transform::TranslateX(x) => translate_x(*x),
+                json::Transform::TranslateY(y) => translate_y(*y),
+                json::Transform::TranslateZ(z) => translate_z(*z),
+                json::Transform::Scale(x, y, z) => scaling(*x, *y, *z),
             };
             combined_transform.then(&t);
         }
@@ -84,7 +81,7 @@ fn build_transform(initial: &Matrix4, transforms: &Option<Vec<Transform>>) -> Ma
     combined_transform
 }
 
-fn build_material(material: &JsonMaterial) -> Material {
+fn build_material(material: &json::Material) -> Material {
     let mut m = default_material();
     m.color = material.color.into();
     m.ambient = material.ambient;
@@ -98,17 +95,17 @@ fn build_material(material: &JsonMaterial) -> Material {
     m.receives_shadow = material.receives_shadow;
 
     if let Some(base_pattern) = &material.pattern {
-        m.set_pattern(&build_pattern(&base_pattern));
+        m.set_pattern(&build_pattern(base_pattern));
     }
 
     m
 }
 
-fn build_pattern(pattern: &JsonPattern) -> Pattern {
+fn build_pattern(pattern: &json::Pattern) -> Pattern {
     match pattern {
-        JsonPattern::Color(r, g, b) => solid_pattern(&color(*r, *g, *b)),
-        JsonPattern::Colori(r, g, b) => solid_pattern(&colori(*r, *g, *b)),
-        JsonPattern::RadialGradient {
+        json::Pattern::Color(r, g, b) => solid_pattern(&color(*r, *g, *b)),
+        json::Pattern::Colori(r, g, b) => solid_pattern(&colori(*r, *g, *b)),
+        json::Pattern::RadialGradient {
             a,
             b,
             transforms,
@@ -118,17 +115,17 @@ fn build_pattern(pattern: &JsonPattern) -> Pattern {
             p.set_transform(&build_transform(&identity4(), transforms));
             p
         }
-        JsonPattern::Rings { a, b, transforms } => {
+        json::Pattern::Rings { a, b, transforms } => {
             let mut p = ring_pattern(build_pattern(a), build_pattern(b));
             p.set_transform(&build_transform(&identity4(), transforms));
             p
         }
-        JsonPattern::Checkers { a, b, transforms } => {
+        json::Pattern::Checkers { a, b, transforms } => {
             let mut p = checkers_pattern(build_pattern(a), build_pattern(b));
             p.set_transform(&build_transform(&identity4(), transforms));
             p
         }
-        JsonPattern::Stripes { a, b, transforms } => {
+        json::Pattern::Stripes { a, b, transforms } => {
             let mut p = stripe_pattern(build_pattern(a), build_pattern(b));
             p.set_transform(&build_transform(&identity4(), transforms));
             p
@@ -138,12 +135,12 @@ fn build_pattern(pattern: &JsonPattern) -> Pattern {
 
 pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptions>)> {
     let mut world = world();
-    let scene = load_scene(filename)?;
+    let scene = json::load_scene(filename)?;
 
     if let Some(lights) = scene.lights {
         for light in lights {
             match light {
-                Light::PointLight {
+                json::Light::PointLight {
                     position,
                     intensity,
                 } => {
@@ -157,7 +154,7 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
     if let Some(bodies) = scene.bodies {
         for body in bodies {
             let shape = match body {
-                Body::Plane(plane) => {
+                json::Body::Plane(plane) => {
                     let mut shape = crate::shapes::plane();
                     shape.set_transform(&build_transform(&identity4(), &plane.common.transforms));
                     if let Some(m) = plane.common.material {
@@ -165,7 +162,7 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
                     };
                     shape
                 }
-                Body::Sphere(sphere) => {
+                json::Body::Sphere(sphere) => {
                     let mut shape = crate::shapes::sphere(1);
                     shape.set_transform(&build_transform(&identity4(), &sphere.common.transforms));
                     if let Some(m) = sphere.common.material {
@@ -173,9 +170,9 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
                     };
                     shape
                 }
-                Body::Cone(cone) => {
+                json::Body::Cone(cone) => {
                     let mut shape = crate::shapes::cone();
-                    let p = shape.as_cone_primitive().expect("should be a cone");
+                    let p = shape.as_cone_primitive().context("should be a cone")?;
                     if let Some(minimum_y) = cone.minimum_y {
                         p.minimum_y = minimum_y;
                     }
@@ -188,7 +185,7 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
                     };
                     shape
                 }
-                Body::Cylinder(cylinder) => {
+                json::Body::Cylinder(cylinder) => {
                     let min_y = cylinder.minimum_y.unwrap_or(-1.0);
                     let max_y = cylinder.maximum_y.unwrap_or(1.0);
                     let closed_min = cylinder.closed_min.unwrap_or(true);
@@ -202,7 +199,7 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
                     };
                     shape
                 }
-                Body::Cube(cube) => {
+                json::Body::Cube(cube) => {
                     let mut shape = crate::shapes::cube();
                     shape.set_transform(&build_transform(&identity4(), &cube.common.transforms));
                     if let Some(m) = cube.common.material {

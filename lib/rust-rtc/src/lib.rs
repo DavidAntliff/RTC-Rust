@@ -5,7 +5,7 @@ pub mod cones;
 pub mod cubes;
 pub mod cylinders;
 pub mod intersections;
-mod json5;
+mod json;
 pub mod lights;
 pub mod materials;
 pub mod math;
