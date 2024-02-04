@@ -10,6 +10,7 @@ use crate::planes::Plane;
 use crate::rays::Ray;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
+use crate::groups::Group;
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
@@ -83,6 +84,12 @@ impl Shape {
         }
     }
 
+    pub fn group() -> Shape {
+        Shape {
+            shape: ShapeEnum::Group(Group::new()),
+            ..Default::default()        }
+    }
+
     // Functions to extract primitive type
     pub fn as_sphere_primitive(&mut self) -> Option<&mut Sphere> {
         match self.shape {
@@ -130,13 +137,14 @@ impl Shape {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ShapeEnum {
     Sphere(Sphere),
     Plane(Plane),
     Cube(Cube),
     Cylinder(Cylinder),
     Cone(Cone),
+    Group(Group),
 }
 
 impl Default for ShapeEnum {
@@ -168,6 +176,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
             ShapeEnum::Cone(ref cone) => cone.local_intersect(local_ray),
+            ShapeEnum::Group(ref group) => group.local_intersect(local_ray),
         }
     }
 
@@ -178,6 +187,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Cube(ref cube) => cube.local_normal_at(local_point),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_normal_at(local_point),
             ShapeEnum::Cone(ref cone) => cone.local_normal_at(local_point),
+            ShapeEnum::Group(ref group) => group.local_normal_at(local_point),
         }
     }
 }
@@ -213,6 +223,8 @@ pub fn cylinder(min_y: f64, max_y: f64, closed_min: bool, closed_max: bool) -> S
 pub fn cone() -> Shape {
     Shape::cone()
 }
+
+pub fn group() -> Shape { Shape::group() }
 
 #[cfg(test)]
 mod test {
@@ -341,5 +353,15 @@ mod test {
 
         let primitive2 = s.as_sphere_primitive();
         assert_eq!(primitive2.unwrap(), &primitive);
+    }
+
+    // Groups tests (Chapter 14)
+
+    // Creating a new group
+    #[test]
+    fn creating_a_new_group() {
+        let g = group();
+        assert_eq!(g.transform, identity4());
+        //assert_eq!(g.members(), vec![]);  <-- see groups::tests::creating_a_new_group
     }
 }
