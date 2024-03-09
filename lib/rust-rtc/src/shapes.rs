@@ -11,6 +11,8 @@ use crate::rays::Ray;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
 use crate::groups::Group;
+use crate::world::World;
+use std::sync::Arc;
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
@@ -18,6 +20,9 @@ pub struct Shape {
     transform: Matrix4,
     inverse_transform: Matrix4,
     pub material: Material,
+    pub parent: Option<usize>,
+    pub experiment: i32,
+    pub experiment2: Arc<World>,
 }
 
 impl Shape {
@@ -108,6 +113,13 @@ impl Shape {
     pub fn as_cone_primitive(&mut self) -> Option<&mut Cone> {
         match self.shape {
             ShapeEnum::Cone(ref mut x) => Some(x),
+            _ => None,
+        }
+    }
+
+    pub fn as_group_primitive(&mut self) -> Option<&mut Group> {
+        match self.shape {
+            ShapeEnum::Group(ref mut x) => Some(x),
             _ => None,
         }
     }
@@ -225,6 +237,14 @@ pub fn cone() -> Shape {
 }
 
 pub fn group() -> Shape { Shape::group() }
+
+pub fn add_child(group: &mut Shape, group_idx: usize, shape: &mut Shape, shape_idx: usize) -> Result<(), String> {
+    group.as_group_primitive().ok_or("Not a group".to_string())?
+        .members.push(shape_idx);
+    shape.parent = Some(group_idx);
+    Ok(())
+}
+
 
 #[cfg(test)]
 mod test {
@@ -364,4 +384,30 @@ mod test {
         assert_eq!(g.transform, identity4());
         //assert_eq!(g.members(), vec![]);  <-- see groups::tests::creating_a_new_group
     }
+
+    // A Shape has a parent attribute
+    #[test]
+    fn shape_has_parent_attribute() {
+        let s = sphere(42);
+        assert_eq!(s.parent, None);
+    }
+
+    // Adding a child to a group
+    #[test]
+    fn adding_child_to_group() {
+        let mut g = group();
+        let group_idx = 17usize;
+        let mut s = sphere(42);
+        let s_idx = 99usize;
+        assert_eq!(add_child(&mut g, group_idx, &mut s, s_idx), Ok(()));
+        assert!(!g.as_group_primitive().unwrap().members.is_empty());
+        assert!(g.as_group_primitive().unwrap().members.contains(&s_idx));
+        assert_eq!(s.parent, Some(group_idx));
+    }
+
+    // Intersecting a ray with a group
+    // TODO: going to have to pass in the World's Vec<Shape> to local_intersect,
+    //       to handle the cases where a Group is present.
+    // Idea: once the World Vec is created, iterate through it and set every object to hold a reference to the World
+    // Will this work?
 }

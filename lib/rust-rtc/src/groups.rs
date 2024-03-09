@@ -3,12 +3,11 @@
 use crate::cones::Cone;
 use crate::intersections::{Intersections};
 use crate::rays::Ray;
-use crate::shapes::Shape;
 use crate::tuples::{Point, Vector};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
-    pub members: Vec<Shape>,
+    pub members: Vec<usize>,
 }
 
 impl Default for Group {
@@ -30,7 +29,7 @@ impl Group {
         todo!()
     }
 
-    fn members(&self) -> Vec<Shape> {
+    fn members(&self) -> Vec<usize> {
         vec![]
     }
 }

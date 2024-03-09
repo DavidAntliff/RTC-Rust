@@ -11,8 +11,9 @@ use crate::rays::{ray, Ray};
 use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{dot, magnitude, normalize, point, Point};
+use std::sync::Arc;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq)]
 pub struct World {
     lights: Vec<PointLight>,
     objects: Vec<Shape>,
@@ -160,6 +161,14 @@ impl World {
             let refracted_ray = ray(comps.under_point, direction);
 
             self.color_at(&refracted_ray, depth - 1) * comps.object.material.transparency
+        }
+    }
+
+    // EXPERIMENT
+    pub fn experiment(&mut self) {
+        for object in &mut self.objects {
+            //object.experiment = 42;
+            //object.experiment2 = Arc::new(self);
         }
     }
 }
