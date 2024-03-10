@@ -11,8 +11,7 @@ use crate::rays::Ray;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
 use crate::groups::Group;
-use crate::world::World;
-use std::sync::Arc;
+use crate::world::{World, ObjectIndex};
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
@@ -20,9 +19,7 @@ pub struct Shape {
     transform: Matrix4,
     inverse_transform: Matrix4,
     pub material: Material,
-    pub parent: Option<usize>,
-    pub experiment: i32,
-    pub experiment2: Arc<World>,
+    pub parent: Option<ObjectIndex>,
 }
 
 impl Shape {
@@ -117,7 +114,14 @@ impl Shape {
         }
     }
 
-    pub fn as_group_primitive(&mut self) -> Option<&mut Group> {
+    pub fn as_group_primitive(&self) -> Option<&Group> {
+        match self.shape {
+            ShapeEnum::Group(ref x) => Some(x),
+            _ => None,
+        }
+    }
+
+    pub fn as_group_primitive_mut(&mut self) -> Option<&mut Group> {
         match self.shape {
             ShapeEnum::Group(ref mut x) => Some(x),
             _ => None,
@@ -166,13 +170,13 @@ impl Default for ShapeEnum {
 }
 
 pub trait ShapeTrait {
-    fn local_intersect(&self, local_ray: &Ray) -> Intersections;
+    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections;
     fn local_normal_at(&self, local_point: &Point) -> Vector;
 }
 
 impl ShapeTrait for Shape {
-    fn local_intersect(&self, local_ray: &Ray) -> Intersections {
-        self.shape.local_intersect(local_ray)
+    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections {
+        self.shape.local_intersect(local_ray, world)
     }
 
     fn local_normal_at(&self, local_point: &Point) -> Vector {
@@ -181,14 +185,16 @@ impl ShapeTrait for Shape {
 }
 
 impl ShapeTrait for ShapeEnum {
-    fn local_intersect(&self, local_ray: &Ray) -> Intersections {
+    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_intersect(local_ray),
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
             ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
             ShapeEnum::Cone(ref cone) => cone.local_intersect(local_ray),
-            ShapeEnum::Group(ref group) => group.local_intersect(local_ray),
+            ShapeEnum::Group(ref group) => if let Some(world) = world {
+                group.local_intersect(local_ray, world) } else {panic!("Groups need a World")
+            },
         }
     }
 
@@ -238,12 +244,12 @@ pub fn cone() -> Shape {
 
 pub fn group() -> Shape { Shape::group() }
 
-pub fn add_child(group: &mut Shape, group_idx: usize, shape: &mut Shape, shape_idx: usize) -> Result<(), String> {
-    group.as_group_primitive().ok_or("Not a group".to_string())?
-        .members.push(shape_idx);
-    shape.parent = Some(group_idx);
-    Ok(())
-}
+// pub fn add_child(group: &mut Shape, group_idx: usize, shape: &mut Shape, shape_idx: usize) -> Result<(), String> {
+//     group.as_group_primitive().ok_or("Not a group".to_string())?
+//         .members.push(shape_idx);
+//     shape.parent = Some(group_idx);
+//     Ok(())
+// }
 
 
 #[cfg(test)]
@@ -257,6 +263,7 @@ mod test {
     use crate::tuples::{point, vector};
     use approx::assert_relative_eq;
     use std::f64::consts::{FRAC_1_SQRT_2, PI};
+    use crate::world::default_world;
 
     #[test]
     fn test_vec_of_shapes() {
@@ -303,7 +310,7 @@ mod test {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut s = sphere(1);
         s.set_transform(&scaling(2.0, 2.0, 2.0));
-        let xs = intersect(&s, &r);
+        let xs = intersect(&s, &r, None);
         assert_eq!(xs.len(), 2);
         assert_eq!(xs[0].t, 3.0);
         assert_eq!(xs[1].t, 7.0);
@@ -315,7 +322,7 @@ mod test {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let mut s = sphere(1);
         s.set_transform(&translation(5.0, 0.0, 0.0));
-        let xs = intersect(&s, &r);
+        let xs = intersect(&s, &r, None);
         assert_eq!(xs.len(), 0);
     }
 
@@ -395,19 +402,19 @@ mod test {
     // Adding a child to a group
     #[test]
     fn adding_child_to_group() {
-        let mut g = group();
-        let group_idx = 17usize;
-        let mut s = sphere(42);
-        let s_idx = 99usize;
-        assert_eq!(add_child(&mut g, group_idx, &mut s, s_idx), Ok(()));
+        let mut w = default_world();
+        let g = group();
+        let group_idx = w.add_object(g);
+        let s = sphere(42);
+        let s_idx = w.add_object(s);
+
+        assert!(w.add_child(&group_idx, &s_idx).is_ok());
+
+        let g = w.get_object_ref(&group_idx);
+        let s = w.get_object_ref(&s_idx);
+
         assert!(!g.as_group_primitive().unwrap().members.is_empty());
         assert!(g.as_group_primitive().unwrap().members.contains(&s_idx));
         assert_eq!(s.parent, Some(group_idx));
     }
-
-    // Intersecting a ray with a group
-    // TODO: going to have to pass in the World's Vec<Shape> to local_intersect,
-    //       to handle the cases where a Group is present.
-    // Idea: once the World Vec is created, iterate through it and set every object to hold a reference to the World
-    // Will this work?
 }

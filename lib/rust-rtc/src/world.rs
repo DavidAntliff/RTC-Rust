@@ -11,7 +11,8 @@ use crate::rays::{ray, Ray};
 use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{dot, magnitude, normalize, point, Point};
-use std::sync::Arc;
+
+use anyhow::{Result, anyhow};
 
 #[derive(Default, Debug, PartialEq)]
 pub struct World {
@@ -19,17 +20,52 @@ pub struct World {
     objects: Vec<Shape>,
 }
 
+#[derive(Debug)]
+pub struct LightIndex(usize);
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ObjectIndex(usize);
+
 impl World {
     fn new(lights: Vec<PointLight>, objects: Vec<Shape>) -> World {
         World { lights, objects }
     }
 
-    pub fn add_light(&mut self, light: PointLight) {
+    pub fn add_light(&mut self, light: PointLight) -> LightIndex {
         self.lights.push(light);
+        LightIndex(self.lights.len() - 1)
     }
 
-    pub fn add_object(&mut self, object: Shape) {
+    pub fn add_object(&mut self, object: Shape) -> ObjectIndex {
         self.objects.push(object);
+        ObjectIndex(self.objects.len() - 1)
+    }
+
+    fn validate_object_index(&self, idx: &ObjectIndex) -> Result<()> {
+        if idx.0 >= self.objects.len() {
+            Err(anyhow!("Index {} out of bounds", idx.0).into())
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn get_object_ref(&self, idx: &ObjectIndex) -> &Shape {
+        self.validate_object_index(idx).unwrap();
+        &self.objects[idx.0]
+    }
+
+    pub fn add_child(&mut self, group_index: &ObjectIndex, object_index: &ObjectIndex) -> Result<()> {
+        self.validate_object_index(group_index)?;
+        self.validate_object_index(object_index)?;
+
+        let group = &mut self.objects[group_index.0];
+        group.as_group_primitive_mut()
+            .ok_or(anyhow!("Not a group"))?
+            .members.push(object_index.clone());
+
+        let object = &mut self.objects[object_index.0];
+        object.parent = Some(group_index.clone());
+        Ok(())
     }
 
     fn intersect(&self, ray: &Ray) -> Intersections {
@@ -37,7 +73,7 @@ impl World {
 
         // Intersections must be in sorted order
         for object in &self.objects {
-            let xs = intersect(object, ray);
+            let xs = intersect(object, ray, Some(self));
             // TODO: insert in sorted order?
             for i in xs {
                 intersections.push(i);
@@ -163,14 +199,6 @@ impl World {
             self.color_at(&refracted_ray, depth - 1) * comps.object.material.transparency
         }
     }
-
-    // EXPERIMENT
-    pub fn experiment(&mut self) {
-        for object in &mut self.objects {
-            //object.experiment = 42;
-            //object.experiment2 = Arc::new(self);
-        }
-    }
 }
 
 pub fn world() -> World {
@@ -229,7 +257,7 @@ mod tests {
     };
     use crate::patterns::test_pattern;
     use crate::rays::ray;
-    use crate::shapes::plane;
+    use crate::shapes::{plane, group, ShapeTrait};
     use crate::transformations::translation;
     use crate::tuples::vector;
     use approx::assert_relative_eq;
@@ -628,5 +656,51 @@ mod tests {
         let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
         let color_ = shade_hit(&w, &comps, 5);
         assert_relative_eq!(color_, color(0.93391, 0.69643, 0.69243), epsilon = 1e-5);
+    }
+
+    // Groups tests (Chapter 14)
+
+    // Intersecting a ray with an empty group
+    #[test]
+    fn intersect_ray_with_empty_group() {
+        let mut w = default_world();
+        let g = group();
+        let g_idx = w.add_object(g);
+        let g = w.get_object_ref(&g_idx);
+        let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
+        let xs = g.local_intersect(&r, Some(&w));
+        assert!(xs.is_empty());
+    }
+
+    // Intersecting a ray with a non-empty group
+    fn intersect_ray_with_non_empty_group() {
+        let mut w = default_world();
+        let g = group();
+        let g_idx = w.add_object(g);
+        let s1 = sphere(1);
+        let s1_idx = w.add_object(s1);
+        let mut s2 = sphere(2);
+        s2.set_transform(&translation(0.0, 0.0, -3.0));
+        let s2_idx = w.add_object(s2);
+        let mut s3 = sphere(3);
+        s3.set_transform(&translation(5.0, 0.0, 0.0));
+        let s3_idx = w.add_object(s3);
+
+        assert!(w.add_child(&g_idx, &s1_idx).is_ok());
+        assert!(w.add_child(&g_idx, &s2_idx).is_ok());
+        assert!(w.add_child(&g_idx, &s3_idx).is_ok());
+
+        let g = w.get_object_ref(&g_idx);
+        let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
+        let xs = g.local_intersect(&r, Some(&w));
+
+         let s1 = w.get_object_ref(&s1_idx);
+         let s2 = w.get_object_ref(&s2_idx);
+
+        assert_eq!(xs.len(), 4);
+        assert_eq!(xs[0].object, Some(s2));
+        assert_eq!(xs[1].object, Some(s2));
+        assert_eq!(xs[2].object, Some(s1));
+        assert_eq!(xs[3].object, Some(s1));
     }
 }

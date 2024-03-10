@@ -7,6 +7,7 @@ use crate::tuples::{dot, reflect, Point, Vector};
 
 use crate::materials::RefractiveIndex;
 pub use std::vec as intersections;
+use crate::world::World;
 
 #[derive(Debug, PartialEq, Default, Copy, Clone)]
 pub struct Intersection<'a> {
@@ -26,10 +27,10 @@ pub fn intersection(t: f64, object: Option<&Shape>) -> Intersection {
 
 pub type Intersections<'a> = Vec<Intersection<'a>>;
 
-pub fn intersect<'a>(object: &'a Shape, ray: &Ray) -> Intersections<'a> {
+pub fn intersect<'a>(object: &'a Shape, ray: &Ray, world: Option<&World>) -> Intersections<'a> {
     // Apply the inverse of the shape's transformation
     let local_ray = ray.transform(object.inverse_transform());
-    let mut intersections = object.local_intersect(&local_ray);
+    let mut intersections = object.local_intersect(&local_ray, world);
     for intersection in &mut intersections {
         intersection.object = Some(object);
     }

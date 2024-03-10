@@ -50,7 +50,7 @@ fn main() {
             let position = point(world_x, world_y, wall_z);
 
             let r = ray(ray_origin, normalize(&(position - ray_origin)));
-            let mut xs = intersect(&shape, &r);
+            let mut xs = intersect(&shape, &r, None);
 
             if hit(&mut xs).is_some() {
                 write_pixel(&mut c, x, y, &red);

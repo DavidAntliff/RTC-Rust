@@ -237,8 +237,5 @@ pub fn load_world(filename: &Path) -> Result<(World, HashMap<String, RenderOptio
         }
     }
 
-    // EXPERIMENT: can we mutate the world now?
-    //world.experiment();
-
     Ok((world, coll))
 }

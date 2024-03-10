@@ -69,7 +69,7 @@ fn main() {
             let pos = point(world_x, world_y, wall_z);
 
             let r = ray(ray_origin, normalize(&(pos - ray_origin)));
-            let mut xs = intersect(&shape, &r);
+            let mut xs = intersect(&shape, &r, None);
 
             if let Some(h) = hit(&mut xs) {
                 if let Some(object) = h.object {

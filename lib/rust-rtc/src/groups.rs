@@ -3,11 +3,13 @@
 use crate::cones::Cone;
 use crate::intersections::{Intersections};
 use crate::rays::Ray;
+use crate::shapes::ShapeTrait;
 use crate::tuples::{Point, Vector};
+use crate::world::{World, ObjectIndex};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
-    pub members: Vec<usize>,
+    pub members: Vec<ObjectIndex>,
 }
 
 impl Default for Group {
@@ -25,12 +27,18 @@ impl Group {
         panic!("local_normal_at() called on Group");
     }
 
-    pub fn local_intersect(&self, _local_ray: &Ray) -> Intersections {
-        todo!()
+    pub fn local_intersect(&self, local_ray: &Ray, world: &World) -> Intersections {
+        let mut xs_all = vec![];
+        for child in &self.members {
+            let object = world.get_object_ref(child);
+            xs_all.extend(object.local_intersect(local_ray, Some(world)));
+        }
+        xs_all.sort_by(|a, b| a.t.total_cmp(&b.t));
+        xs_all
     }
 
-    fn members(&self) -> Vec<usize> {
-        vec![]
+    fn members(&self) -> &Vec<ObjectIndex> {
+        &self.members
     }
 }
 
@@ -52,8 +60,6 @@ mod tests {
     #[test]
     fn creating_a_new_group() {
         let g = group();
-        assert_eq!(g.members(), vec![]);
+        assert!(g.members().is_empty());
     }
-
-
 }
