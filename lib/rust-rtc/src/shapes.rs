@@ -170,13 +170,21 @@ impl Default for ShapeEnum {
 }
 
 pub trait ShapeTrait {
-    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections;
+    fn local_intersect<'a>(&'a self, local_ray: &Ray, world: Option<&'a World>) -> Intersections;
     fn local_normal_at(&self, local_point: &Point) -> Vector;
 }
 
 impl ShapeTrait for Shape {
-    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections {
-        self.shape.local_intersect(local_ray, world)
+    fn local_intersect<'a>(&'a self, local_ray: &Ray, world: Option<&'a World>) -> Intersections {
+        let mut intersections = self.shape.local_intersect(local_ray, world);
+        if let ShapeEnum::Group(_) = self.shape {
+            // Don't rewrite intersected shapes if handling a group.
+        } else {
+            for intersection in &mut intersections {
+                intersection.object = Some(self);
+            }
+        }
+        intersections
     }
 
     fn local_normal_at(&self, local_point: &Point) -> Vector {
@@ -185,7 +193,7 @@ impl ShapeTrait for Shape {
 }
 
 impl ShapeTrait for ShapeEnum {
-    fn local_intersect(&self, local_ray: &Ray, world: Option<&World>) -> Intersections {
+    fn local_intersect<'a>(&'a self, local_ray: &Ray, world: Option<&'a World>) -> Intersections {
         match self {
             ShapeEnum::Sphere(ref sphere) => sphere.local_intersect(local_ray),
             ShapeEnum::Plane(ref plane) => plane.local_intersect(local_ray),
@@ -193,7 +201,7 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
             ShapeEnum::Cone(ref cone) => cone.local_intersect(local_ray),
             ShapeEnum::Group(ref group) => if let Some(world) = world {
-                group.local_intersect(local_ray, world) } else {panic!("Groups need a World")
+                group.local_intersect(local_ray, world) } else {panic!("A Group needs a World")
             },
         }
     }

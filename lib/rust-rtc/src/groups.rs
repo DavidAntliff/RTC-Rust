@@ -1,9 +1,8 @@
 // Chapter 14: Groups
 
 use crate::cones::Cone;
-use crate::intersections::{Intersections};
+use crate::intersections::{intersect, Intersections};
 use crate::rays::Ray;
-use crate::shapes::ShapeTrait;
 use crate::tuples::{Point, Vector};
 use crate::world::{World, ObjectIndex};
 
@@ -27,11 +26,11 @@ impl Group {
         panic!("local_normal_at() called on Group");
     }
 
-    pub fn local_intersect(&self, local_ray: &Ray, world: &World) -> Intersections {
+    pub fn local_intersect<'a>(&'a self, local_ray: &Ray, world: &'a World) -> Intersections {
         let mut xs_all = vec![];
         for child in &self.members {
             let object = world.get_object_ref(child);
-            xs_all.extend(object.local_intersect(local_ray, Some(world)));
+            xs_all.extend(intersect(&object, local_ray, Some(world)));
         }
         xs_all.sort_by(|a, b| a.t.total_cmp(&b.t));
         xs_all

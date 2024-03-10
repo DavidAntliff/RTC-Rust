@@ -673,6 +673,7 @@ mod tests {
     }
 
     // Intersecting a ray with a non-empty group
+    #[test]
     fn intersect_ray_with_non_empty_group() {
         let mut w = default_world();
         let g = group();

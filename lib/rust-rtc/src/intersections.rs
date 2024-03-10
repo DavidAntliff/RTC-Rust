@@ -27,14 +27,10 @@ pub fn intersection(t: f64, object: Option<&Shape>) -> Intersection {
 
 pub type Intersections<'a> = Vec<Intersection<'a>>;
 
-pub fn intersect<'a>(object: &'a Shape, ray: &Ray, world: Option<&World>) -> Intersections<'a> {
+pub fn intersect<'a>(object: &'a Shape, ray: &Ray, world: Option<&'a World>) -> Intersections<'a> {
     // Apply the inverse of the shape's transformation
     let local_ray = ray.transform(object.inverse_transform());
-    let mut intersections = object.local_intersect(&local_ray, world);
-    for intersection in &mut intersections {
-        intersection.object = Some(object);
-    }
-    intersections
+    object.local_intersect(&local_ray, world)
 }
 
 /// Given a vector of ray intersections, sort in ascending order by parameter t, and then
