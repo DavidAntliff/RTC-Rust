@@ -3,6 +3,7 @@
 use crate::cones::Cone;
 use crate::cubes::Cube;
 use crate::cylinders::Cylinder;
+use crate::groups::Group;
 use crate::intersections::Intersections;
 use crate::materials::{Material, RefractiveIndex};
 use crate::matrices::{inverse, transpose, Matrix4};
@@ -10,8 +11,7 @@ use crate::planes::Plane;
 use crate::rays::Ray;
 use crate::spheres::Sphere;
 use crate::tuples::{normalize, Point, Vector};
-use crate::groups::Group;
-use crate::world::{World, ObjectIndex};
+use crate::world::{ObjectIndex, World};
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Shape {
@@ -89,7 +89,8 @@ impl Shape {
     pub fn group() -> Shape {
         Shape {
             shape: ShapeEnum::Group(Group::new()),
-            ..Default::default()        }
+            ..Default::default()
+        }
     }
 
     // Functions to extract primitive type
@@ -200,9 +201,13 @@ impl ShapeTrait for ShapeEnum {
             ShapeEnum::Cube(ref cube) => cube.local_intersect(local_ray),
             ShapeEnum::Cylinder(ref cylinder) => cylinder.local_intersect(local_ray),
             ShapeEnum::Cone(ref cone) => cone.local_intersect(local_ray),
-            ShapeEnum::Group(ref group) => if let Some(world) = world {
-                group.local_intersect(local_ray, world) } else {panic!("A Group needs a World")
-            },
+            ShapeEnum::Group(ref group) => {
+                if let Some(world) = world {
+                    group.local_intersect(local_ray, world)
+                } else {
+                    panic!("A Group needs a World")
+                }
+            }
         }
     }
 
@@ -250,7 +255,9 @@ pub fn cone() -> Shape {
     Shape::cone()
 }
 
-pub fn group() -> Shape { Shape::group() }
+pub fn group() -> Shape {
+    Shape::group()
+}
 
 // pub fn add_child(group: &mut Shape, group_idx: usize, shape: &mut Shape, shape_idx: usize) -> Result<(), String> {
 //     group.as_group_primitive().ok_or("Not a group".to_string())?
@@ -258,7 +265,6 @@ pub fn group() -> Shape { Shape::group() }
 //     shape.parent = Some(group_idx);
 //     Ok(())
 // }
-
 
 #[cfg(test)]
 mod test {
@@ -269,9 +275,9 @@ mod test {
     use crate::rays::ray;
     use crate::transformations::{rotation_z, scaling, translation};
     use crate::tuples::{point, vector};
+    use crate::world::default_world;
     use approx::assert_relative_eq;
     use std::f64::consts::{FRAC_1_SQRT_2, PI};
-    use crate::world::default_world;
 
     #[test]
     fn test_vec_of_shapes() {

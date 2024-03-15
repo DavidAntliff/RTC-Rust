@@ -12,7 +12,7 @@ use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{dot, magnitude, normalize, point, Point};
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 #[derive(Default, Debug, PartialEq)]
 pub struct World {
@@ -54,14 +54,20 @@ impl World {
         &self.objects[idx.0]
     }
 
-    pub fn add_child(&mut self, group_index: &ObjectIndex, object_index: &ObjectIndex) -> Result<()> {
+    pub fn add_child(
+        &mut self,
+        group_index: &ObjectIndex,
+        object_index: &ObjectIndex,
+    ) -> Result<()> {
         self.validate_object_index(group_index)?;
         self.validate_object_index(object_index)?;
 
         let group = &mut self.objects[group_index.0];
-        group.as_group_primitive_mut()
+        group
+            .as_group_primitive_mut()
             .ok_or(anyhow!("Not a group"))?
-            .members.push(object_index.clone());
+            .members
+            .push(object_index.clone());
 
         let object = &mut self.objects[object_index.0];
         object.parent = Some(group_index.clone());
@@ -257,7 +263,7 @@ mod tests {
     };
     use crate::patterns::test_pattern;
     use crate::rays::ray;
-    use crate::shapes::{plane, group, ShapeTrait};
+    use crate::shapes::{group, plane, ShapeTrait};
     use crate::transformations::translation;
     use crate::tuples::vector;
     use approx::assert_relative_eq;
@@ -695,8 +701,8 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let xs = g.local_intersect(&r, Some(&w));
 
-         let s1 = w.get_object_ref(&s1_idx);
-         let s2 = w.get_object_ref(&s2_idx);
+        let s1 = w.get_object_ref(&s1_idx);
+        let s2 = w.get_object_ref(&s2_idx);
 
         assert_eq!(xs.len(), 4);
         assert_eq!(xs[0].object, Some(s2));

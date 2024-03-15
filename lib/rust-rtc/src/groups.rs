@@ -4,7 +4,7 @@ use crate::cones::Cone;
 use crate::intersections::{intersect, Intersections};
 use crate::rays::Ray;
 use crate::tuples::{Point, Vector};
-use crate::world::{World, ObjectIndex};
+use crate::world::{ObjectIndex, World};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
@@ -13,14 +13,14 @@ pub struct Group {
 
 impl Default for Group {
     fn default() -> Self {
-        Group {
-            members: vec![],
-        }
+        Group { members: vec![] }
     }
 }
 
 impl Group {
-    pub fn new() -> Group { Group::default() }
+    pub fn new() -> Group {
+        Group::default()
+    }
 
     pub fn local_normal_at(&self, _local_point: &Point) -> Vector {
         panic!("local_normal_at() called on Group");
@@ -49,7 +49,9 @@ pub fn local_intersect<'a>(c: &'a Cone, local_ray: &Ray) -> Intersections<'a> {
     c.local_intersect(local_ray)
 }
 
-pub fn group() -> Group { Group::default() }
+pub fn group() -> Group {
+    Group::default()
+}
 
 #[cfg(test)]
 mod tests {

@@ -6,8 +6,8 @@ use crate::shapes::{normal_at, Shape, ShapeTrait};
 use crate::tuples::{dot, reflect, Point, Vector};
 
 use crate::materials::RefractiveIndex;
-pub use std::vec as intersections;
 use crate::world::World;
+pub use std::vec as intersections;
 
 #[derive(Debug, PartialEq, Default, Copy, Clone)]
 pub struct Intersection<'a> {
