@@ -188,9 +188,10 @@ pub fn octave_perlin(x: f64, y: f64, z: f64, octaves: u32, persistence: f64) -> 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::canvas::canvas;
     use crate::colors::color;
+
+    use super::*;
 
     #[test]
     fn generate_octave_perlin_noise_image() {
@@ -212,7 +213,7 @@ mod tests {
             }
         }
         image.to_ppm_file("test_perlin_noise.ppm");
-        println!("min {}, max {}", min_vv, max_vv);
+        dbg!("min {}, max {}", min_vv, max_vv);
 
         assert_eq!(0.5, perlin(0.0, 0.0, 0.0));
     }

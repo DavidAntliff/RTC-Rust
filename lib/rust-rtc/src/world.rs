@@ -1,5 +1,7 @@
 // Chapter 7: Making a Scene
 
+use anyhow::{anyhow, Result};
+
 use crate::colors::{color, Color};
 use crate::intersections::{
     intersect, prepare_computations_for_refraction, schlick, Intersection, IntersectionComputation,
@@ -11,8 +13,6 @@ use crate::rays::{ray, Ray};
 use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
 use crate::tuples::{dot, magnitude, normalize, point, Point};
-
-use anyhow::{anyhow, Result};
 
 #[derive(Default, Debug, PartialEq)]
 pub struct World {
@@ -256,7 +256,8 @@ pub fn refracted_color(world: &World, comps: &IntersectionComputation, depth: i3
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use approx::assert_relative_eq;
+
     use crate::intersections::{
         intersection, intersections, prepare_computations, prepare_computations_for_refraction,
         Intersection,
@@ -266,7 +267,8 @@ mod tests {
     use crate::shapes::{group, plane, ShapeTrait};
     use crate::transformations::translation;
     use crate::tuples::vector;
-    use approx::assert_relative_eq;
+
+    use super::*;
 
     // Creating an empty world
     #[test]
@@ -709,5 +711,26 @@ mod tests {
         assert_eq!(xs[1].object, Some(s2));
         assert_eq!(xs[2].object, Some(s1));
         assert_eq!(xs[3].object, Some(s1));
+    }
+
+    // Intersecting a transformed group
+    #[test]
+    fn intersecting_a_transformed_group() {
+        let mut w = default_world();
+        let mut g = group();
+        g.set_transform(&scaling(2.0, 2.0, 2.0));
+        let g_idx = w.add_object(g);
+
+        let mut s = sphere(1);
+        s.set_transform(&translation(5.0, 0.0, 0.0));
+        let s_idx = w.add_object(s);
+
+        assert!(w.add_child(&g_idx, &s_idx).is_ok());
+
+        let g = w.get_object_ref(&g_idx);
+        let r = ray(point(10.0, 0.0, -10.0), vector(0.0, 0.0, 1.0));
+        let xs = intersect(&g, &r, Some(&w));
+
+        assert_eq!(xs.len(), 2);
     }
 }
