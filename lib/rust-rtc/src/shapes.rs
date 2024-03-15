@@ -20,6 +20,7 @@ pub struct Shape {
     inverse_transform: Matrix4,
     pub material: Material,
     pub parent: Option<ObjectIndex>,
+    pub foo: i32,
 }
 
 impl Shape {
@@ -223,8 +224,17 @@ impl ShapeTrait for ShapeEnum {
     }
 }
 
+// Pre-Groups:
 pub fn normal_at(object: &Shape, world_point: &Point) -> Vector {
     object.normal_at(world_point)
+}
+
+// Support Groups:
+pub fn normal_at_by_idx(world: &World, object_idx: &ObjectIndex, world_point: &Point) -> Vector {
+    let local_point = world.world_to_object(object_idx, world_point);
+    let shape = world.get_object_ref(object_idx);
+    let local_normal = shape.local_normal_at(&local_point);
+    world.normal_to_world(object_idx, &local_normal)
 }
 
 pub fn sphere(id: i32) -> Shape {
@@ -268,7 +278,10 @@ pub fn group() -> Shape {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::f64::consts::{FRAC_1_SQRT_2, PI};
+
+    use approx::assert_relative_eq;
+
     use crate::intersections::intersect;
     use crate::materials::default_material;
     use crate::matrices::identity4;
@@ -276,8 +289,8 @@ mod test {
     use crate::transformations::{rotation_z, scaling, translation};
     use crate::tuples::{point, vector};
     use crate::world::default_world;
-    use approx::assert_relative_eq;
-    use std::f64::consts::{FRAC_1_SQRT_2, PI};
+
+    use super::*;
 
     #[test]
     fn test_vec_of_shapes() {

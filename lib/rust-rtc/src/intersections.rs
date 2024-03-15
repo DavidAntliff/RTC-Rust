@@ -87,6 +87,7 @@ pub fn prepare_computations<'a>(
 
     comps.point = ray.position(comps.t);
     comps.eyev = -ray.direction;
+    // TODO: convert to use normal_at_by_idx()
     comps.normalv = normal_at(comps.object, &comps.point);
 
     if dot(&comps.normalv, &comps.eyev) < 0.0 {

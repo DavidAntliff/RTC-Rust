@@ -9,10 +9,11 @@ use crate::intersections::{
 };
 use crate::lights::{point_light, PointLight};
 use crate::materials::material;
+use crate::matrices::{inverse, transpose};
 use crate::rays::{ray, Ray};
 use crate::shapes::{sphere, Shape};
 use crate::transformations::scaling;
-use crate::tuples::{dot, magnitude, normalize, point, Point};
+use crate::tuples::{dot, magnitude, normalize, point, Point, Vector};
 
 #[derive(Default, Debug, PartialEq)]
 pub struct World {
@@ -43,7 +44,7 @@ impl World {
 
     fn validate_object_index(&self, idx: &ObjectIndex) -> Result<()> {
         if idx.0 >= self.objects.len() {
-            Err(anyhow!("Index {} out of bounds", idx.0).into())
+            Err(anyhow!("Index {} out of bounds", idx.0))
         } else {
             Ok(())
         }
@@ -205,9 +206,31 @@ impl World {
             self.color_at(&refracted_ray, depth - 1) * comps.object.material.transparency
         }
     }
+
+    pub fn world_to_object(&self, idx: &ObjectIndex, point: &Point) -> Point {
+        let mut point = *point;
+        let shape = self.get_object_ref(idx);
+        if let Some(parent) = &shape.parent {
+            point = self.world_to_object(parent, &point);
+        }
+
+        inverse(shape.transform()) * point
+    }
+
+    pub fn normal_to_world(&self, idx: &ObjectIndex, vector: &Vector) -> Vector {
+        let shape = self.get_object_ref(idx);
+        let mut normal = transpose(&inverse(shape.transform())) * vector;
+        normal.set_w(0.0);
+        normal = normalize(&normal);
+        if let Some(parent) = &shape.parent {
+            normal = self.normal_to_world(parent, &normal);
+        }
+        normal
+    }
 }
 
 pub fn world() -> World {
+    // Empty world:
     World::default()
 }
 
@@ -256,6 +279,8 @@ pub fn refracted_color(world: &World, comps: &IntersectionComputation, depth: i3
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use approx::assert_relative_eq;
 
     use crate::intersections::{
@@ -264,8 +289,8 @@ mod tests {
     };
     use crate::patterns::test_pattern;
     use crate::rays::ray;
-    use crate::shapes::{group, plane, ShapeTrait};
-    use crate::transformations::translation;
+    use crate::shapes::{group, normal_at_by_idx, plane, ShapeTrait};
+    use crate::transformations::{rotation_y, translation};
     use crate::tuples::vector;
 
     use super::*;
@@ -729,8 +754,96 @@ mod tests {
 
         let g = w.get_object_ref(&g_idx);
         let r = ray(point(10.0, 0.0, -10.0), vector(0.0, 0.0, 1.0));
-        let xs = intersect(&g, &r, Some(&w));
+        let xs = intersect(g, &r, Some(&w));
 
         assert_eq!(xs.len(), 2);
+    }
+
+    // Converting a point from world to object space
+    #[test]
+    fn converting_point_from_world_to_object_space() {
+        let mut w = world();
+        // Given g1 ← group()
+        let mut g1 = group();
+        // And set_transform(g1, rotation_y(π/2))
+        g1.set_transform(&rotation_y(PI / 2.0));
+        // And g2 ← group()
+        let mut g2 = group();
+        // And set_transform(g2, scaling(2, 2, 2))
+        g2.set_transform(&scaling(2.0, 2.0, 2.0));
+        // And add_child(g1, g2)
+        let g1_idx = w.add_object(g1);
+        let g2_idx = w.add_object(g2);
+        w.add_child(&g1_idx, &g2_idx).unwrap();
+        // And s ← sphere()
+        let mut s = sphere(1);
+        // And set_transform(s, translation(5, 0, 0))
+        s.set_transform(&translation(5.0, 0.0, 0.0));
+        let s_idx = w.add_object(s);
+        // And add_child(g2, s)
+        w.add_child(&g2_idx, &s_idx).unwrap();
+        // When p ← world_to_object(s, point(-2, 0, -10))
+        let p = w.world_to_object(&s_idx, &point(-2.0, 0.0, -10.0));
+        // Then p = point(0, 0, -1)
+        assert_relative_eq!(p, point(0.0, 0.0, -1.0));
+    }
+
+    // Scenario: Converting a normal from object to world space
+    #[test]
+    fn convert_normal_from_object_to_world_space() {
+        let mut w = world();
+        // Given g1 ← group()
+        let mut g1 = group();
+        // And set_transform(g1, rotation_y(π/2))
+        g1.set_transform(&rotation_y(PI / 2.0));
+        // And g2 ← group()
+        let mut g2 = group();
+        // And set_transform(g2, scaling(1, 2, 3))
+        g2.set_transform(&scaling(1.0, 2.0, 3.0));
+        // And add_child(g1, g2)
+        let g1_idx = w.add_object(g1);
+        let g2_idx = w.add_object(g2);
+        w.add_child(&g1_idx, &g2_idx).unwrap();
+        // And s ← sphere()
+        let mut s = sphere(1);
+        // And set_transform(s, translation(5, 0, 0))
+        s.set_transform(&translation(5.0, 0.0, 0.0));
+        let s_idx = w.add_object(s);
+        // And add_child(g2, s)
+        w.add_child(&g2_idx, &s_idx).unwrap();
+        // When n ← normal_to_world(s, vector(√3/3, √3/3, √3/3))
+        let k = f64::sqrt(3.0) / 3.0;
+        let n = w.normal_to_world(&s_idx, &vector(k, k, k));
+        // Then n = vector(0.2857, 0.4286, -0.8571)
+        assert_relative_eq!(n, vector(0.2857, 0.4286, -0.8571), epsilon = 1e-4);
+    }
+
+    // Scenario: Finding the normal on a child object
+    #[test]
+    fn find_normal_on_child_object() {
+        let mut w = world();
+        // Given g1 ← group()
+        let mut g1 = group();
+        // And set_transform(g1, rotation_y(π/2))
+        g1.set_transform(&rotation_y(PI / 2.0));
+        // And g2 ← group()
+        let mut g2 = group();
+        // And set_transform(g2, scaling(1, 2, 3))
+        g2.set_transform(&scaling(1.0, 2.0, 3.0));
+        // And add_child(g1, g2)
+        let g1_idx = w.add_object(g1);
+        let g2_idx = w.add_object(g2);
+        w.add_child(&g1_idx, &g2_idx).unwrap();
+        // And s ← sphere()
+        let mut s = sphere(1);
+        // And set_transform(s, translation(5, 0, 0))
+        s.set_transform(&translation(5.0, 0.0, 0.0));
+        let s_idx = w.add_object(s);
+        // And add_child(g2, s)
+        w.add_child(&g2_idx, &s_idx).unwrap();
+        // When n ← (s, point(1.7321, 1.1547, -5.5774))
+        let n = normal_at_by_idx(&w, &s_idx, &point(1.7321, 1.1547, -5.5774));
+        // Then n = vector(0.2857, 0.4286, -0.8571)
+        assert_relative_eq!(n, vector(0.2857, 0.4286, -0.8571), epsilon = 1e-4);
     }
 }

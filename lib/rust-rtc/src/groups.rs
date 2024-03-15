@@ -6,15 +6,9 @@ use crate::rays::Ray;
 use crate::tuples::{Point, Vector};
 use crate::world::{ObjectIndex, World};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub struct Group {
     pub members: Vec<ObjectIndex>,
-}
-
-impl Default for Group {
-    fn default() -> Self {
-        Group { members: vec![] }
-    }
 }
 
 impl Group {
@@ -23,6 +17,7 @@ impl Group {
     }
 
     pub fn local_normal_at(&self, _local_point: &Point) -> Vector {
+        // Groups are abstract and don't have normal vectors.
         panic!("local_normal_at() called on Group");
     }
 
@@ -30,7 +25,7 @@ impl Group {
         let mut xs_all = vec![];
         for child in &self.members {
             let object = world.get_object_ref(child);
-            xs_all.extend(intersect(&object, local_ray, Some(world)));
+            xs_all.extend(intersect(object, local_ray, Some(world)));
         }
         xs_all.sort_by(|a, b| a.t.total_cmp(&b.t));
         xs_all

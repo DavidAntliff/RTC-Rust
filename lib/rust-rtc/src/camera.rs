@@ -124,7 +124,7 @@ impl Camera {
             }
 
             match &mut progress_callback {
-                Some(f) => (f)(self.resolution.hsize as u64),
+                Some(f) => f(self.resolution.hsize as u64),
                 None => (),
             };
         }
@@ -344,7 +344,7 @@ impl Camera {
             match &pb_opt {
                 Some(ref arc) => {
                     let mut f = arc.lock().expect("should be lockable");
-                    (f)(self.resolution.hsize as u64);
+                    f(self.resolution.hsize as u64);
                 }
                 None => (),
             }
