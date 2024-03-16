@@ -251,6 +251,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "chapter14_group_simple"
+version = "0.1.0"
+dependencies = [
+ "rust-rtc",
+]
+
+[[package]]
 name = "chapter4"
 version = "0.1.0"
 dependencies = [

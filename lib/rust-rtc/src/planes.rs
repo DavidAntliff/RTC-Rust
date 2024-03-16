@@ -1,4 +1,5 @@
 // Chapter 9 - Planes
+// Default plane is the XZ plane (horizontal).
 
 use crate::intersections::{intersection, intersections, Intersections};
 use crate::math::EPSILON;

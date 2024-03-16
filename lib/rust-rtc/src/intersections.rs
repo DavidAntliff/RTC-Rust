@@ -2,7 +2,7 @@
 
 use crate::math::EPSILON;
 use crate::rays::Ray;
-use crate::shapes::{normal_at, Shape, ShapeTrait};
+use crate::shapes::{normal_at, normal_at_by_idx, Shape, ShapeTrait};
 use crate::tuples::{dot, reflect, Point, Vector};
 
 use crate::materials::RefractiveIndex;
@@ -79,6 +79,7 @@ impl IntersectionComputation<'_> {
 }
 
 pub fn prepare_computations<'a>(
+    world: Option<&World>,
     intersection: &'a Intersection,
     ray: &Ray,
 ) -> IntersectionComputation<'a> {
@@ -87,8 +88,15 @@ pub fn prepare_computations<'a>(
 
     comps.point = ray.position(comps.t);
     comps.eyev = -ray.direction;
-    // TODO: convert to use normal_at_by_idx()
-    comps.normalv = normal_at(comps.object, &comps.point);
+    comps.normalv = if let Some(world) = world {
+        if let Some(index) = &comps.object.index {
+             normal_at_by_idx(world, index, &comps.point)
+        } else {
+            panic!("Investigate!");
+        }
+    } else {
+        normal_at(comps.object, &comps.point)
+    };
 
     if dot(&comps.normalv, &comps.eyev) < 0.0 {
         comps.inside = true;
@@ -104,11 +112,12 @@ pub fn prepare_computations<'a>(
 }
 
 pub fn prepare_computations_for_refraction<'a>(
+    world: Option<&World>,
     intersection: &'a Intersection,
     ray: &Ray,
     intersections: &[Intersection],
 ) -> IntersectionComputation<'a> {
-    let mut comps = prepare_computations(intersection, ray);
+    let mut comps = prepare_computations(world, intersection, ray);
 
     // Determine n1 (refractive index of material being exited),
     // and n2 (refractive index of material being entered):
@@ -269,7 +278,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(4.0, Some(&shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         assert_eq!(comps.t, i.t);
         assert_eq!(comps.object, i.object.expect("no shape"));
         assert_eq!(comps.point, point(0.0, 0.0, -1.0));
@@ -283,7 +292,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(4.0, Some(&shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         assert!(!comps.inside);
     }
 
@@ -293,7 +302,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = sphere(1);
         let i = intersection(1.0, Some(&shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         assert_eq!(comps.point, point(0.0, 0.0, 1.0));
         assert_eq!(comps.eyev, vector(0.0, 0.0, -1.0));
         assert!(comps.inside);
@@ -308,7 +317,7 @@ mod tests {
         let mut shape = sphere(1);
         shape.set_transform(&translation(0.0, 0.0, 1.0));
         let i = intersection(5.0, Some(&shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         assert!(comps.over_point.z() < -EPSILON / 2.0);
         assert!(comps.point.z() > comps.over_point.z());
     }
@@ -322,7 +331,7 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 1.0, -1.0), vector(0.0, -k, k));
         let i = intersection(f64::sqrt(2.0), Some(&shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         assert_eq!(comps.reflectv, vector(0.0, k, k));
     }
 
@@ -357,7 +366,7 @@ mod tests {
             Intersection::new(5.25, Some(&c)),
             Intersection::new(6.0, Some(&a))
         );
-        let comps = prepare_computations_for_refraction(&xs[index], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[index], &r, &xs);
         assert_eq!(comps.n1, n1);
         assert_eq!(comps.n2, n2);
     }
@@ -370,7 +379,7 @@ mod tests {
         shape.set_transform(&translation(0.0, 0.0, 1.0));
         let i = intersection(5.0, Some(&shape));
         let xs = intersections!(i);
-        let comps = prepare_computations_for_refraction(&i, &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &i, &r, &xs);
         assert!(comps.under_point.z() > EPSILON / 2.0);
         assert!(comps.point.z() < comps.under_point.z());
     }
@@ -385,7 +394,7 @@ mod tests {
             Intersection::new(-k, Some(&shape)),
             Intersection::new(k, Some(&shape))
         );
-        let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[1], &r, &xs);
         let reflectance = schlick(&comps);
         assert_eq!(reflectance, 1.0);
     }
@@ -400,7 +409,7 @@ mod tests {
             Intersection::new(-1.0, Some(&shape)),
             Intersection::new(1.0, Some(&shape))
         );
-        let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[1], &r, &xs);
         let reflectance = schlick(&comps);
         assert_relative_eq!(reflectance, 0.04, epsilon = 1e-5);
     }
@@ -412,7 +421,7 @@ mod tests {
         shape.material.refractive_index = 1.5; // tests assume glass_sphere() uses ri = 1.5
         let r = ray(point(0.0, 0.99, -2.0), vector(0.0, 0.0, 1.0));
         let xs = intersections!(Intersection::new(1.8589, Some(&shape)));
-        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[0], &r, &xs);
         let reflectance = schlick(&comps);
         assert_relative_eq!(reflectance, 0.48873, epsilon = 1e-5);
     }

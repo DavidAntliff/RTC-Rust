@@ -20,7 +20,11 @@ pub struct Shape {
     inverse_transform: Matrix4,
     pub material: Material,
     pub parent: Option<ObjectIndex>,
-    pub foo: i32,
+    pub index: Option<ObjectIndex>,
+    // TODO: Maybe we can store a read-only reference to the world
+    //       within a Shape so that it's accessible without changing all
+    //       the APIs?
+    // pub world: Option<&'a World>,
 }
 
 impl Shape {

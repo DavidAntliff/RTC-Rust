@@ -28,7 +28,7 @@ pub struct LightIndex(usize);
 pub struct ObjectIndex(usize);
 
 impl World {
-    fn new(lights: Vec<PointLight>, objects: Vec<Shape>) -> World {
+    pub fn new(lights: Vec<PointLight>, objects: Vec<Shape>) -> World {
         World { lights, objects }
     }
 
@@ -37,9 +37,12 @@ impl World {
         LightIndex(self.lights.len() - 1)
     }
 
-    pub fn add_object(&mut self, object: Shape) -> ObjectIndex {
+    pub fn add_object(&mut self, mut object: Shape) -> ObjectIndex {
+        let index = ObjectIndex(self.objects.len());
+        object.index = Some(index.clone());
         self.objects.push(object);
-        ObjectIndex(self.objects.len() - 1)
+        index
+        //ObjectIndex(self.objects.len() - 1)
     }
 
     fn validate_object_index(&self, idx: &ObjectIndex) -> Result<()> {
@@ -80,6 +83,11 @@ impl World {
 
         // Intersections must be in sorted order
         for object in &self.objects {
+            // Experiment: don't render shapes in a group
+            if object.parent.is_some() {
+                continue;
+            }
+
             let xs = intersect(object, ray, Some(self));
             // TODO: insert in sorted order?
             for i in xs {
@@ -158,7 +166,7 @@ impl World {
         let hit = xs.iter().find(|&x| x.t > 0.0);
 
         if let Some(i) = hit {
-            let comps = prepare_computations_for_refraction(i, ray, &xs);
+            let comps = prepare_computations_for_refraction(Some(self), i, ray, &xs);
             self.shade_hit(&comps, depth)
         } else {
             Color::new(0.0, 0.0, 0.0)
@@ -235,22 +243,21 @@ pub fn world() -> World {
 }
 
 pub fn default_world() -> World {
-    let mut lights = vec![];
+    let mut world = World::default();
+    
     let light = point_light(point(-10.0, 10.0, -10.0), color(1.0, 1.0, 1.0));
-    lights.push(light);
-
-    let mut objects = vec![];
+    world.add_light(light);
 
     let m = material(color(0.8, 1.0, 0.6), 0.1, 0.7, 0.2, 200.0);
     let mut s1 = sphere(1);
     s1.material = m;
-    objects.push(s1);
+    world.add_object(s1);
 
     let mut s2 = sphere(2);
     s2.set_transform(&scaling(0.5, 0.5, 0.5));
-    objects.push(s2);
+    world.add_object(s2);
 
-    World::new(lights, objects)
+    world
 }
 
 pub fn intersect_world<'a>(world: &'a World, ray: &Ray) -> Intersections<'a> {
@@ -313,6 +320,9 @@ mod tests {
         let mut s2 = sphere(2);
         s2.set_transform(&scaling(0.5, 0.5, 0.5));
 
+        s1.index = Some(ObjectIndex(0));
+        s2.index = Some(ObjectIndex(1));
+        
         let w = default_world();
         assert_eq!(w.lights[0], light);
         assert_eq!(w.objects[0], s1);
@@ -339,7 +349,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[0];
         let i = intersection(4.0, Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let c = shade_hit(&w, &comps, 1);
         assert_relative_eq!(c, color(0.38066, 0.47583, 0.2855), epsilon = 1e-5);
     }
@@ -353,7 +363,7 @@ mod tests {
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[1];
         let i = intersection(0.5, Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let c = shade_hit(&w, &comps, 1);
         assert_relative_eq!(c, color(0.90498, 0.90498, 0.90498), epsilon = 1e-5);
     }
@@ -435,7 +445,7 @@ mod tests {
         w.add_object(s2.clone());
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let i = intersection(4.0, Some(&s2));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let c = shade_hit(&w, &comps, 1);
         assert_eq!(c, color(0.1, 0.1, 0.1));
     }
@@ -454,7 +464,7 @@ mod tests {
         w.add_object(s2.clone());
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
         let i = intersection(4.0, Some(&s2));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let c = shade_hit(&w, &comps, 1);
         assert_eq!(c, color(1.9, 1.9, 1.9));
     }
@@ -472,7 +482,7 @@ mod tests {
         }
         let shape = &w.objects[1];
         let i = intersection(1.0, Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let color_ = reflected_color(&w, &comps, 1);
         assert_eq!(color_, color(0.0, 0.0, 0.0));
     }
@@ -489,7 +499,7 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 0.0, -3.0), vector(0.0, -k, k));
         let i = intersection(f64::sqrt(2.0), Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let color_ = reflected_color(&w, &comps, 1);
         assert_relative_eq!(color_, color(0.19032, 0.2379, 0.14274), epsilon = 1e-4);
     }
@@ -506,7 +516,7 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 0.0, -3.0), vector(0.0, -k, k));
         let i = intersection(f64::sqrt(2.0), Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let color_ = shade_hit(&w, &comps, 1);
         assert_relative_eq!(color_, color(0.87677, 0.92436, 0.82918), epsilon = 1e-4);
     }
@@ -540,7 +550,7 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 0.0, -3.0), vector(0.0, -k, k));
         let i = intersection(f64::sqrt(2.0), Some(shape));
-        let comps = prepare_computations(&i, &r);
+        let comps = prepare_computations(None, &i, &r);
         let color_ = reflected_color(&w, &comps, 0);
         assert_eq!(color_, color(0.0, 0.0, 0.0));
     }
@@ -555,7 +565,7 @@ mod tests {
             Intersection::new(4.0, Some(shape)),
             Intersection::new(6.0, Some(shape))
         );
-        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
         assert_eq!(c, color(0.0, 0.0, 0.0));
     }
@@ -575,7 +585,7 @@ mod tests {
             Intersection::new(4.0, Some(shape)),
             Intersection::new(6.0, Some(shape))
         );
-        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[0], &r, &xs);
         let c = refracted_color(&w, &comps, 0);
         assert_eq!(c, color(0.0, 0.0, 0.0));
     }
@@ -597,7 +607,7 @@ mod tests {
             Intersection::new(k, Some(shape))
         );
         // Since we're inside the sphere, need to look at the *second* intersection: xs[1]
-        let comps = prepare_computations_for_refraction(&xs[1], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[1], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
         assert_eq!(c, color(0.0, 0.0, 0.0));
     }
@@ -626,7 +636,7 @@ mod tests {
             Intersection::new(0.4899, Some(b)),
             Intersection::new(0.9899, Some(a))
         );
-        let comps = prepare_computations_for_refraction(&xs[2], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[2], &r, &xs);
         let c = refracted_color(&w, &comps, 5);
         assert_relative_eq!(c, color(0.0, 0.99888, 0.04725), epsilon = 1e-4);
     }
@@ -655,7 +665,7 @@ mod tests {
         let k = f64::sqrt(2.0) / 2.0;
         let r = ray(point(0.0, 0.0, -3.0), vector(0.0, -k, k));
         let xs = intersections!(Intersection::new(f64::sqrt(2.0), floor));
-        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[0], &r, &xs);
         let color_ = shade_hit(&w, &comps, 5);
         assert_relative_eq!(color_, color(0.93642, 0.68642, 0.68642), epsilon = 1e-4);
     }
@@ -686,7 +696,7 @@ mod tests {
         };
 
         let xs = intersections!(Intersection::new(f64::sqrt(2.0), floor));
-        let comps = prepare_computations_for_refraction(&xs[0], &r, &xs);
+        let comps = prepare_computations_for_refraction(None, &xs[0], &r, &xs);
         let color_ = shade_hit(&w, &comps, 5);
         assert_relative_eq!(color_, color(0.93391, 0.69643, 0.69243), epsilon = 1e-5);
     }
